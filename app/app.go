@@ -14,12 +14,19 @@ var (
 	App *golf.Application
 )
 
-func Init() {
-	App = golf.New()
-	err := model.Initialize("dingo.db")
-	if err != nil {
-		panic(err)
+func fileExists(filename string) bool {
+	_, err := os.Stat(filename)
+	return err == nil
+}
+
+func Init(dbPath string) {
+	if err := model.Initialize(dbPath, fileExists(dbPath)); err != nil {
+		fmt.Errorf("failed to intialize db: %v", err)
+		os.Exit(1)
 	}
+	fmt.Printf("Database is used at %s\n", dbPath)
+
+	App = golf.New()
 
 	App.Config.Set("app/static_dir", "static")
 	App.Config.Set("app.log_dir", "tmp/log")
@@ -131,6 +138,6 @@ func registerHomeHandler() {
 func Run(portNumber string) {
 	registerAdminURLHandlers()
 	registerHomeHandler()
-	fmt.Println("Application Started on port " + portNumber)
+	fmt.Printf("Application Started on port %s\n", portNumber)
 	App.Run(":" + portNumber)
 }

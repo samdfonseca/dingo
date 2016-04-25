@@ -2,14 +2,13 @@ package model
 
 import (
 	"database/sql"
+	"time"
+
 	"github.com/dinever/dingo/app/utils"
 	_ "github.com/mattn/go-sqlite3"
-	"os"
-	"time"
 )
 
 var db *sql.DB
-
 
 const samplePostContent = `
 Welcome to Dingo! This is your first post. You can find it in the [admin panel](/admin/).
@@ -81,25 +80,40 @@ type Row interface {
 	Scan(dest ...interface{}) error
 }
 
-func Initialize(dbPath string) error {
+func Initialize(dbPath string, dbExists bool) error {
 	tokens = make(map[string]*Token)
 
+	if err := initConnection(dbPath); err != nil {
+		return err
+	}
+
+	if err := createTableIfNotExist(); err != nil {
+		return err
+	}
+
+	if !dbExists {
+		if err := createWelcomeData(); err != nil {
+			return err
+		}
+	}
+
+	return nil
+}
+
+func initConnection(dbPath string) error {
 	var err error
-	_, errDB := os.Stat(dbPath)
 	db, err = sql.Open("sqlite3", dbPath)
 	if err != nil {
 		return err
 	}
-	_, err = db.Exec(schema)
-	if err != nil {
+	return nil
+}
+
+func createTableIfNotExist() error {
+	if _, err := db.Exec(schema); err != nil {
 		return err
 	}
-	if errDB != nil {
-		err = CreateWelcomeData()
-		if err != nil {
-			panic(err)
-		}
-	}
+
 	checkBlogSettings()
 	return nil
 }
@@ -110,7 +124,7 @@ func checkBlogSettings() {
 	SetSettingIfNotExists("description", "Awesome blog created by Dingo.", "blog")
 }
 
-func CreateWelcomeData() error {
+func createWelcomeData() error {
 	var err error
 	p := NewPost()
 	p.Title = "Welcome to Dingo!"
