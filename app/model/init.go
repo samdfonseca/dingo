@@ -81,8 +81,6 @@ type Row interface {
 }
 
 func Initialize(dbPath string, dbExists bool) error {
-	tokens = make(map[string]*Token)
-
 	if err := initConnection(dbPath); err != nil {
 		return err
 	}
