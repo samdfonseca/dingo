@@ -20,8 +20,8 @@ func AuthMiddleware(next golf.HandlerFunc) golf.HandlerFunc {
 		}
 		tokenStr, err := ctx.Request.Cookie("token-value")
 		if err == nil {
-			token := model.GetTokenByValue(tokenStr.Value)
-			if token != nil && token.IsValid() {
+			token, err := model.GetTokenByValue(tokenStr.Value)
+			if err == nil && token.IsValid() {
 				tokenUser, err := ctx.Request.Cookie("token-user")
 				if err != nil {
 					panic(err)
@@ -34,9 +34,11 @@ func AuthMiddleware(next golf.HandlerFunc) golf.HandlerFunc {
 				ctx.Session.Set("user", user)
 				next(ctx)
 			} else {
+				panic(err)
 				ctx.Redirect("/login/")
 			}
 		} else {
+			panic(err)
 			ctx.Redirect("/login/")
 		}
 	}
