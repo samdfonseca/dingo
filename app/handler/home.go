@@ -62,7 +62,7 @@ func CommentHandler(ctx *golf.Context) {
 	post, err := model.GetPostById(int64(cid))
 	if cid < 1 || err != nil {
 		ctx.JSON(map[string]interface{}{
-			"res": false,
+			"status": "error",
 		})
 	}
 	c := new(model.Comment)
@@ -84,8 +84,8 @@ func CommentHandler(ctx *golf.Context) {
 		_, err := c.Save()
 		if err != nil {
 			ctx.JSON(map[string]interface{}{
-				"res": false,
-				"msg": "Can not comment on this post.",
+				"status": "error",
+				"msg":    "Can not comment on this post.",
 			})
 		}
 		post.CommentNum++
@@ -100,8 +100,8 @@ func CommentHandler(ctx *golf.Context) {
 		model.CreateMessage("comment", c)
 	} else {
 		ctx.JSON(map[string]interface{}{
-			"res": false,
-			"msg": msg,
+			"status": "error",
+			"msg":    msg,
 		})
 	}
 }

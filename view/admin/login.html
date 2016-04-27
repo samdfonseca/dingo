@@ -82,7 +82,7 @@ $(function () {
     $('#login-form').ajaxSubmit({
       dataType: "json",
       success: function (json) {
-        if (!json.res) {
+        if (json.status === "error") {
           Materialize.toast("Incorrect username & password combination.", 2000, "red");
         } else {
           window.location.href = "/admin/";

@@ -40,8 +40,8 @@ func AuthSignUpHandler(ctx *golf.Context) {
 	if !rxEmail.MatchString(email) {
 		ctx.SendStatus(400)
 		ctx.JSON(map[string]interface{}{
-			"res": false,
-			"msg": "Invalid email address.",
+			"status": "error",
+			"msg":    "Invalid email address.",
 		})
 		return
 	}
@@ -49,8 +49,8 @@ func AuthSignUpHandler(ctx *golf.Context) {
 	if len(name) < 3 {
 		ctx.SendStatus(400)
 		ctx.JSON(map[string]interface{}{
-			"res": false,
-			"msg": "Name is too short.",
+			"status": "error",
+			"msg":    "Name is too short.",
 		})
 		return
 	}
@@ -58,16 +58,16 @@ func AuthSignUpHandler(ctx *golf.Context) {
 	if len(password) < 5 {
 		ctx.SendStatus(400)
 		ctx.JSON(map[string]interface{}{
-			"res": false,
-			"msg": "Password is too short.",
+			"status": "error",
+			"msg":    "Password is too short.",
 		})
 		return
 	}
 	if len(password) > 20 {
 		ctx.SendStatus(400)
 		ctx.JSON(map[string]interface{}{
-			"res": false,
-			"msg": "Password is too long.",
+			"status": "error",
+			"msg":    "Password is too long.",
 		})
 		return
 	}
@@ -75,8 +75,8 @@ func AuthSignUpHandler(ctx *golf.Context) {
 	if password != rePassword {
 		ctx.SendStatus(400)
 		ctx.JSON(map[string]interface{}{
-			"res": false,
-			"msg": "Password does not match.",
+			"status": "error",
+			"msg":    "Password does not match.",
 		})
 		return
 	}
@@ -105,7 +105,7 @@ func AuthSignUpHandler(ctx *golf.Context) {
 	ctx.SetCookie("token-user", strconv.Itoa(int(s.UserId)), exp)
 	ctx.SetCookie("token-value", s.Value, exp)
 	ctx.JSON(map[string]interface{}{
-		"res": true,
+		"status": "success",
 	})
 }
 
@@ -115,11 +115,11 @@ func AuthLoginHandler(ctx *golf.Context) {
 	rememberMe := ctx.Request.FormValue("remember-me")
 	user, err := model.GetUserByEmail(email)
 	if user == nil || err != nil {
-		ctx.JSON(map[string]interface{}{"res": false})
+		ctx.JSON(map[string]interface{}{"status": "error"})
 		return
 	}
 	if !user.CheckPassword(password) {
-		ctx.JSON(map[string]interface{}{"res": false})
+		ctx.JSON(map[string]interface{}{"status": "error"})
 		return
 	}
 	var (
@@ -130,20 +130,20 @@ func AuthLoginHandler(ctx *golf.Context) {
 		exp = 3600 * 24 * 3
 		s, err = model.CreateToken(user, ctx, int64(exp))
 		if err != nil {
-			ctx.JSON(map[string]interface{}{"res": false, "message": "Can not create token."})
+			ctx.JSON(map[string]interface{}{"status": "error", "message": "Can not create token."})
 			panic(err)
 		}
 	} else {
 		exp = 0
 		s, err = model.CreateToken(user, ctx, 3600)
 		if err != nil {
-			ctx.JSON(map[string]interface{}{"res": false, "message": "Can not create token."})
+			ctx.JSON(map[string]interface{}{"status": "error", "message": "Can not create token."})
 			panic(err)
 		}
 	}
 	ctx.SetCookie("token-user", strconv.Itoa(int(s.UserId)), exp)
 	ctx.SetCookie("token-value", s.Value, exp)
-	ctx.JSON(map[string]interface{}{"res": true})
+	ctx.JSON(map[string]interface{}{"status": "success"})
 }
 
 func AuthLogoutHandler(ctx *golf.Context) {

@@ -11,11 +11,11 @@ import (
 
 func AdminHandler(ctx *golf.Context) {
 	userObj, _ := ctx.Session.Get("user")
-	user := userObj.(*model.User)
+	u := userObj.(*model.User)
 	ctx.Loader("admin").Render("home.html", map[string]interface{}{
 		"Title":    "Dashboard",
 		"Statis":   model.NewStatis(ctx.App),
-		"User":     user,
+		"User":     u,
 		"Messages": model.GetUnreadMessages(),
 		"Monitor":  utils.ReadMemStats(),
 	})
@@ -23,50 +23,50 @@ func AdminHandler(ctx *golf.Context) {
 
 func ProfileHandler(ctx *golf.Context) {
 	userObj, _ := ctx.Session.Get("user")
-	user := userObj.(*model.User)
+	u := userObj.(*model.User)
 	ctx.Loader("admin").Render("profile.html", map[string]interface{}{
 		"Title": "Profile",
-		"User":  user,
+		"User":  u,
 	})
 }
 
 func ProfileChangeHandler(ctx *golf.Context) {
 	userObj, _ := ctx.Session.Get("user")
-	user := userObj.(*model.User)
-	if user.Email != ctx.Request.FormValue("email") && !model.UserChangeEmail(ctx.Request.FormValue("email")) {
-		ctx.JSON(map[string]interface{}{"res": false, "msg": "A user with that email address already exists."})
+	u := userObj.(*model.User)
+	if u.Email != ctx.Request.FormValue("email") && !model.UserChangeEmail(ctx.Request.FormValue("email")) {
+		ctx.JSON(map[string]interface{}{"status": "error", "msg": "A user with that email address already exists."})
 		return
 	}
-	user.Name = ctx.Request.FormValue("name")
-	user.Slug = ctx.Request.FormValue("slug")
-	user.Email = ctx.Request.FormValue("email")
-	user.Avatar = utils.Gravatar(ctx.Request.FormValue("email"), "180")
-	user.Website = ctx.Request.FormValue("url")
-	user.Bio = ctx.Request.FormValue("bio")
-	err := user.UpdateUser(user.Id)
+	u.Name = ctx.Request.FormValue("name")
+	u.Slug = ctx.Request.FormValue("slug")
+	u.Email = ctx.Request.FormValue("email")
+	u.Avatar = utils.Gravatar(ctx.Request.FormValue("email"), "180")
+	u.Website = ctx.Request.FormValue("url")
+	u.Bio = ctx.Request.FormValue("bio")
+	err := u.UpdateUser(u.Id)
 	if err != nil {
 		ctx.JSON(map[string]interface{}{
-			"res": false,
-			"msg": err.Error(),
+			"status": "error",
+			"msg":    err.Error(),
 		})
 	}
-	ctx.JSON(map[string]interface{}{"res": true})
+	ctx.JSON(map[string]interface{}{"status": "success"})
 }
 
 func PostCreateHandler(ctx *golf.Context) {
 	userObj, _ := ctx.Session.Get("user")
-	user := userObj.(*model.User)
-	c := model.NewPost()
-	ctx.Loader("admin").Render("edit_article.html", map[string]interface{}{
+	u := userObj.(*model.User)
+	p := model.NewPost()
+	ctx.Loader("admin").Render("edit_post.html", map[string]interface{}{
 		"Title": "New Post",
-		"Post":  c,
-		"User":  user,
+		"Post":  p,
+		"User":  u,
 	})
 }
 
 func PostSaveHandler(ctx *golf.Context) {
 	userObj, _ := ctx.Session.Get("user")
-	user := userObj.(*model.User)
+	u := userObj.(*model.User)
 	p := model.NewPost()
 	id := ctx.Param("id")
 	idInt, _ := strconv.Atoi(id)
@@ -78,88 +78,90 @@ func PostSaveHandler(ctx *golf.Context) {
 	p.Tags = model.GenerateTagsFromCommaString(ctx.Request.FormValue("tag"))
 	p.AllowComment = ctx.Request.FormValue("comment") == "on"
 	p.Category = ctx.Request.FormValue("category")
-	p.CreatedBy = user.Id
-	p.UpdatedBy = user.Id
+	p.CreatedBy = u.Id
+	p.UpdatedBy = u.Id
 	p.IsPublished = ctx.Request.FormValue("status") == "on"
 	p.IsPage = false
-	p.Author = user
+	p.Author = u
 	p.Hits = 1
 	var e error
 	e = p.Save()
 	if e != nil {
+		ctx.SendStatus(400)
 		ctx.JSON(map[string]interface{}{
-			"res": false,
-			"msg": e.Error()})
+			"status": "error",
+			"msg":    e.Error(),
+		})
 		return
 	}
 	ctx.JSON(map[string]interface{}{
-		"res":     true,
+		"status":  "success",
 		"content": p,
 	})
 }
 
 func AdminPostHandler(ctx *golf.Context) {
 	userObj, _ := ctx.Session.Get("user")
-	user := userObj.(*model.User)
+	u := userObj.(*model.User)
 	i, _ := strconv.Atoi(ctx.Request.FormValue("page"))
-	articles, pager, err := model.GetPostList(int64(i), 10, false, false, "created_at DESC")
+	posts, pager, err := model.GetPostList(int64(i), 10, false, false, "created_at DESC")
 	if err != nil {
 		panic(err)
 	}
 	ctx.Loader("admin").Render("posts.html", map[string]interface{}{
 		"Title": "Posts",
-		"Posts": articles,
-		"User":  user,
+		"Posts": posts,
+		"User":  u,
 		"Pager": pager,
 	})
 }
 
 func PostEditHandler(ctx *golf.Context) {
 	userObj, _ := ctx.Session.Get("user")
-	user := userObj.(*model.User)
+	u := userObj.(*model.User)
 	id := ctx.Param("id")
-	articleId, _ := strconv.Atoi(id)
-	c, err := model.GetPostById(int64(articleId))
-	if c == nil || err != nil {
+	postId, _ := strconv.Atoi(id)
+	p, err := model.GetPostById(int64(postId))
+	if p == nil || err != nil {
 		ctx.Redirect("/admin/posts/")
 		return
 	}
-	ctx.Loader("admin").Render("edit_article.html", map[string]interface{}{
+	ctx.Loader("admin").Render("edit_post.html", map[string]interface{}{
 		"Title": "Edit Post",
-		"Post":  c,
-		"User":  user,
+		"Post":  p,
+		"User":  u,
 	})
 }
 
 func PostRemoveHandler(ctx *golf.Context) {
 	id := ctx.Param("id")
-	articleId, _ := strconv.Atoi(id)
-	err := model.DeletePostById(int64(articleId))
+	postId, _ := strconv.Atoi(id)
+	err := model.DeletePostById(int64(postId))
 	if err != nil {
 		ctx.JSON(map[string]interface{}{
-			"res": false,
+			"status": "error",
 		})
 	} else {
 		ctx.JSON(map[string]interface{}{
-			"res": true,
+			"status": "success",
 		})
 	}
 }
 
 func PageCreateHandler(ctx *golf.Context) {
 	userObj, _ := ctx.Session.Get("user")
-	user := userObj.(*model.User)
-	c := model.NewPost()
-	ctx.Loader("admin").Render("edit_article.html", map[string]interface{}{
+	u := userObj.(*model.User)
+	p := model.NewPost()
+	ctx.Loader("admin").Render("edit_post.html", map[string]interface{}{
 		"Title": "New Page",
-		"Post":  c,
-		"User":  user,
+		"Post":  p,
+		"User":  u,
 	})
 }
 
 func AdminPageHandler(ctx *golf.Context) {
 	userObj, _ := ctx.Session.Get("user")
-	user := userObj.(*model.User)
+	u := userObj.(*model.User)
 	i, _ := strconv.Atoi(ctx.Request.FormValue("page"))
 	pages, pager, err := model.GetPostList(int64(i), 10, true, false, `created_at`)
 	if err != nil {
@@ -168,20 +170,20 @@ func AdminPageHandler(ctx *golf.Context) {
 	ctx.Loader("admin").Render("pages.html", map[string]interface{}{
 		"Title": "Pages",
 		"Pages": pages,
-		"User":  user,
+		"User":  u,
 		"Pager": pager,
 	})
 }
 
 func PageSaveHandler(ctx *golf.Context) {
 	userObj, _ := ctx.Session.Get("user")
-	user := userObj.(*model.User)
+	u := userObj.(*model.User)
 	p := model.NewPost()
 	p.Id = 0
 	if !model.PostChangeSlug(ctx.Request.FormValue("slug")) {
 		ctx.JSON(map[string]interface{}{
-			"res": false,
-			"msg": "The slug of this post has conflicts with another post."})
+			"status": "error",
+			"msg":    "The slug of this post has conflicts with another post."})
 		return
 	}
 	p.Title = ctx.Request.FormValue("title")
@@ -191,22 +193,23 @@ func PageSaveHandler(ctx *golf.Context) {
 	p.Tags = model.GenerateTagsFromCommaString(ctx.Request.FormValue("tag"))
 	p.AllowComment = ctx.Request.FormValue("comment") == "on"
 	p.Category = ctx.Request.FormValue("category")
-	p.CreatedBy = user.Id
+	p.CreatedBy = u.Id
+	p.UpdatedBy = u.Id
 	p.IsPublished = ctx.Request.FormValue("status") == "on"
 	p.IsPage = true
-	p.Author = user
+	p.Author = u
 	p.Hits = 1
 	var e error
 	e = p.Save()
 	if e != nil {
 		ctx.JSON(map[string]interface{}{
-			"res": false,
-			"msg": e.Error(),
+			"status": "error",
+			"msg":    e.Error(),
 		})
 		return
 	}
 	ctx.JSON(map[string]interface{}{
-		"res":     true,
+		"status":  "success",
 		"content": p,
 	})
 }
@@ -228,36 +231,36 @@ func CommentViewHandler(ctx *golf.Context) {
 
 func CommentAddHandler(ctx *golf.Context) {
 	userObj, _ := ctx.Session.Get("user")
-	user := userObj.(*model.User)
+	u := userObj.(*model.User)
 	pid, _ := strconv.Atoi(ctx.Request.FormValue("pid"))
 	parent, err := model.GetCommentById(int64(pid))
 	if err != nil {
 		panic(err)
 	}
-	comment := new(model.Comment)
-	comment.Author = user.Name
-	comment.Email = user.Email
-	comment.Website = user.Website
-	comment.Content = ctx.Request.FormValue("content")
-	comment.Avatar = utils.Gravatar(comment.Email, "50")
-	comment.Parent = parent.Id
-	comment.PostId = parent.PostId
-	comment.Ip = ctx.Request.RemoteAddr
-	comment.UserAgent = ctx.Request.UserAgent()
-	comment.UserId = user.Id
-	comment.Approved = true
+	c := new(model.Comment)
+	c.Author = u.Name
+	c.Email = u.Email
+	c.Website = u.Website
+	c.Content = ctx.Request.FormValue("content")
+	c.Avatar = utils.Gravatar(c.Email, "50")
+	c.Parent = parent.Id
+	c.PostId = parent.PostId
+	c.Ip = ctx.Request.RemoteAddr
+	c.UserAgent = ctx.Request.UserAgent()
+	c.UserId = u.Id
+	c.Approved = true
 	t := time.Now()
-	comment.CreatedAt = &t
-	id, err := comment.Save()
+	c.CreatedAt = &t
+	id, err := c.Save()
 	if err != nil {
 		panic(err)
 	}
-	comment.Id = id
+	c.Id = id
 	ctx.JSON(map[string]interface{}{
-		"res":     true,
-		"comment": comment.ToJson(),
+		"status":  "success",
+		"comment": c.ToJson(),
 	})
-	model.CreateMessage("comment", comment)
+	model.CreateMessage("comment", c)
 }
 
 func CommentUpdateHandler(ctx *golf.Context) {
@@ -265,14 +268,14 @@ func CommentUpdateHandler(ctx *golf.Context) {
 	c, err := model.GetCommentById(int64(id))
 	if err != nil {
 		ctx.JSON(map[string]interface{}{
-			"res": false,
-			"msg": err.Error(),
+			"status": "error",
+			"msg":    err.Error(),
 		})
 	}
 	c.Approved = true
 	c.Save()
 	ctx.JSON(map[string]interface{}{
-		"res": true,
+		"status": "success",
 	})
 }
 
@@ -281,12 +284,12 @@ func CommentRemoveHandler(ctx *golf.Context) {
 	err := model.DeleteComment(int64(id))
 	if err != nil {
 		ctx.JSON(map[string]interface{}{
-			"res": true,
-			"msg": err.Error(),
+			"status": "success",
+			"msg":    err.Error(),
 		})
 	}
 	ctx.JSON(map[string]interface{}{
-		"res": true,
+		"status": "success",
 	})
 }
 
@@ -302,7 +305,7 @@ func SettingViewHandler(ctx *golf.Context) {
 
 func SettingUpdateHandler(ctx *golf.Context) {
 	userObj, _ := ctx.Session.Get("user")
-	user := userObj.(*model.User)
+	u := userObj.(*model.User)
 	var err error
 	for key, value := range ctx.Request.Form {
 		setting := new(model.Setting)
@@ -310,20 +313,20 @@ func SettingUpdateHandler(ctx *golf.Context) {
 		setting.Key = key
 		setting.Value = value[0]
 		setting.Type = ""
-		setting.CreatedBy = user.Id
+		setting.CreatedBy = u.Id
 		now := time.Now()
 		setting.CreatedAt = &now
 		err = model.SaveSetting(setting)
 		if err != nil {
 			panic(err)
 			ctx.JSON(map[string]interface{}{
-				"res": false,
-				"msg": err.Error(),
+				"status": "error",
+				"msg":    err.Error(),
 			})
 		}
 	}
 	ctx.JSON(map[string]interface{}{
-		"res": true,
+		"status": "success",
 	})
 }
 
@@ -337,7 +340,7 @@ func SettingCustomHandler(ctx *golf.Context) {
 		model.SetSetting(k, values[i], "custom")
 	}
 	ctx.JSON(map[string]interface{}{
-		"res": true,
+		"status": "success",
 	})
 }
 
@@ -346,7 +349,7 @@ func SettingNavHandler(ctx *golf.Context) {
 	urls := ctx.Request.Form["url"]
 	model.SetNavigators(labels, urls)
 	ctx.JSON(map[string]interface{}{
-		"res": true,
+		"status": "success",
 	})
 }
 
@@ -360,19 +363,19 @@ func AdminPasswordPage(ctx *golf.Context) {
 
 func AdminPasswordChange(ctx *golf.Context) {
 	userObj, _ := ctx.Session.Get("user")
-	user := userObj.(*model.User)
+	u := userObj.(*model.User)
 	oldPassword := ctx.Request.FormValue("old")
-	if !user.CheckPassword(oldPassword) {
+	if !u.CheckPassword(oldPassword) {
 		ctx.JSON(map[string]interface{}{
-			"res": false,
-			"msg": "Old password incorrect.",
+			"status": "error",
+			"msg":    "Old password incorrect.",
 		})
 		return
 	}
 	newPassword := ctx.Request.FormValue("new")
-	user.ChangePassword(newPassword)
+	u.ChangePassword(newPassword)
 	ctx.JSON(map[string]interface{}{
-		"res": true,
+		"status": "success",
 	})
 }
 

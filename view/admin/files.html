@@ -103,7 +103,7 @@ $(function () {
         "type": "delete",
         "url": "/admin/files/?path=" + path,
         "success": function (json) {
-          if(json.res){
+          if(json.status === "success"){
             console.log("#file-" + name);
             $("#file-" + name).remove();
             Materialize.toast("File deleted", 2000, "green");

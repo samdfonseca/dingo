@@ -56,7 +56,7 @@ func FileRemoveHandler(ctx *golf.Context) {
 		return
 	}
 	ctx.JSON(map[string]interface{}{
-		"res": true,
+		"status": "success",
 	})
 }
 
@@ -66,8 +66,8 @@ func FileUploadHandler(ctx *golf.Context) {
 	f, h, e := req.FormFile("file")
 	if e != nil {
 		ctx.JSON(map[string]interface{}{
-			"res": false,
-			"msg": e.Error(),
+			"status": "error",
+			"msg":    e.Error(),
 		})
 		return
 	}
@@ -80,16 +80,16 @@ func FileUploadHandler(ctx *golf.Context) {
 	}()
 	if len(data) >= maxSize {
 		ctx.JSON(map[string]interface{}{
-			"res": false,
-			"msg": "File size should be smaller than 10MB.",
+			"status": "error",
+			"msg":    "File size should be smaller than 10MB.",
 		})
 		return
 	}
 	fileExt, _ := ctx.App.Config.GetString("app.upload_files", ".jpg,.png,.gif,.zip,.txt,.doc,.docx,.xls,.xlsx,.ppt,.pptx")
 	if !strings.Contains(fileExt, path.Ext(h.Filename)) {
 		ctx.JSON(map[string]interface{}{
-			"res": false,
-			"msg": "Only supports documents, images and zip files.",
+			"status": "error",
+			"msg":    "Only supports documents, images and zip files.",
 		})
 		return
 	}
@@ -98,13 +98,13 @@ func FileUploadHandler(ctx *golf.Context) {
 	e = ioutil.WriteFile(Url, data, os.ModePerm)
 	if e != nil {
 		ctx.JSON(map[string]interface{}{
-			"res": false,
-			"msg": e.Error(),
+			"status": "error",
+			"msg":    e.Error(),
 		})
 		return
 	}
 	ctx.JSON(map[string]interface{}{
-		"res": true,
+		"status": "success",
 		"file": map[string]interface{}{
 			"url":  Url,
 			"name": h.Filename,

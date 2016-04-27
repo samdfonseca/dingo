@@ -96,7 +96,7 @@ $(function () {
     $('#signup-form').ajaxSubmit({
       dataType: "json",
       success: function (json) {
-        if (json.res) {
+        if (json.status === "success") {
           window.location.href = "/admin/";
         } else {
           Materialize.toast(json.msg, 2000, "red");

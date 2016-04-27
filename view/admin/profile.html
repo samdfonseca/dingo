@@ -80,7 +80,7 @@
                 return;
             }
             $('#profile').ajaxSubmit(function(json){
-                if(!json.res){
+                if(json.status === "error"){
                     alert(json.msg);
                 }else{
                     Materialize.toast("Profile saved", 4000, "green")
