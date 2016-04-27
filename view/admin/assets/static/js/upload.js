@@ -14,7 +14,7 @@ function initUpload(p) {
                     bar.css("width", percentVal).html(percentVal);
                 },
                 "success": function (json) {
-                    if (!json.res) {
+                    if (json.status === "error") {
                         bar.html(json.msg).addClass("err");
                         setTimeout(function () {
                             bar.remove();

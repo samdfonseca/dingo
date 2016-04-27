@@ -98,7 +98,7 @@ $(".del").on("click",function(e){
       "url":"/admin/editor/"+id+"/",
       "type":"delete",
       "success":function(json){
-        if(json.res){
+        if(json.status === "success"){
           Materialize.toast("Post deleted", 500, "", function(){
             window.location.reload();
           });

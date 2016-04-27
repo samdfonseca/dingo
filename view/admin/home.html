@@ -63,7 +63,7 @@ $(document).ready(function(){
   $(".read").on("click",function(){
     var $this = $(this);
     $.post($this.attr("href"),function(json){
-      if(json.res){
+      if(json.status === "success"){
         $this.parent().remove();
       }
     });

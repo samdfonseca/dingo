@@ -97,11 +97,11 @@
                     type: "delete",
                     url: "/admin/comments/?id=" + id,
                     success: function (json) {
-                        if (json.res) {
+                        if (json.status === "success") {
                             $('#comment-' + id).remove();
                             Materialize.toast("Comment delted", 2500, "green");
                         } else {
-                            Materialize.toast("Can not delete: " + json.res, 2500, "red");
+                            Materialize.toast("Can not delete: " + json.status === "success", 2500, "red");
                         }
                     }
                 });
@@ -115,7 +115,7 @@
                 type: "put",
                 url: "/admin/comments/?id=" + id,
                 success: function (json) {
-                    if (json.res) {
+                    if (json.status === "success") {
                         Materialize.toast("Comment approved", 1000, "green");
                         comment.removeClass("c-approve", "green").addClass("disabled").text("Approved");
                     } else {
@@ -132,7 +132,7 @@
            return false;
         });
         $('#comment-form').ajaxForm(function(json){
-            if (json.res) {
+            if (json.status === "success") {
               Materialize.toast("Succesfully replied", 1000, "green", function() {
                 window.location.href = "/admin/comments/";
               });
