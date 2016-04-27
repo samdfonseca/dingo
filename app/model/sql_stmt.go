@@ -32,6 +32,14 @@ posts (
 );
 
 CREATE TABLE IF NOT EXISTS
+tokens (
+  value       varchar(40) NOT NULL PRIMARY KEY,
+  user_id     integer UNIQUE,
+  created_at  datetime,
+  expired_at  datetime
+);
+
+CREATE TABLE IF NOT EXISTS
 users (
   id               integer NOT NULL PRIMARY KEY AUTOINCREMENT,
   uuid             varchar(36) NOT NULL,
@@ -196,6 +204,10 @@ const stmtGetUserByEmail = `SELECT id, name, slug, email, image, cover, bio, web
 const stmtGetHashedPasswordByEmail = `SELECT password FROM users WHERE email = ?`
 const stmtGetUsersCount = `SELECT count(*) FROM users`
 const stmtGetUsersCountByEmail = `SELECT count(*) FROM users where email = ?`
+
+// Tokens
+const stmtGetTokenByValue = `SELECT value, user_id, created_at, expired_at FROM tokens WHERE value = ?`
+const stmtUpdateToken = `INSERT OR REPLACE INTO tokens (value, user_id, created_at, expired_at) VALUES (?, ?, ?, ?)`
 
 // Tags
 const stmtGetAllTags = `SELECT id, name, slug FROM tags`

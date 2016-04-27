@@ -21,8 +21,8 @@ func fileExists(filename string) bool {
 
 func Init(dbPath string) {
 	if err := model.Initialize(dbPath, fileExists(dbPath)); err != nil {
-		fmt.Errorf("failed to intialize db: %v", err)
-		os.Exit(1)
+		err = fmt.Errorf("failed to intialize db: %v", err)
+		panic(err)
 	}
 	fmt.Printf("Database is used at %s\n", dbPath)
 

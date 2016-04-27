@@ -4,56 +4,49 @@ import (
 	"fmt"
 	"github.com/dinever/dingo/app/utils"
 	"github.com/dinever/golf"
+	"time"
 )
 
-var tokens map[string]*Token
-
 type Token struct {
-	Value      string
-	UserId     int64
-	CreateTime int64
-	ExpireTime int64
+	Value     string
+	UserId    int64
+	CreatedAt *time.Time
+	ExpiredAt *time.Time
 }
 
-func CreateToken(u *User, context *golf.Context, expire int64) *Token {
+func CreateToken(u *User, ctx *golf.Context, expire int64) (*Token, error) {
 	t := new(Token)
 	t.UserId = u.Id
-	t.CreateTime = utils.NowUnix()
-	t.ExpireTime = t.CreateTime + expire
-	t.Value = utils.Sha1(fmt.Sprintf("%s-%s-%d-%d", context.Request.RemoteAddr, context.Request.UserAgent(), t.CreateTime, t.UserId))
-	tokens[t.Value] = t
-	return t
+	t.CreatedAt = utils.Now()
+	expiredAt := t.CreatedAt.Add(time.Duration(expire) * time.Second)
+	t.ExpiredAt = &expiredAt
+	t.Value = utils.Sha1(fmt.Sprintf("%s-%s-%d-%d", ctx.ClientIP(), ctx.Request.UserAgent(), t.CreatedAt.Unix(), t.UserId))
+	err := updateToken(t)
+	return t, err
 }
 
-// get token by token value.
-func GetTokenByValue(v string) *Token {
-	return tokens[v]
-}
-
-// get tokens of given user.
-func GetTokensByUser(u *User) []*Token {
-	ts := make([]*Token, 0)
-	for _, t := range tokens {
-		if t.UserId == u.Id {
-			ts = append(ts, t)
-		}
+func updateToken(t *Token) error {
+	writeDB, err := db.Begin()
+	if err != nil {
+		writeDB.Rollback()
+		return err
 	}
-	return ts
-}
-
-// remove a token by token value.
-func RemoveToken(v string) {
-	delete(tokens, v)
-}
-
-// clean all expired tokens in memory.
-// do not write to json.
-func CleanTokens() {
-	for k, t := range tokens {
-		if !t.IsValid() {
-			delete(tokens, k)
-		}
+	_, err = writeDB.Exec(stmtUpdateToken, t.Value, t.UserId, t.CreatedAt, t.ExpiredAt)
+	if err != nil {
+		writeDB.Rollback()
+		return err
 	}
+	return writeDB.Commit()
+}
+
+func GetTokenByValue(v string) (*Token, error) {
+	t := new(Token)
+	row := db.QueryRow(stmtGetTokenByValue, v)
+	err := row.Scan(&t.Value, &t.UserId, &t.CreatedAt, &t.ExpiredAt)
+	if err != nil {
+		return nil, err
+	}
+	return t, nil
 }
 
 func (t *Token) IsValid() bool {
@@ -61,5 +54,5 @@ func (t *Token) IsValid() bool {
 	if user == nil {
 		return false
 	}
-	return t.ExpireTime > utils.NowUnix()
+	return t.ExpiredAt.After(*utils.Now())
 }
