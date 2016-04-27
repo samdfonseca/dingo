@@ -70,9 +70,9 @@ func registerMiddlewares() {
 }
 
 func CreateSampleData() {
-	model.SetSetting("site_url", "http://example.com/", "blog")
-	model.SetSetting("title", "Dingo Blog", "blog")
-	model.SetSetting("sub_title", "Another blog created by Dingo", "blog")
+	model.NewSetting("site_url", "http://example.com/", "blog").Save()
+	model.NewSetting("title", "Dingo Blog", "blog").Save()
+	model.NewSetting("sub_title", "Another blog created by Dingo", "blog").Save()
 }
 
 func registerAdminURLHandlers() {
