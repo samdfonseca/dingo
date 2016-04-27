@@ -307,6 +307,7 @@ func SettingUpdateHandler(ctx *golf.Context) {
 	userObj, _ := ctx.Session.Get("user")
 	u := userObj.(*model.User)
 	var err error
+	ctx.Request.ParseForm()
 	for key, value := range ctx.Request.Form {
 		setting := new(model.Setting)
 		setting.UUID = uuid.Formatter(uuid.NewV4(), uuid.CleanHyphen)
@@ -331,6 +332,7 @@ func SettingUpdateHandler(ctx *golf.Context) {
 }
 
 func SettingCustomHandler(ctx *golf.Context) {
+	ctx.Request.ParseForm()
 	keys := ctx.Request.Form["key"]
 	values := ctx.Request.Form["value"]
 	for i, k := range keys {
@@ -345,6 +347,7 @@ func SettingCustomHandler(ctx *golf.Context) {
 }
 
 func SettingNavHandler(ctx *golf.Context) {
+	ctx.Request.ParseForm()
 	labels := ctx.Request.Form["label"]
 	urls := ctx.Request.Form["url"]
 	model.SetNavigators(labels, urls)
