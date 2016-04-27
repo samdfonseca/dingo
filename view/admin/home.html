@@ -46,7 +46,7 @@
       <div class="card-content black-text">
         <span class="card-title">New Messages</span>{{range .Messages}}
         <div class="msg relative {{.Type}}">
-          <span class="time btn-small blue darken-1 white-text">{{DateFormat .CreateTime "%b %d, %I:%M %p"}}</span>
+          <span class="time btn-small blue darken-1 white-text">{{DateFormat .CreatedAt "%b %d, %I:%M %p"}}</span>
           <div class="data">{{Html .Data}}</div>
         </div>{{end}}{{if lt (len .Messages) 1}}
         <p>No new messages.</p>

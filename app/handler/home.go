@@ -97,7 +97,7 @@ func CommentHandler(ctx *golf.Context) {
 			"res":     true,
 			"comment": c.ToJson(),
 		})
-		model.CreateMessage("comment", c)
+		model.NewMessage("comment", c)
 	} else {
 		ctx.JSON(map[string]interface{}{
 			"status": "error",
