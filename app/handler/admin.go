@@ -237,6 +237,10 @@ func CommentAddHandler(ctx *golf.Context) {
 	if err != nil {
 		panic(err)
 	}
+	if !parent.Approved {
+		parent.Approved = true
+		parent.Save()
+	}
 	c := new(model.Comment)
 	c.Author = u.Name
 	c.Email = u.Email
@@ -369,6 +373,7 @@ func AdminPasswordChange(ctx *golf.Context) {
 	u := userObj.(*model.User)
 	oldPassword := ctx.Request.FormValue("old")
 	if !u.CheckPassword(oldPassword) {
+		ctx.SendStatus(400)
 		ctx.JSON(map[string]interface{}{
 			"status": "error",
 			"msg":    "Old password incorrect.",
