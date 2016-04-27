@@ -10,7 +10,6 @@ import (
 	"os"
 	"strings"
 	"testing"
-	"fmt"
 )
 
 func authenticatedContext(form url.Values, method, path string) *golf.Context {
@@ -36,7 +35,6 @@ func TestViewHandler(t *testing.T) {
 			app.ServeHTTP(ctx.Response, ctx.Request)
 
 			Convey("Should return HTTP response 200 OK", func() {
-				fmt.Println(ctx.Response.(*httptest.ResponseRecorder).Body.String())
 				So(ctx.Response.(*httptest.ResponseRecorder).Code, ShouldEqual, 200)
 			})
 		})
