@@ -41,8 +41,9 @@ func SetNavigators(labels, urls []string) error {
 	if err != nil {
 		return err
 	}
-	err = SetSetting("navigation", string(navStr), "navigation")
-	return err
+
+	s := NewSetting("navigation", string(navStr), "navigation")
+	return s.Save()
 }
 
 func GetSetting(k string) (*Setting, error) {
@@ -95,7 +96,7 @@ func GetSettings(t string) []*Setting {
 
 }
 
-func SaveSetting(setting *Setting) error {
+func (setting *Setting) Save() error {
 	writeDB, err := db.Begin()
 	if err != nil {
 		writeDB.Rollback()
@@ -109,7 +110,7 @@ func SaveSetting(setting *Setting) error {
 	return writeDB.Commit()
 }
 
-func SetSetting(k, v, t string) error {
+func NewSetting(k, v, t string) *Setting {
 	setting := new(Setting)
 	setting.UUID = uuid.Formatter(uuid.NewV4(), uuid.CleanHyphen)
 	setting.Key = k
@@ -117,13 +118,14 @@ func SetSetting(k, v, t string) error {
 	setting.Type = t
 	now := time.Now()
 	setting.CreatedAt = &now
-	return SaveSetting(setting)
+	return setting
 }
 
 func SetSettingIfNotExists(k, v, t string) error {
 	_, err := GetSetting(k)
 	if err != nil {
-		err = SetSetting(k, v, t)
+		s := NewSetting(k, v, t)
+		return s.Save()
 	}
 	return err
 }

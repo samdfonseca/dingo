@@ -24,8 +24,11 @@ func TestSetting(t *testing.T) {
 		})
 
 		Convey("Test Settings", func() {
-			SetSetting("github", "dinever", "custom")
-			SetSetting("twitter", "Dingpeixuan", "custom")
+			err := NewSetting("github", "dinever", "custom").Save()
+			So(err, ShouldBeNil)
+
+			err = NewSetting("twitter", "Dingpeixuan", "custom").Save()
+			So(err, ShouldBeNil)
 
 			Convey("Get Setting", func() {
 				s, err := GetSetting("github")
@@ -75,4 +78,3 @@ func TestSetting(t *testing.T) {
 		})
 	})
 }
-

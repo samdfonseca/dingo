@@ -321,7 +321,7 @@ func SettingUpdateHandler(ctx *golf.Context) {
 		setting.CreatedBy = u.Id
 		now := time.Now()
 		setting.CreatedAt = &now
-		err = model.SaveSetting(setting)
+		err = setting.Save()
 		if err != nil {
 			panic(err)
 			ctx.JSON(map[string]interface{}{
@@ -343,7 +343,7 @@ func SettingCustomHandler(ctx *golf.Context) {
 		if len(k) < 1 {
 			continue
 		}
-		model.SetSetting(k, values[i], "custom")
+		model.NewSetting(k, values[i], "custom").Save()
 	}
 	ctx.JSON(map[string]interface{}{
 		"status": "success",
