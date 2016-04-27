@@ -24,7 +24,7 @@ func mockPost() *Post {
 	return p
 }
 
-func TestProfileHandler(t *testing.T) {
+func TestPost(t *testing.T) {
 	Convey("Initialize database", t, func() {
 		Initialize("test.db", true)
 
