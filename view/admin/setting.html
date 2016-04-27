@@ -38,11 +38,11 @@
                 </p>
                 <p class="item">
                 <label for="site-keywords">Meta Keyword</label>
-                <input id="site-keywords" class="ipt" type="text" name="site_keywords" value="{{Setting `site_keywords`}}"/>
+                <input id="site-keywords" class="ipt" type="text" name="meta_keywords" value="{{Setting `meta_keywords`}}"/>
                 </p>
                 <p class="item">
                 <label for="site-desc">Meta Description</label>
-                <input id="site-desc" class="ipt" type="text" name="description" value="{{Setting `description`}}"/>
+                <input id="site-desc" class="ipt" type="text" name="meta_description" value="{{Setting `meta_description`}}"/>
                 </p>
                 <p>
                 <label>&nbsp;</label>
@@ -63,11 +63,6 @@
                 <p class="item">
                 <label for="recent-comment-size">Recent commented posts</label>
                 <input id="recent-comment-size" class="ipt" type="number" name="recent_comment_size" value="{{Setting `recent_comment_size`}}" max="10" min="3" required="required"/>
-                </p>
-                <p class="item">
-                <label for="go-markdown">Rendering Markdown by Go?</label>
-                <input id="go-markdown" class="ipt" type="text" name="enable_go_markdown" value="{{Setting `enable_go_markdown`}}"/>
-                <input type="hidden" name="enable_go_markdown_def" value="false"/>
                 </p>
                 <p>
                 <button class="btn waves-effect waves-light blue">Save</button>

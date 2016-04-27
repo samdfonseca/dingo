@@ -237,6 +237,10 @@ func CommentAddHandler(ctx *golf.Context) {
 	if err != nil {
 		panic(err)
 	}
+	if !parent.Approved {
+		parent.Approved = true
+		parent.Save()
+	}
 	c := new(model.Comment)
 	c.Author = u.Name
 	c.Email = u.Email
@@ -307,6 +311,7 @@ func SettingUpdateHandler(ctx *golf.Context) {
 	userObj, _ := ctx.Session.Get("user")
 	u := userObj.(*model.User)
 	var err error
+	ctx.Request.ParseForm()
 	for key, value := range ctx.Request.Form {
 		setting := new(model.Setting)
 		setting.UUID = uuid.Formatter(uuid.NewV4(), uuid.CleanHyphen)
@@ -331,6 +336,7 @@ func SettingUpdateHandler(ctx *golf.Context) {
 }
 
 func SettingCustomHandler(ctx *golf.Context) {
+	ctx.Request.ParseForm()
 	keys := ctx.Request.Form["key"]
 	values := ctx.Request.Form["value"]
 	for i, k := range keys {
@@ -345,6 +351,7 @@ func SettingCustomHandler(ctx *golf.Context) {
 }
 
 func SettingNavHandler(ctx *golf.Context) {
+	ctx.Request.ParseForm()
 	labels := ctx.Request.Form["label"]
 	urls := ctx.Request.Form["url"]
 	model.SetNavigators(labels, urls)
@@ -366,6 +373,7 @@ func AdminPasswordChange(ctx *golf.Context) {
 	u := userObj.(*model.User)
 	oldPassword := ctx.Request.FormValue("old")
 	if !u.CheckPassword(oldPassword) {
+		ctx.SendStatus(400)
 		ctx.JSON(map[string]interface{}{
 			"status": "error",
 			"msg":    "Old password incorrect.",
