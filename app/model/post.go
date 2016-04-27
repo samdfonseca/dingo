@@ -77,6 +77,11 @@ func (p *Post) Excerpt() string {
 }
 
 func (p *Post) Save() error {
+	p.Slug = strings.TrimLeft(p.Slug, "/")
+	p.Slug = strings.TrimRight(p.Slug, "/")
+	if p.Slug == "" {
+		return fmt.Errorf("Slug can not be empty or root")
+	}
 	if p.Id == 0 {
 		// Insert post
 		postId, err := InsertPost(p)
@@ -89,11 +94,6 @@ func (p *Post) Save() error {
 		if err != nil {
 			return err
 		}
-	}
-	p.Slug = strings.TrimLeft(p.Slug, "/")
-	p.Slug = strings.TrimRight(p.Slug, "/")
-	if p.Slug == "" {
-		return fmt.Errorf("Slug can not be empty or root")
 	}
 	tagIds := make([]int64, 0)
 	// Insert tags
@@ -127,9 +127,13 @@ func InsertPost(p *Post) (int64, error) {
 	}
 	if p.IsPublished {
 		p.status = "published"
+		p.PublishedAt = p.CreatedAt
+		p.PublishedBy = p.CreatedBy
 	} else {
 		p.status = "draft"
 	}
+	p.UpdatedAt = p.CreatedAt
+	p.UpdatedBy = p.CreatedBy
 	writeDB, err := db.Begin()
 	if err != nil {
 		writeDB.Rollback()
@@ -137,9 +141,9 @@ func InsertPost(p *Post) (int64, error) {
 	}
 	var result sql.Result
 	if p.IsPublished {
-		result, err = writeDB.Exec(stmtInsertPost, nil, uuid.Formatter(uuid.NewV4(), uuid.CleanHyphen), p.Title, p.Slug, p.Markdown, p.Html, p.IsFeatured, p.IsPage, p.AllowComment, p.status, p.Image, p.CreatedBy, p.CreatedAt, p.CreatedBy, p.CreatedAt, p.CreatedBy, p.CreatedAt, p.CreatedBy)
+		result, err = writeDB.Exec(stmtInsertPost, nil, uuid.Formatter(uuid.NewV4(), uuid.CleanHyphen), p.Title, p.Slug, p.Markdown, p.Html, p.IsFeatured, p.IsPage, p.AllowComment, p.status, p.Image, p.CreatedBy, p.CreatedAt, p.CreatedBy, p.UpdatedAt, p.UpdatedBy, p.PublishedAt, p.PublishedBy)
 	} else {
-		result, err = writeDB.Exec(stmtInsertPost, nil, uuid.Formatter(uuid.NewV4(), uuid.CleanHyphen), p.Title, p.Slug, p.Markdown, p.Html, p.IsFeatured, p.IsPage, p.AllowComment, p.status, p.Image, p.CreatedBy, p.CreatedAt, p.CreatedBy, p.CreatedAt, p.CreatedBy, nil, nil)
+		result, err = writeDB.Exec(stmtInsertPost, nil, uuid.Formatter(uuid.NewV4(), uuid.CleanHyphen), p.Title, p.Slug, p.Markdown, p.Html, p.IsFeatured, p.IsPage, p.AllowComment, p.status, p.Image, p.CreatedBy, p.CreatedAt, p.CreatedBy, p.UpdatedAt, p.UpdatedBy, nil, nil)
 	}
 	if err != nil {
 		writeDB.Rollback()
@@ -178,7 +182,11 @@ func UpdatePost(p *Post) error {
 	status := "draft"
 	if p.IsPublished {
 		status = "published"
+		p.PublishedAt = utils.Now()
+		p.PublishedBy = p.CreatedBy
 	}
+	p.UpdatedAt = utils.Now()
+	p.UpdatedBy = p.CreatedBy
 	writeDB, err := db.Begin()
 	if err != nil {
 		writeDB.Rollback()
@@ -186,9 +194,9 @@ func UpdatePost(p *Post) error {
 	}
 	// If the updated post is published for the first time, add publication date and user
 	if p.IsPublished && !currentPost.IsPublished {
-		_, err = writeDB.Exec(stmtUpdatePostPublished, p.Title, p.Slug, p.Markdown, p.Html, p.IsFeatured, p.IsPage, p.AllowComment, status, p.Image, p.CreatedAt, p.CreatedBy, p.CreatedAt, p.CreatedBy, p.Id)
+		_, err = writeDB.Exec(stmtUpdatePostPublished, p.Title, p.Slug, p.Markdown, p.Html, p.IsFeatured, p.IsPage, p.AllowComment, status, p.Image, p.UpdatedAt, p.UpdatedBy, p.PublishedAt, p.PublishedBy, p.Id)
 	} else {
-		_, err = writeDB.Exec(stmtUpdatePost, p.Title, p.Slug, p.Markdown, p.Html, p.IsFeatured, p.IsPage, p.AllowComment, status, p.Image, p.CreatedAt, p.CreatedBy, p.Id)
+		_, err = writeDB.Exec(stmtUpdatePost, p.Title, p.Slug, p.Markdown, p.Html, p.IsFeatured, p.IsPage, p.AllowComment, status, p.Image, p.UpdatedAt, p.UpdatedBy, p.Id)
 	}
 	if err != nil {
 		writeDB.Rollback()
@@ -231,17 +239,6 @@ func DeletePostById(id int64) error {
 		return err
 	}
 	return DeleteOldTags()
-}
-
-func GetPostCreationDateById(post_id int64) (*time.Time, error) {
-	var date time.Time
-	// Get number of posts
-	row := db.QueryRow(stmtGetPostCreationDateById, post_id)
-	err := row.Scan(&date)
-	if err != nil {
-		return &date, err
-	}
-	return &date, nil
 }
 
 func GetPostById(id int64) (*Post, error) {
@@ -381,6 +378,8 @@ func scanPost(rows Row, post *Post) error {
 	err := rows.Scan(&post.Id, &post.UUID, &post.Title, &post.Slug, &post.Markdown,
 		&post.Html, &post.IsFeatured, &post.IsPage, &post.AllowComment, &post.CommentNum, &post.status, &nullImage,
 		&post.userId, &post.CreatedAt, &post.CreatedBy, &post.UpdatedAt, &nullUpdatedBy, &post.PublishedAt, &nullPublishedBy)
+	post.UpdatedBy = nullUpdatedBy.Int64
+	post.PublishedBy = nullUpdatedBy.Int64
 	post.Image = nullImage.String
 	return err
 }
@@ -392,13 +391,6 @@ func extractPosts(rows *sql.Rows) ([]*Post, error) {
 		err := scanPost(rows, post)
 		if err != nil {
 			return nil, err
-		}
-		// If there was no publication date attached to the post, make its creation date the date of the post
-		if post.PublishedAt == nil {
-			post.PublishedAt, err = GetPostCreationDateById(post.Id)
-			if err != nil {
-				return nil, err
-			}
 		}
 		// Evaluate status
 		if post.status == "published" {
@@ -430,13 +422,6 @@ func extractPost(row *sql.Row) (*Post, error) {
 	err := scanPost(row, post)
 	if err != nil {
 		return nil, err
-	}
-	// If there was no publication date attached to the post, make its creation date the date of the post
-	if post.PublishedAt == nil {
-		post.PublishedAt, err = GetPostCreationDateById(post.Id)
-		if err != nil {
-			return nil, err
-		}
 	}
 	// Evaluate status
 	if post.status == "published" {
