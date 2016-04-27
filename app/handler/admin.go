@@ -264,7 +264,7 @@ func CommentAddHandler(ctx *golf.Context) {
 		"status":  "success",
 		"comment": c.ToJson(),
 	})
-	model.CreateMessage("comment", c)
+	model.NewMessage("comment", c)
 }
 
 func CommentUpdateHandler(ctx *golf.Context) {

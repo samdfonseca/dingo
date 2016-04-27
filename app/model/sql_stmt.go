@@ -135,7 +135,7 @@ settings (
   id          integer NOT NULL PRIMARY KEY AUTOINCREMENT,
   uuid        varchar(36) NOT NULL,
   key         varchar(150) NOT NULL,
-  value       text,
+  value       varchar(20) NOT NULL,
   type        varchar(150) NOT NULL DEFAULT 'core',
   created_at  datetime NOT NULL,
   created_by  integer NOT NULL,
@@ -153,6 +153,15 @@ roles (
   created_by   integer NOT NULL,
   updated_at   datetime,
   updated_by   integer
+);
+
+CREATE TABLE IF NOT EXISTS
+messages (
+  id           integer NOT NULL PRIMARY KEY AUTOINCREMENT,
+  type         varchar(20) NOT NULL,
+  data         text NOT NULL,
+  is_read      boolean NOT NULL default 0,
+  created_at   datetime NOT NULL
 );
 `
 
@@ -238,3 +247,15 @@ const stmtUpdateTag = `UPDATE tags SET uuid = ?, name = ?, slug =?, updated_at =
 const stmtDeletePostTagsByPostId = `DELETE FROM posts_tags WHERE post_id = ?`
 const stmtDeletePostById = `DELETE FROM posts WHERE id = ?`
 const stmtDeleteOldTags = `DELETE FROM tags WHERE id IN (SELECT id FROM tags EXCEPT SELECT tag_id FROM posts_tags)`
+
+// Messages
+var messageCountSelector = SQL.Select(`count(*)`).From(`messages`)
+var sttmGetUnreadMessageCount = messageCountSelector.Copy().Where(`is_read = 0`).From(`messages`).SQL()
+
+var messageSelector = SQL.Select(`id, type, data, is_read, created_at`).From(`messages`)
+var stmtGetAllMessages = messageSelector.Copy().OrderBy(`created_at DESC`).SQL()
+var stmtGetUnreadMessages = messageSelector.Copy().Where(`is_read = 0`).OrderBy(`created_at DESC`).Limit(`?`).Offset(`?`).SQL()
+var stmtGetAllMessagesByPage = messageSelector.Copy().OrderBy(`created_at DESC`).Limit(`?`).Offset(`?`).SQL()
+
+const stmtInsertMessage = `INSERT INTO messages (id, type, data, is_read, created_at) VALUES (?, ?, ?, ?, ?)`
+const stmtReadMessage = `UPDATE messages SET is_read = 1 WHERE id = ?`

@@ -8,8 +8,6 @@ import (
 )
 
 var (
-	messages         []*Message
-	messageMaxId     int
 	messageGenerator map[string]func(v interface{}) string
 )
 
@@ -20,14 +18,14 @@ func init() {
 }
 
 type Message struct {
-	Id         int
-	Type       string
-	CreateTime *time.Time
-	Data       string
-	IsRead     bool
+	Id        int
+	Type      string
+	CreatedAt *time.Time
+	Data      string
+	IsRead    bool
 }
 
-func CreateMessage(tp string, data interface{}) *Message {
+func NewMessage(tp string, data interface{}) *Message {
 	m := new(Message)
 	m.Type = tp
 	m.Data = messageGenerator[tp](data)
@@ -35,60 +33,49 @@ func CreateMessage(tp string, data interface{}) *Message {
 		log.Printf("[Error]: message generator returns empty")
 		return nil
 	}
-	m.CreateTime = utils.Now()
+	m.CreatedAt = utils.Now()
 	m.IsRead = false
-	messageMaxId += 1
-	m.Id = messageMaxId
-	messages = append([]*Message{m}, messages...)
+	err := m.Save()
+	if err != nil {
+		panic(err)
+	}
 	return m
+}
+
+func (m *Message) Save() error {
+	writeDB, err := db.Begin()
+	if err != nil {
+		writeDB.Rollback()
+	}
+	_, err = writeDB.Exec(stmtInsertMessage, nil, m.Type, m.Data, m.IsRead, m.CreatedAt)
+	if err != nil {
+		writeDB.Rollback()
+	}
+	return writeDB.Commit()
 }
 
 func SetMessageGenerator(name string, fn func(v interface{}) string) {
 	messageGenerator[name] = fn
 }
 
-func GetMessage(id int) *Message {
-	for _, m := range messages {
-		if m.Id == id {
-			return m
-		}
-	}
-	return nil
-}
-
 func GetUnreadMessages() []*Message {
-	ms := make([]*Message, 0)
-	for _, m := range messages {
-		if m.IsRead {
+	messages := make([]*Message, 0)
+	rows, err := db.Query(stmtGetUnreadMessages, 10, 0)
+	defer rows.Close()
+	if err != nil {
+		panic(err)
+		return messages
+	}
+	for rows.Next() {
+		m := new(Message)
+		err := rows.Scan(&m.Id, &m.Type, &m.Data, &m.IsRead, &m.CreatedAt)
+		if err != nil {
+			panic(err)
 			continue
 		}
-		ms = append(ms, m)
+		messages = append(messages, m)
 	}
-	return ms
-}
-
-func GetMessages() []*Message {
 	return messages
-}
-
-func GetTypedMessages(tp string, unread bool) []*Message {
-	ms := make([]*Message, 0)
-	for _, m := range messages {
-		if m.Type == tp {
-			if unread {
-				if !m.IsRead {
-					ms = append(ms, m)
-				}
-			} else {
-				ms = append(ms, m)
-			}
-		}
-	}
-	return ms
-}
-
-func SaveMessageRead(m *Message) {
-	m.IsRead = true
 }
 
 func generateCommentMessage(co interface{}) string {
