@@ -14,18 +14,17 @@ type Token struct {
 	ExpiredAt *time.Time
 }
 
-func CreateToken(u *User, ctx *golf.Context, expire int64) (*Token, error) {
+func NewToken(u *User, ctx *golf.Context, expire int64) *Token {
 	t := new(Token)
 	t.UserId = u.Id
 	t.CreatedAt = utils.Now()
 	expiredAt := t.CreatedAt.Add(time.Duration(expire) * time.Second)
 	t.ExpiredAt = &expiredAt
 	t.Value = utils.Sha1(fmt.Sprintf("%s-%s-%d-%d", ctx.ClientIP(), ctx.Request.UserAgent(), t.CreatedAt.Unix(), t.UserId))
-	err := updateToken(t)
-	return t, err
+	return t
 }
 
-func updateToken(t *Token) error {
+func (t *Token) Save() error {
 	writeDB, err := db.Begin()
 	if err != nil {
 		writeDB.Rollback()
