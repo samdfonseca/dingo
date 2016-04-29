@@ -35,10 +35,6 @@ func NewMessage(tp string, data interface{}) *Message {
 	}
 	m.CreatedAt = utils.Now()
 	m.IsRead = false
-	err := m.Save()
-	if err != nil {
-		panic(err)
-	}
 	return m
 }
 
