@@ -125,7 +125,7 @@ func TestUserLogInWithCorrectInformation(t *testing.T) {
 		model.Initialize("test.db", false)
 
 		Convey("Create a user first", func() {
-			err := model.CreateNewUser(email, name, password)
+			err := model.NewUser(email, name).Create(password)
 			So(err, ShouldBeNil)
 
 			Convey("Login with correct information", func() {

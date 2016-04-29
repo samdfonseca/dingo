@@ -13,7 +13,7 @@ import (
 )
 
 func authenticatedContext(form url.Values, method, path string) *golf.Context {
-	_ = model.CreateNewUser(email, name, password)
+	_ = model.NewUser(email, name).Create(password)
 	ctx := mockLogInPostContext()
 	ctx.App.ServeHTTP(ctx.Response, ctx.Request)
 	rec := ctx.Response.(*httptest.ResponseRecorder)
@@ -476,7 +476,7 @@ func TestSettingHandler(t *testing.T) {
 		model.Initialize("test.db", true)
 
 		Convey("Save settings", func() {
-			settings := []struct{
+			settings := []struct {
 				Key, Value string
 			}{
 				{"title", "Dingo Blog"},
@@ -500,7 +500,7 @@ func TestSettingHandler(t *testing.T) {
 		})
 
 		Convey("Save custom settings", func() {
-			settings := []struct{
+			settings := []struct {
 				Key, Value string
 			}{
 				{"title", "Dingo Blog"},
@@ -525,7 +525,7 @@ func TestSettingHandler(t *testing.T) {
 		})
 
 		Convey("Save navigator settings", func() {
-			settings := []struct{
+			settings := []struct {
 				Lable, Url string
 			}{
 				{"Home", "/"},

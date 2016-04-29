@@ -24,6 +24,21 @@ type User struct {
 
 var ghostUser = &User{Id: 0, Name: "Dingo User", Email: "example@example.com"}
 
+func NewUser(email, name string) *User {
+	user := new(User)
+	user.Email = email
+	user.Name = name
+	return user
+}
+
+func (u *User) Create(password string) error {
+	hashedPassword, err := EncryptPassword(password)
+	if err != nil {
+		return err
+	}
+	return u.Save(hashedPassword, 0)
+}
+
 func (u *User) Save(hashedPassword string, createdBy int64) error {
 	id, err := InsertUser(u.Name, u.Slug, hashedPassword, u.Email, u.Image, u.Cover, time.Now(), createdBy)
 	if err != nil {
@@ -217,15 +232,4 @@ func GetNumberOfUsers() (int64, error) {
 	row := db.QueryRow("SELECT COUNT(*) FROM users")
 	err := row.Scan(&count)
 	return count, err
-}
-
-func CreateNewUser(email, name, password string) error {
-	user := new(User)
-	user.Email = email
-	user.Name = name
-	hashedPassword, err := EncryptPassword(password)
-	if err != nil {
-		return err
-	}
-	return user.Save(hashedPassword, 0)
 }
