@@ -24,6 +24,21 @@ type User struct {
 
 var ghostUser = &User{Id: 0, Name: "Dingo User", Email: "example@example.com"}
 
+func NewUser(email, name string) *User {
+	user := new(User)
+	user.Email = email
+	user.Name = name
+	return user
+}
+
+func (u *User) Create(password string) error {
+	hashedPassword, err := EncryptPassword(password)
+	if err != nil {
+		return err
+	}
+	return u.Save(hashedPassword, 0)
+}
+
 func (u *User) Save(hashedPassword string, createdBy int64) error {
 	id, err := InsertUser(u.Name, u.Slug, hashedPassword, u.Email, u.Image, u.Cover, time.Now(), createdBy)
 	if err != nil {
@@ -37,12 +52,18 @@ func (u *User) Save(hashedPassword string, createdBy int64) error {
 	return nil
 }
 
-func (u *User) UpdateUser(updatedById int64) error {
-	err := UpdateUser(u.Id, u.Name, u.Slug, u.Email, u.Image, u.Cover, u.Bio, u.Website, u.Location, time.Now(), updatedById)
+func (u *User) Update() error {
+	writeDB, err := db.Begin()
 	if err != nil {
+		writeDB.Rollback()
 		return err
 	}
-	return nil
+	_, err = writeDB.Exec(stmtUpdateUser, u.Name, u.Slug, u.Email, u.Image, u.Cover, u.Bio, u.Website, u.Location, time.Now(), u.Id, u.Id)
+	if err != nil {
+		writeDB.Rollback()
+		return err
+	}
+	return writeDB.Commit()
 }
 
 func (u *User) ChangePassword(password string) error {
@@ -188,28 +209,14 @@ func InsertRoleUser(role_id int, user_id int64) error {
 	return writeDB.Commit()
 }
 
-func UpdateUser(id int64, name string, slug string, email string, image string, cover string, bio string, website string, location string, updated_at time.Time, updated_by int64) error {
-	writeDB, err := db.Begin()
-	if err != nil {
-		writeDB.Rollback()
-		return err
-	}
-	_, err = writeDB.Exec(stmtUpdateUser, name, slug, email, image, cover, bio, website, location, updated_at, updated_by, id)
-	if err != nil {
-		writeDB.Rollback()
-		return err
-	}
-	return writeDB.Commit()
-}
-
-func UserChangeEmail(email string) bool {
+func UserEmailExist(email string) bool {
 	var count int64
 	row := db.QueryRow(stmtGetUsersCountByEmail, email)
 	err := row.Scan(&count)
 	if count > 0 || err != nil {
-		return false
+		return true
 	}
-	return true
+	return false
 }
 
 func GetNumberOfUsers() (int64, error) {
@@ -217,15 +224,4 @@ func GetNumberOfUsers() (int64, error) {
 	row := db.QueryRow("SELECT COUNT(*) FROM users")
 	err := row.Scan(&count)
 	return count, err
-}
-
-func CreateNewUser(email, name, password string) error {
-	user := new(User)
-	user.Email = email
-	user.Name = name
-	hashedPassword, err := EncryptPassword(password)
-	if err != nil {
-		return err
-	}
-	return user.Save(hashedPassword, 0)
 }

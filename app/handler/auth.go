@@ -80,7 +80,7 @@ func AuthSignUpHandler(ctx *golf.Context) {
 		})
 		return
 	}
-	err = model.CreateNewUser(email, name, password)
+	err = model.NewUser(email, name).Create(password)
 	if err != nil {
 		ctx.Abort(500)
 		return
@@ -128,21 +128,21 @@ func AuthLoginHandler(ctx *golf.Context) {
 	}
 	var (
 		exp int
-		s   *model.Token
+		t   *model.Token
 	)
 	if rememberMe == "on" {
 		exp = 3600 * 24 * 3
-		s = model.NewToken(user, ctx, int64(exp))
+		t = model.NewToken(user, ctx, int64(exp))
 	} else {
 		exp = 0
-		s = model.NewToken(user, ctx, 3600)
+		t = model.NewToken(user, ctx, 3600)
 	}
-	if err = s.Save(); err != nil {
+	if err = t.Save(); err != nil {
 		ctx.JSON(map[string]interface{}{"status": "error", "message": "Can not create token."})
 		panic(err)
 	}
-	ctx.SetCookie("token-user", strconv.Itoa(int(s.UserId)), exp)
-	ctx.SetCookie("token-value", s.Value, exp)
+	ctx.SetCookie("token-user", strconv.Itoa(int(t.UserId)), exp)
+	ctx.SetCookie("token-value", t.Value, exp)
 	ctx.JSON(map[string]interface{}{"status": "success"})
 }
 
