@@ -33,7 +33,7 @@ func ProfileHandler(ctx *golf.Context) {
 func ProfileChangeHandler(ctx *golf.Context) {
 	userObj, _ := ctx.Session.Get("user")
 	u := userObj.(*model.User)
-	if u.Email != ctx.Request.FormValue("email") && !model.UserChangeEmail(ctx.Request.FormValue("email")) {
+	if u.Email != ctx.Request.FormValue("email") && model.UserEmailExist(ctx.Request.FormValue("email")) {
 		ctx.JSON(map[string]interface{}{"status": "error", "msg": "A user with that email address already exists."})
 		return
 	}

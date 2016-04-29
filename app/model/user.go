@@ -53,7 +53,7 @@ func (u *User) Save(hashedPassword string, createdBy int64) error {
 }
 
 func (u *User) UpdateUser(updatedById int64) error {
-	err := UpdateUser(u.Id, u.Name, u.Slug, u.Email, u.Image, u.Cover, u.Bio, u.Website, u.Location, time.Now(), updatedById)
+	err := updateUser(u.Id, u.Name, u.Slug, u.Email, u.Image, u.Cover, u.Bio, u.Website, u.Location, time.Now(), updatedById)
 	if err != nil {
 		return err
 	}
@@ -203,7 +203,7 @@ func InsertRoleUser(role_id int, user_id int64) error {
 	return writeDB.Commit()
 }
 
-func UpdateUser(id int64, name string, slug string, email string, image string, cover string, bio string, website string, location string, updated_at time.Time, updated_by int64) error {
+func updateUser(id int64, name string, slug string, email string, image string, cover string, bio string, website string, location string, updated_at time.Time, updated_by int64) error {
 	writeDB, err := db.Begin()
 	if err != nil {
 		writeDB.Rollback()
@@ -217,14 +217,14 @@ func UpdateUser(id int64, name string, slug string, email string, image string, 
 	return writeDB.Commit()
 }
 
-func UserChangeEmail(email string) bool {
+func UserEmailExist(email string) bool {
 	var count int64
 	row := db.QueryRow(stmtGetUsersCountByEmail, email)
 	err := row.Scan(&count)
 	if count > 0 || err != nil {
-		return false
+		return true
 	}
-	return true
+	return false
 }
 
 func GetNumberOfUsers() (int64, error) {
