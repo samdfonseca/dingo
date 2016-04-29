@@ -2,7 +2,6 @@ package model
 
 import (
 	"database/sql"
-	"time"
 
 	"github.com/dinever/dingo/app/utils"
 	_ "github.com/mattn/go-sqlite3"
@@ -142,7 +141,7 @@ func createWelcomeData() error {
 		return err
 	}
 
-	c := new(Comment)
+	c := NewComment()
 	c.Author = "Shawn Ding"
 	c.Email = "dingpeixuan911@gmail.com"
 	c.Website = "http://github.com/dinever/dingo"
@@ -154,8 +153,5 @@ func createWelcomeData() error {
 	c.UserAgent = "Mozilla"
 	c.UserId = 0
 	c.Approved = true
-	createdAt := time.Now()
-	c.CreatedAt = &createdAt
-	_, err = c.Save()
-	return err
+	return c.Save()
 }
