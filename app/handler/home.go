@@ -36,20 +36,24 @@ func HomeHandler(ctx *golf.Context) {
 
 func ContentHandler(ctx *golf.Context) {
 	slug := ctx.Param("slug")
-	article, err := model.GetPostBySlug(slug)
+	post, err := model.GetPostBySlug(slug)
+	if !post.IsPublished {
+		ctx.Abort(404)
+		return
+	}
 	if err != nil {
 		log.Printf("[Error]: %v", err)
 		ctx.Abort(404)
 		return
 	}
-	article.Hits++
+	post.Hits++
 	data := map[string]interface{}{
-		"Title":    article.Title,
-		"Article":  article,
-		"Content":  article,
-		"Comments": article.Comments,
+		"Title":    post.Title,
+		"Article":  post,
+		"Content":  post,
+		"Comments": post.Comments,
 	}
-	if article.IsPage {
+	if post.IsPage {
 		ctx.Loader("theme").Render("page.html", data)
 	} else {
 		ctx.Loader("theme").Render("article.html", data)
