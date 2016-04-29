@@ -41,7 +41,7 @@ func Init(dbPath string) {
 	App.View.SetTemplateLoader("theme", filepath.Join("view", theme))
 	//	static_dir, _ := App.Config.GetString("app/static_dir", "static")
 	App.Static("/upload/", upload_dir)
-	App.Static("/", filepath.Join("view", "admin", "assets"))
+	App.Static("/", filepath.Join("view", "admin", "assets", "dist"))
 	App.Static("/", filepath.Join("view", theme, "assets"))
 
 	App.SessionManager = golf.NewMemorySessionManager()

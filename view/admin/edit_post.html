@@ -1,16 +1,120 @@
 {{ extends "/default.html" }}
 
 {{ define "body"}}
+
+<section class="text-fields">
+  <div class="mdl-color--light-blue ml-header relative clear">
+    <div class="p-20">
+      <h3 class="mdl-color-text--white m-t-20 m-b-5">Editor</h3>
+    </div>
+  </div>
+
+  <div class="mdl-grid mdl-grid--no-spacing">
+
+    <div class="mdl-cell mdl-cell--3-col mdl-cell--12-col-tablet mdl-cell--12-col-phone mdl-color--grey-100">
+      <div class="p-40 p-r-20 p-20--small">
+        <div class=" mdl-color-text--blue-grey-400">
+          <h3><i class="material-icons f-left m-r-5">info</i> Post information</h3>
+          <p>Some relevant information should be displayed here</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="mdl-cell mdl-cell--9-col mdl-cell--12-col-tablet mdl-cell--12-col-phone no-p-l">
+      <div class="p-20 ml-card-holder ml-card-holder-first">
+        <div class="mdl-card dingo-card mdl-shadow--1dp">
+
+          <div class="p-30">
+            <form id="post-form" action="#" method="post">
+
+              <div class="mdl-grid mdl-grid--no-spacing">
+                <div class="mdl-cell mdl-cell--12-col mdl-cell--12-col-tablet mdl-cell--12-col-phone">
+                  <div class="mdl-textfield mdl-js-textfield mdl-textfield--floating-label fullwidth">
+                    <input class="mdl-textfield__input" type="text" name="title" id="title" value="{{ .Post.Title }}">
+                    <label class="mdl-textfield__label" for="title">Title</label>
+                  </div>
+                </div>
+
+                <div class="mdl-cell mdl-cell--6-col mdl-cell--12-col-tablet mdl-cell--12-col-phone">
+                  <div class="mdl-textfield mdl-js-textfield mdl-textfield--floating-label fullwidth">
+                    <input class="mdl-textfield__input" type="text" name="slug" id="slug" value="{{ .Post.Slug }}">
+                    <label class="mdl-textfield__label" for="slug">Post Slug</label>
+                  </div>
+                </div>
+
+                <div class="mdl-cell mdl-cell--12-col mdl-cell--12-col-tablet mdl-cell--12-col-phone">
+                  <textarea name="content" id="content" class="ipt">{{Html .Post.Markdown}}</textarea>
+                </div>
+
+                <div class="mdl-cell mdl-cell--6-col mdl-cell--12-col-tablet mdl-cell--12-col-phone p-r-20">
+                  <div class="mdl-textfield mdl-js-textfield mdl-textfield--floating-label fullwidth">
+                    <input class="mdl-textfield__input" type="text" name="category" id="slug">
+                    <label class="mdl-textfield__label" for="slug">Category</label>
+                  </div>
+                </div>
+
+                <div class="mdl-cell mdl-cell--6-col mdl-cell--12-col-tablet mdl-cell--12-col-phone">
+                  <div class="mdl-textfield mdl-js-textfield mdl-textfield--floating-label fullwidth">
+                    <input class="mdl-textfield__input" type="text" name="tags" id="slug">
+                    <label class="mdl-textfield__label" for="slug">Tags (Separate by commas)</label>
+                  </div>
+                </div>
+
+                <div class="mdl-cell mdl-cell--2-col mdl-cell--12-col-tablet mdl-cell--12-col-phone">
+
+                  <button type="button" id="attach-show" class="mdl-button mdl-js-button mdl-button--fab mdl-js-ripple-effect mdl-button--colored mdl-color--blue">
+                    <i class="material-icons">attachment</i>
+                    <span class="mdl-button__ripple-container">
+                      <span class="mdl-ripple is-animating"></span>
+                    </span>
+                  </button>
+                </div>
+
+                <div class="mdl-cell mdl-cell--5-col mdl-cell--12-col-tablet mdl-cell--12-col-phone">
+
+                  <label class="mdl-switch mdl-js-switch mdl-js-ripple-effect" for="comment">
+                    <input type="checkbox" id="comment" class="mdl-switch__input" name="comment" {{ if .Post.AllowComment }}checked{{ end }}/>
+                    <span class="mdl-switch__label">Allow Comment</span>
+                    <span class="mdl-ripple hide" /><!-- Workaround for js error -->
+                  </label>
+
+                </div>
+                <div class="mdl-cell mdl-cell--5-col mdl-cell--12-col-tablet mdl-cell--12-col-phone">
+
+                  <label class="mdl-switch mdl-js-switch mdl-js-ripple-effect" for="status">
+                    <input type="checkbox" id="status" class="mdl-switch__input" name="status" {{ if .Post.IsPublished }}checked{{ end }}/>
+                    <span class="mdl-switch__label">Publish</span>
+                    <span class="mdl-ripple hide" /><!-- Workaround for js error -->
+                  </label>
+
+                </div>
+
+<div class="m-t-20">
+
+                <button type="submit" class="mdl-button mdl-js-button mdl-button--raised mdl-button--colored mdl-color--green mdl-js-ripple-effect">
+                  Save
+                </button>
+              </div>
+
+
+
+              </div>
+            </form>
+          </div>
+        </div>
+      </div>
+    </div>
+
+
+  </div>
+</section>
+
+
 <div class="breadcrumb grey lighten-3">
   <h6>
     {{.Title}}
   </h6>
 </div>
-
-<style>
-    @import "//cdn.jsdelivr.net/simplemde/latest/simplemde.min.css";
-    @import "/static/css/codemirror.css";
-</style>
 
 <div class="content">
   <div class="row">
@@ -75,101 +179,34 @@
 
 
 {{ define "after_footer" }}
-<script src="/static/lib/validate.min.js"></script>
-<script src="/static/js/upload.js"></script>
-<script src="/static/lib/highlight.min.js"></script>
-<script src="/static/lib/simplemde.min.js"></script>
 <script>
- $(document).ready(function() {
-    $('select:not([multiple])').material_select();
-  });
-
 $(function () {
   var simplemde = new SimpleMDE({
     element: $("#content")[0],
     renderingConfig: {
       codeSyntaxHighlighting: true
-    },
-    toolbar: [{
-      name: "bold",
-      action: SimpleMDE.toggleBold,
-      className: "fa fa-bold",
-      title: "Bold"
-    }, {
-      name: "italic",
-      action: SimpleMDE.toggleItalic,
-      className: "fa fa-italic",
-      title: "Italic"
-    }, {
-      name: "heading",
-      action: SimpleMDE.toggleHeadingSmaller,
-      className: "fa fa-header",
-      title: "Heading"
-    }, {
-      name: "code",
-      action: SimpleMDE.toggleCodeBlock,
-      className: "fa fa-code",
-      title: "CodeBlock"
-    }, {
-      name: "unordered-list",
-      action: SimpleMDE.toggleUnorderedList,
-      className: "fa fa-list-ul",
-      title: "UnorderedList"
-    }, {
-      name: "ordered-list",
-      action: SimpleMDE.toggleOrderedList,
-      className: "fa fa-list-ol",
-      title: "OrderedList"
-    }, {
-      name: "table",
-      action: SimpleMDE.drawTable,
-      className: "fa fa-table",
-      title: "Table"
-    }, {
-      name: "preview",
-      action: SimpleMDE.togglePreview,
-      className: "fa fa-eye no-disable",
-      title: "Preview"
-    }, {
-      name: "side-by-side",
-      action: SimpleMDE.toggleSideBySide,
-      className: "fa fa-columns no-disable no-mobile",
-      title: "Toggle Side by Side"
-    }, {
-      name: "fullscreen",
-      action: SimpleMDE.toggleFullScreen,
-      className: "fa fa-arrows-alt no-disable no-mobile",
-      title: "Toggle Fullscreen"
-    }, {
-      name: "image",
-      action: function (editor) {
-        var cm = editor.codemirror;
-        var doc = cm.getDoc();
-        $('#attach-upload').trigger("click");
-      },
-      className: "fa fa-image",
-      title: "ImageUpload"
-    }]
+    }
   });
-        new FormValidator("article-form", [
-            {"name": "slug", "rules": "alpha_dash"}
-        ], function (errors, e) {
-            e.preventDefault();
-            $('.invalid').hide();
-            if (errors.length) {
-                $("#" + errors[0].id + "-invalid").removeClass("hide").show();
-                return;
-            }
-            $('#article-form').ajaxSubmit(function (json) {
-                if (json.status === "success") {
-                  Materialize.toast("Content saved", 2500, "green");
-                  window.history.pushState({},"", "../" + json.content.Id + "/");
-                } else {
-                  Materialize.toast("Error: " + json.msg, 2500, "red");
-                }
-            });
-        });
-        initUpload("#article-submit");
+  new FormValidator("post-form", [
+      {"name": "slug", "rules": "alpha_dash"}
+  ], function (errors, e) {
+    e.preventDefault();
+    $('.invalid').hide();
+    if (errors.length) {
+      $("#" + errors[0].id + "-invalid").removeClass("hide").show();
+      return;
+    }
+    $('#post-form').ajaxSubmit({
+    success: function (json) {
+      alertify.notify("Content saved", 'success');
+      window.history.pushState({},"", "../" + json.content.Id + "/");
+    },
+    error: function (json) {
+        alertify.error(("Error: " + JSON.parse(json.responseText).msg));
+    }
     });
+  });
+  initUpload("#post-submit");
+});
 </script>
 {{end}}
