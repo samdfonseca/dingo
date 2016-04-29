@@ -1,20 +1,19 @@
 $(".del").on("click",function(e){
   e.preventDefault();
   var id = $(this).attr("rel");
-  if (confirm("Are you sure you want to delete this post?")) {
+  alertify.confirm("Are you sure you want to delete this post?", function() {
     $.ajax({
       "url":"/admin/editor/"+id+"/",
       "type":"delete",
       "success":function(json){
         if(json.status === "success"){
-          Materialize.toast("Post deleted", 500, "", function(){
-            window.location.reload();
-          });
+          alertify.success("Post deleted");
+          $('#dingo-post-' + id).remove();
         }else{
-          Materialize.toast(json.msg, 4000)
+          alertify.error(("Error: " + JSON.parse(json.responseText).msg));
         }
       }
     });
-  }
+  });
 });
 
