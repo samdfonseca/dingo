@@ -26,29 +26,35 @@ type Comment struct {
 	UserId    int64
 }
 
-func (comment *Comment) Save() (int64, error) {
+func NewComment() *Comment {
+	c := new(Comment)
+	c.CreatedAt = utils.Now()
+	return c
+}
+
+func (c *Comment) Save() error {
 	writeDB, err := db.Begin()
 	if err != nil {
 		writeDB.Rollback()
-		return 0, err
+		return err
 	}
 	var result sql.Result
-	if comment.Id > 0 {
-		result, err = writeDB.Exec(stmtInsertComment, comment.Id, uuid.Formatter(uuid.NewV4(), uuid.CleanHyphen), comment.PostId, comment.Author, comment.Email, comment.Website, comment.Ip, comment.CreatedAt, comment.Content, comment.Approved, comment.UserAgent, comment.Parent, comment.UserId)
+	if c.Id > 0 {
+		result, err = writeDB.Exec(stmtInsertComment, c.Id, uuid.Formatter(uuid.NewV4(), uuid.CleanHyphen), c.PostId, c.Author, c.Email, c.Website, c.Ip, c.CreatedAt, c.Content, c.Approved, c.UserAgent, c.Parent, c.UserId)
 	} else {
-		result, err = writeDB.Exec(stmtInsertComment, nil, uuid.Formatter(uuid.NewV4(), uuid.CleanHyphen), comment.PostId, comment.Author, comment.Email, comment.Website, comment.Ip, comment.CreatedAt, comment.Content, comment.Approved, comment.UserAgent, comment.Parent, comment.UserId)
+		result, err = writeDB.Exec(stmtInsertComment, nil, uuid.Formatter(uuid.NewV4(), uuid.CleanHyphen), c.PostId, c.Author, c.Email, c.Website, c.Ip, c.CreatedAt, c.Content, c.Approved, c.UserAgent, c.Parent, c.UserId)
 	}
 	if err != nil {
 		writeDB.Rollback()
-		return 0, err
+		return err
 	}
 	commentId, err := result.LastInsertId()
 	if err != nil {
 		writeDB.Rollback()
-		return 0, err
+		return err
 	}
-	comment.Id = commentId
-	return commentId, writeDB.Commit()
+	c.Id = commentId
+	return writeDB.Commit()
 }
 
 func (c *Comment) ToJson() map[string]interface{} {
@@ -166,4 +172,17 @@ func DeleteComment(id int64) error {
 		return err
 	}
 	return writeDB.Commit()
+}
+
+func (c *Comment) ValidateComment() string {
+	if utils.IsEmptyString(c.Author) || utils.IsEmptyString(c.Content) {
+		return "Name, Email and Content are required fields."
+	}
+	if !utils.IsEmail(c.Email) {
+		return "Email format not valid."
+	}
+	if !utils.IsEmptyString(c.Website) && !utils.IsURL(c.Website) {
+		return "Website URL format not valid."
+	}
+	return ""
 }

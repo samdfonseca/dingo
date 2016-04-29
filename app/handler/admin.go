@@ -241,7 +241,7 @@ func CommentAddHandler(ctx *golf.Context) {
 		parent.Approved = true
 		parent.Save()
 	}
-	c := new(model.Comment)
+	c := model.NewComment()
 	c.Author = u.Name
 	c.Email = u.Email
 	c.Website = u.Website
@@ -253,13 +253,9 @@ func CommentAddHandler(ctx *golf.Context) {
 	c.UserAgent = ctx.Request.UserAgent()
 	c.UserId = u.Id
 	c.Approved = true
-	t := time.Now()
-	c.CreatedAt = &t
-	id, err := c.Save()
-	if err != nil {
+	if err := c.Save(); err != nil {
 		panic(err)
 	}
-	c.Id = id
 	ctx.JSON(map[string]interface{}{
 		"status":  "success",
 		"comment": c.ToJson(),
@@ -277,7 +273,9 @@ func CommentUpdateHandler(ctx *golf.Context) {
 		})
 	}
 	c.Approved = true
-	c.Save()
+	if err := c.Save(); err != nil {
+		panic(err)
+	}
 	ctx.JSON(map[string]interface{}{
 		"status": "success",
 	})
