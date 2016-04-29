@@ -52,12 +52,18 @@ func (u *User) Save(hashedPassword string, createdBy int64) error {
 	return nil
 }
 
-func (u *User) UpdateUser(updatedById int64) error {
-	err := updateUser(u.Id, u.Name, u.Slug, u.Email, u.Image, u.Cover, u.Bio, u.Website, u.Location, time.Now(), updatedById)
+func (u *User) Update() error {
+	writeDB, err := db.Begin()
 	if err != nil {
+		writeDB.Rollback()
 		return err
 	}
-	return nil
+	_, err = writeDB.Exec(stmtUpdateUser, u.Name, u.Slug, u.Email, u.Image, u.Cover, u.Bio, u.Website, u.Location, time.Now(), u.Id, u.Id)
+	if err != nil {
+		writeDB.Rollback()
+		return err
+	}
+	return writeDB.Commit()
 }
 
 func (u *User) ChangePassword(password string) error {
@@ -196,20 +202,6 @@ func InsertRoleUser(role_id int, user_id int64) error {
 		return err
 	}
 	_, err = writeDB.Exec(stmtInsertRoleUser, nil, role_id, user_id)
-	if err != nil {
-		writeDB.Rollback()
-		return err
-	}
-	return writeDB.Commit()
-}
-
-func updateUser(id int64, name string, slug string, email string, image string, cover string, bio string, website string, location string, updated_at time.Time, updated_by int64) error {
-	writeDB, err := db.Begin()
-	if err != nil {
-		writeDB.Rollback()
-		return err
-	}
-	_, err = writeDB.Exec(stmtUpdateUser, name, slug, email, image, cover, bio, website, location, updated_at, updated_by, id)
 	if err != nil {
 		writeDB.Rollback()
 		return err

@@ -85,7 +85,7 @@ func TestUser(t *testing.T) {
 			Convey("Update User", func() {
 				user.Name = "Kenjiro Nakayama"
 				user.Email = "nakayamakenjiro@gmail.com"
-				err := user.UpdateUser(user.Id)
+				err := user.Update()
 				So(err, ShouldBeNil)
 				u, err := GetUserById(user.Id)
 				userEqualCheck(u, user)

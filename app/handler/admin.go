@@ -43,7 +43,7 @@ func ProfileChangeHandler(ctx *golf.Context) {
 	u.Avatar = utils.Gravatar(ctx.Request.FormValue("email"), "180")
 	u.Website = ctx.Request.FormValue("url")
 	u.Bio = ctx.Request.FormValue("bio")
-	err := u.UpdateUser(u.Id)
+	err := u.Update()
 	if err != nil {
 		ctx.JSON(map[string]interface{}{
 			"status": "error",
