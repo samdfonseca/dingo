@@ -48,14 +48,14 @@
 
                 <div class="mdl-cell mdl-cell--6-col mdl-cell--12-col-tablet mdl-cell--12-col-phone p-r-20">
                   <div class="mdl-textfield mdl-js-textfield mdl-textfield--floating-label fullwidth">
-                    <input class="mdl-textfield__input" type="text" name="category" id="slug">
+                    <input class="mdl-textfield__input" type="text" name="category" id="category">
                     <label class="mdl-textfield__label" for="slug">Category</label>
                   </div>
                 </div>
 
                 <div class="mdl-cell mdl-cell--6-col mdl-cell--12-col-tablet mdl-cell--12-col-phone">
                   <div class="mdl-textfield mdl-js-textfield mdl-textfield--floating-label fullwidth">
-                    <input class="mdl-textfield__input" type="text" name="tags" id="slug">
+                    <input class="mdl-textfield__input" type="text" name="tag" id="tag" value="{{ .Post.TagString }}">
                     <label class="mdl-textfield__label" for="slug">Tags (Separate by commas)</label>
                   </div>
                 </div>
