@@ -1,10 +1,11 @@
 package model
 
 import (
-	"github.com/dinever/dingo/app/utils"
 	"log"
 	"strings"
 	"time"
+
+	"github.com/dinever/dingo/app/utils"
 )
 
 var (
