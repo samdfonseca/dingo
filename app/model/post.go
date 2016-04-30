@@ -43,12 +43,10 @@ type Post struct {
 }
 
 func NewPost() *Post {
-	post := new(Post)
-	post.UUID = uuid.Formatter(uuid.NewV4(), uuid.CleanHyphen)
-	var createdAt time.Time
-	createdAt = time.Now()
-	post.CreatedAt = &createdAt
-	return post
+	return &Post{
+		UUID:      uuid.Formatter(uuid.NewV4(), uuid.CleanHyphen),
+		CreatedAt: utils.Now(),
+	}
 }
 
 func (p *Post) TagString() string {
@@ -84,14 +82,11 @@ func (p *Post) Save() error {
 	}
 	if p.Id == 0 {
 		// Insert post
-		postId, err := InsertPost(p)
-		if err != nil {
+		if err := p.Insert(); err != nil {
 			return err
 		}
-		p.Id = postId
 	} else {
-		err := UpdatePost(p)
-		if err != nil {
+		if err := p.Update(); err != nil {
 			return err
 		}
 	}
@@ -121,7 +116,7 @@ func (p *Post) Save() error {
 	return DeleteOldTags()
 }
 
-func InsertPost(p *Post) (int64, error) {
+func (p *Post) Insert() error {
 	if !PostChangeSlug(p.Slug) {
 		p.Slug = generateNewSlug(p.Slug, 1)
 	}
@@ -137,7 +132,7 @@ func InsertPost(p *Post) (int64, error) {
 	writeDB, err := db.Begin()
 	if err != nil {
 		writeDB.Rollback()
-		return 0, err
+		return err
 	}
 	var result sql.Result
 	if p.IsPublished {
@@ -147,14 +142,14 @@ func InsertPost(p *Post) (int64, error) {
 	}
 	if err != nil {
 		writeDB.Rollback()
-		return 0, err
+		return err
 	}
-	postId, err := result.LastInsertId()
+	p.Id, err = result.LastInsertId()
 	if err != nil {
 		writeDB.Rollback()
-		return 0, err
+		return err
 	}
-	return postId, writeDB.Commit()
+	return writeDB.Commit()
 }
 
 func InsertPostTag(post_id int64, tag_id int64) error {
@@ -171,7 +166,7 @@ func InsertPostTag(post_id int64, tag_id int64) error {
 	return writeDB.Commit()
 }
 
-func UpdatePost(p *Post) error {
+func (p *Post) Update() error {
 	currentPost, err := GetPostById(p.Id)
 	if err != nil {
 		return err
@@ -384,32 +379,40 @@ func scanPost(rows Row, post *Post) error {
 	return err
 }
 
+func paddingPostData(post *Post) error {
+	// Evaluate status
+	if post.status == "published" {
+		post.IsPublished = true
+	} else {
+		post.IsPublished = false
+	}
+	var err error
+	// Get user
+	post.Author, err = GetUserById(post.userId)
+	if err != nil {
+		post.Author = ghostUser
+	}
+	// Get tags
+	post.Tags, err = GetTagsByPostId(post.Id)
+	if err != nil {
+		return err
+	}
+	// Get comments
+	post.Comments, err = GetCommentByPostId(post.Id)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
 func extractPosts(rows *sql.Rows) ([]*Post, error) {
 	posts := make([]*Post, 0)
 	for rows.Next() {
 		post := new(Post)
-		err := scanPost(rows, post)
-		if err != nil {
+		if err := scanPost(rows, post); err != nil {
 			return nil, err
 		}
-		// Evaluate status
-		if post.status == "published" {
-			post.IsPublished = true
-		} else {
-			post.IsPublished = false
-		}
-		// Get user
-		post.Author, err = GetUserById(post.userId)
-		if err != nil {
-			post.Author = ghostUser
-		}
-		// Get tags
-		post.Tags, err = GetTagsByPostId(post.Id)
-		if err != nil {
-			return nil, err
-		}
-		post.Comments, err = GetCommentByPostId(post.Id)
-		if err != nil {
+		if err := paddingPostData(post); err != nil {
 			return nil, err
 		}
 		posts = append(posts, post)
@@ -419,29 +422,10 @@ func extractPosts(rows *sql.Rows) ([]*Post, error) {
 
 func extractPost(row *sql.Row) (*Post, error) {
 	post := new(Post)
-	err := scanPost(row, post)
-	if err != nil {
+	if err := scanPost(row, post); err != nil {
 		return nil, err
 	}
-	// Evaluate status
-	if post.status == "published" {
-		post.IsPublished = true
-	} else {
-		post.IsPublished = false
-	}
-	// Get user
-	post.Author, err = GetUserById(post.userId)
-	if err != nil {
-		post.Author = ghostUser
-	}
-	// Get tags
-	post.Tags, err = GetTagsByPostId(post.Id)
-	if err != nil {
-		return nil, err
-	}
-	// Get comments
-	post.Comments, err = GetCommentByPostId(post.Id)
-	if err != nil {
+	if err := paddingPostData(post); err != nil {
 		return nil, err
 	}
 	return post, nil
