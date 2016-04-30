@@ -47,7 +47,7 @@ func generateUniqueSlug(slug string, table string, suffix int) string {
 	}
 	var err error
 	if table == "tags" { // Not needed at the moment. Tags with the same name should have the same slug.
-		_, err = GetTagIdBySlug(slugToCheck)
+		_, err = GetTagBySlug(slugToCheck)
 	} else if table == "posts" {
 		_, err = GetPostBySlug(slugToCheck)
 	} else if table == "users" {

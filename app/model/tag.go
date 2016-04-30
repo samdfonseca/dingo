@@ -1,10 +1,12 @@
 package model
 
 import (
-	"github.com/twinj/uuid"
 	"log"
 	"strings"
 	"time"
+
+	"github.com/dinever/dingo/app/utils"
+	"github.com/twinj/uuid"
 )
 
 type Tag struct {
@@ -20,42 +22,40 @@ func (t *Tag) Url() string {
 	return "/tag/" + t.Slug
 }
 
+func NewTag(name, slug string) *Tag {
+	return &Tag{
+		Name:      name,
+		CreatedAt: utils.Now(),
+		Slug:      slug,
+	}
+}
+
 func (t *Tag) Save() error {
 	oldTag, err := GetTagBySlug(t.Slug)
 	if err != nil {
 		// Tag is probably not in database yet
-
-		tagId, err := InsertTag(t)
-		if err != nil {
+		if err := t.Insert(); err != nil {
 			log.Printf("[Error] Can not insert tag: %v", err.Error())
 			return err
 		}
-		t.Id = tagId
 	} else {
 		t.Id = oldTag.Id
 		// If oldTag.Hidden != t.Hidden, we need to decide whether change the hidden status of oldTag
 		if oldTag.Hidden != t.Hidden {
 			if oldTag.Hidden {
-				err = UpdateTag(t)
-				if err != nil {
-					return err
-				}
+				return t.Update()
 			} else {
 				// oldTag.Hidden is false and t.Hidden is true
 				posts, err := GetAllPostsByTag(oldTag.Id)
-				needUpdate := true
+				if err != nil {
+					return err
+				}
 				for _, p := range posts {
 					if p.IsPublished {
-						needUpdate = false
-						break
+						return nil
 					}
 				}
-				if needUpdate {
-					err = UpdateTag(t)
-					if err != nil {
-						return err
-					}
-				}
+				return t.Update()
 			}
 		}
 	}
@@ -70,42 +70,32 @@ func GenerateTagsFromCommaString(input string) []*Tag {
 	}
 	for _, tag := range tags {
 		if tag != "" {
-			output = append(output, &Tag{Name: tag, Slug: GenerateSlug(tag, "tags")})
+			output = append(output, NewTag(tag, GenerateSlug(tag, "tags")))
 		}
 	}
 	return output
 }
 
-func GetTagIdBySlug(slug string) (int64, error) {
-	var id int64
-	row := db.QueryRow(stmtGetTagIdBySlug, slug)
-	err := row.Scan(&id)
-	if err != nil {
-		return 0, err
-	}
-	return id, nil
-}
-
-func InsertTag(t *Tag) (int64, error) {
+func (t *Tag) Insert() error {
 	writeDB, err := db.Begin()
 	if err != nil {
 		writeDB.Rollback()
-		return 0, err
+		return err
 	}
 	result, err := writeDB.Exec(stmtInsertTag, nil, uuid.Formatter(uuid.NewV4(), uuid.CleanHyphen), t.Name, t.Slug, t.CreatedAt, t.CreatedBy, t.CreatedAt, t.CreatedBy, t.Hidden)
 	if err != nil {
 		writeDB.Rollback()
-		return 0, err
+		return err
 	}
-	tagId, err := result.LastInsertId()
+	t.Id, err = result.LastInsertId()
 	if err != nil {
 		writeDB.Rollback()
-		return 0, err
+		return err
 	}
-	return tagId, writeDB.Commit()
+	return writeDB.Commit()
 }
 
-func UpdateTag(t *Tag) error {
+func (t *Tag) Update() error {
 	writeDB, err := db.Begin()
 	if err != nil {
 		writeDB.Rollback()
@@ -119,7 +109,7 @@ func UpdateTag(t *Tag) error {
 	return writeDB.Commit()
 }
 
-func GetTags(postId int64) ([]*Tag, error) {
+func GetTagsByPostId(postId int64) ([]*Tag, error) {
 	tags := make([]*Tag, 0)
 	// Get tags
 	rows, err := db.Query(stmtGetTags, postId)
@@ -181,10 +171,6 @@ func GetAllTags() ([]*Tag, error) {
 		tags = append(tags, tag)
 	}
 	return tags, nil
-}
-
-func CleanTags() error {
-	return nil
 }
 
 func DeleteOldTags() error {

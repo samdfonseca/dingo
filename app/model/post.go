@@ -404,7 +404,7 @@ func extractPosts(rows *sql.Rows) ([]*Post, error) {
 			post.Author = ghostUser
 		}
 		// Get tags
-		post.Tags, err = GetTags(post.Id)
+		post.Tags, err = GetTagsByPostId(post.Id)
 		if err != nil {
 			return nil, err
 		}
@@ -435,7 +435,7 @@ func extractPost(row *sql.Row) (*Post, error) {
 		post.Author = ghostUser
 	}
 	// Get tags
-	post.Tags, err = GetTags(post.Id)
+	post.Tags, err = GetTagsByPostId(post.Id)
 	if err != nil {
 		return nil, err
 	}

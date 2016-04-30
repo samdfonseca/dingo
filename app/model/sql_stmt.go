@@ -223,7 +223,6 @@ const stmtGetAllTags = `SELECT id, name, slug FROM tags`
 const stmtGetTags = `SELECT tag_id FROM posts_tags WHERE post_id = ?`
 const stmtGetTagById = `SELECT id, name, slug FROM tags WHERE id = ?`
 const stmtGetTagBySlug = `SELECT id, name, slug, hidden FROM tags WHERE slug = ?`
-const stmtGetTagIdBySlug = `SELECT id FROM tags WHERE slug = ?`
 
 // Settings
 const stmtGetBlog = `SELECT value FROM settings WHERE key = ?`
