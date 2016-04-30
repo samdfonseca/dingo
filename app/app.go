@@ -136,6 +136,10 @@ func registerHomeHandler() {
 }
 
 func registerAPIHandler() {
+	// Auth
+	App.Post("/auth", handler.JWTAuthLoginHandler)
+	App.Get("/auth", handler.JWTAuthValidateHandler)
+
 	// register the API handler
 	App.Get("/api", handler.APIDocumentationHandler)
 
