@@ -260,7 +260,9 @@ func CommentAddHandler(ctx *golf.Context) {
 		"status":  "success",
 		"comment": c.ToJson(),
 	})
-	model.NewMessage("comment", c)
+	if err := model.NewMessage("comment", c).Save(); err != nil {
+		panic(err)
+	}
 }
 
 func CommentUpdateHandler(ctx *golf.Context) {
