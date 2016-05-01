@@ -85,11 +85,10 @@
   }
 }
 
-//== Media overrides
-//
-@media screen and (max-width: 850px) {
-
-  .ml-card-holder.ml-card-holder-first {
-    margin-top:0px;
-  }
+.dingo-card-message-box {
+  color: $card-supporting-text-text-color;
+  font-size: $card-supporting-text-font-size;
+  line-height: $card-supporting-text-line-height;
+  overflow: hidden;
+  padding: 0 $card-horizontal-padding;
 }

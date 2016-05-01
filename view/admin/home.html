@@ -29,26 +29,27 @@
     </div>
   </div>
 
-  <div class="content-column mdl-cell mdl-cell--9-col mdl-cell--10-col-tablet mdl-cell--12-col-phone mdl-cell--top ">
+  <div class="content-column mdl-cell mdl-cell--4-col mdl-cell--10-col-tablet mdl-cell--12-col-phone mdl-cell--top ">
 
     <div class="dingo-card-list">
-      <div class="mdl-layout mdl-card dingo-card-msg mdl-shadow--2dp">
+      <div class="mdl-layout mdl-card dingo-card-short dingo-card-msg mdl-shadow--2dp">
         <div class="mdl-card__title">
           <h2 class="mdl-card__title-text">Recent Activity</h2>
         </div>
+        {{range .Messages}}
+        <div class="dingo-card-message-box">
+            <div class="dingo-msg {{.Type}}">
+              <time class="timeago dingo-msg-timestamp mdl-color-text--grey-400" datetime='{{DateFormat .CreatedAt "%Y-%m-%dT%H:%M:%S"}}'>{{DateFormat .CreatedAt "%b %d, %I:%M %p"}}</time>
+              <div class="data">{{Html .Data}}</div>
+            </div>
+          </div>
+        {{end}}
+
+        {{if lt (len .Messages) 1}}
         <div class="mdl-card__supporting-text">
-
-          {{range .Messages}}
-
-          <div class="dingo-msg {{.Type}}">
-            <div class="dingo-msg-timestamp mdl-color-text--grey-400">{{DateFormat .CreatedAt "%b %d, %I:%M %p"}}</div>
-            <div class="data">{{Html .Data}}</div>
-          </div>{{end}}
-          {{if lt (len .Messages) 1}}
           <p>No new messages.</p>
-          {{end}}
-
         </div>
+        {{end}}
 
       </div>
     </div>
@@ -58,4 +59,9 @@
 {{end}}
 
 {{ define "after_footer" }}
+<script type="text/javascript">
+  jQuery(document).ready(function() {
+    $("time.timeago").timeago();
+  });
+</script>
 {{end}}
