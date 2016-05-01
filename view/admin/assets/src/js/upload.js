@@ -3,7 +3,7 @@ function initUpload(p) {
         $('#attach-upload').trigger("click");
     });
     $('#attach-upload').on("change", function () {
-        if (confirm("Upload now?")) {
+        alertify.confirm("Upload now?", function() {
             var bar = $('<p class="file-progress inline-block">0%</p>');
             $('#attach-form').ajaxSubmit({
                 "beforeSubmit": function () {
@@ -28,8 +28,8 @@ function initUpload(p) {
                     doc.replaceSelections(["![](/" + json.file.url + ")"]);
                 }
             });
-        } else {
+        }, function() {
             $(this).val("");
-        }
+        });
     });
 }

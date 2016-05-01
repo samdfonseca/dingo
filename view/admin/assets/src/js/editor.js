@@ -10,13 +10,17 @@ $(function () {
     }
     $('#post-form').ajaxSubmit({
     success: function (json) {
-      alertify.notify("Content saved", 'success');
-      window.history.pushState({},"", "../" + json.content.Id + "/");
+      if (json.status === "success") {
+        alertify.success("Content saved", 'success');
+        window.history.pushState({},"", "../" + json.content.Id + "/");
+      } else {
+        alertify.error(json.msg);
+      }
     },
     error: function (json) {
         alertify.error(("Error: " + JSON.parse(json.responseText).msg));
     }
     });
   });
-  initUpload("#post-submit");
+  initUpload("#post-information");
 });

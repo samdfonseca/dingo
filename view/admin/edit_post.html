@@ -15,7 +15,7 @@
       <div class="p-40 p-r-20 p-20--small">
         <div class=" mdl-color-text--blue-grey-400">
           <h3><i class="material-icons f-left m-r-5">info</i> Content information</h3>
-          <p>Some relevant information should be displayed here</p>
+          <p id="post-information">Some relevant information should be displayed here</p>
         </div>
       </div>
     </div>
@@ -94,11 +94,16 @@
                 <button type="submit" class="mdl-button mdl-js-button mdl-button--raised mdl-button--colored mdl-color--green mdl-js-ripple-effect">
                   Save
                 </button>
-              </div>
-
-
 
               </div>
+
+
+
+              </div>
+            </form>
+
+            <form class="form hide" id="attach-form" action="/admin/files/upload/" enctype="multipart/form-data" method="post">
+              <input id="attach-upload" type="file" name="file"/>
             </form>
           </div>
         </div>

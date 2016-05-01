@@ -1,4 +1,4 @@
-$(".del").on("click",function(e){
+$(".delete-post").on("click",function(e){
   e.preventDefault();
   var id = $(this).attr("rel");
   alertify.confirm("Are you sure you want to delete this post?", function() {
@@ -10,7 +10,7 @@ $(".del").on("click",function(e){
           alertify.success("Post deleted");
           $('#dingo-post-' + id).remove();
         }else{
-          alertify.error(("Error: " + JSON.parse(json.responseText).msg));
+          alertify.error((JSON.parse(json.responseText).msg));
         }
       }
     });

@@ -1,5 +1,5 @@
 $(function () {
-  $(".del").on("click",function(e){
+  $(".delete-file").on("click",function(e){
     e.preventDefault();
     var name = $(this).attr("name");
     var path = $(this).attr("rel");
@@ -19,6 +19,4 @@ $(function () {
       });
     });
   });
-
-  initUpload("#attach-show");
 });
