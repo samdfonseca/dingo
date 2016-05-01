@@ -1,10 +1,14 @@
 package model
 
 import (
+	"crypto/rand"
 	"crypto/rsa"
+	"crypto/x509"
+	"encoding/pem"
 	"fmt"
 	"io/ioutil"
 	"log"
+	"os"
 	"time"
 
 	jwt "github.com/dgrijalva/jwt-go"
@@ -29,6 +33,8 @@ var (
 )
 
 func init() {
+	createJWTKeyFiles()
+
 	signBytes, err := ioutil.ReadFile(privKeyPath)
 	if err != nil {
 		log.Fatal(err)
@@ -109,5 +115,49 @@ func ValidateJWT(t string) (*jwt.Token, error) {
 		}
 	default:
 		return token, fmt.Errorf("Unable to parse token: %s\n", token.Raw)
+	}
+}
+
+func GenerateJWTKeys(bits int) ([]byte, []byte, error) {
+	// http://stackoverflow.com/questions/21151714/go-generate-an-ssh-public-key
+	privateKey, err := rsa.GenerateKey(rand.Reader, bits)
+	if err != nil {
+		return nil, nil, err
+	}
+
+	privateKeyDer := x509.MarshalPKCS1PrivateKey(privateKey)
+	privateKeyBlock := pem.Block{
+		Type:    "RSA PRIVATE KEY",
+		Headers: nil,
+		Bytes:   privateKeyDer,
+	}
+	privateKeyPem := pem.EncodeToMemory(&privateKeyBlock)
+
+	publicKey := privateKey.PublicKey
+	publicKeyDer, err := x509.MarshalPKIXPublicKey(&publicKey)
+	if err != nil {
+		return nil, nil, err
+	}
+
+	publicKeyBlock := pem.Block{
+		Type:    "PUBLIC KEY",
+		Headers: nil,
+		Bytes:   publicKeyDer,
+	}
+	publicKeyPem := pem.EncodeToMemory(&publicKeyBlock)
+
+	return privateKeyPem, publicKeyPem, nil
+}
+
+func createJWTKeyFiles() {
+	_, privErr := os.Stat("dingo.rsa")
+	_, pubErr := os.Stat("dingo.rsa.pub")
+	if os.IsNotExist(privErr) || os.IsNotExist(pubErr) {
+		privKey, pubKey, err := GenerateJWTKeys(4096)
+		if err != nil {
+			log.Fatalf("Unable to create JWT keys: %s\n", err)
+		}
+		ioutil.WriteFile("dingo.rsa", privKey, 0600)
+		ioutil.WriteFile("dingo.rsa.pub", pubKey, 0600)
 	}
 }
