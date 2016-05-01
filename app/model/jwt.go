@@ -23,8 +23,8 @@ type JWT struct {
 }
 
 const (
-	privKeyPath = "dingo.rsa"     // openssl genrsa -out dingo.rsa 2048
-	pubKeyPath  = "dingo.rsa.pub" // openssl rsa -in dingo.rsa -pubout > dingo.rsa.pub
+	privKeyPath = "dingo.rsa"
+	pubKeyPath  = "dingo.rsa.pub"
 )
 
 var (
