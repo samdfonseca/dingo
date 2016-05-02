@@ -65,7 +65,7 @@ func (t *Tag) Save() error {
 func GenerateTagsFromCommaString(input string) []*Tag {
 	output := make([]*Tag, 0)
 	tags := strings.Split(input, ",")
-	for index, _ := range tags {
+	for index := range tags {
 		tags[index] = strings.TrimSpace(tags[index])
 	}
 	for _, tag := range tags {
@@ -87,12 +87,16 @@ func (t *Tag) Insert() error {
 		writeDB.Rollback()
 		return err
 	}
-	t.Id, err = result.LastInsertId()
+	tagId, err := result.LastInsertId()
 	if err != nil {
 		writeDB.Rollback()
 		return err
 	}
-	return writeDB.Commit()
+	if err := writeDB.Commit(); err != nil {
+		return err
+	}
+	t.Id = tagId
+	return nil
 }
 
 func (t *Tag) Update() error {

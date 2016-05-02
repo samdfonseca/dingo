@@ -54,8 +54,11 @@ func (c *Comment) Save() error {
 		writeDB.Rollback()
 		return err
 	}
+	if err := writeDB.Commit(); err != nil {
+		return err
+	}
 	c.Id = commentId
-	return writeDB.Commit()
+	return nil
 }
 
 func (c *Comment) ToJson() map[string]interface{} {
