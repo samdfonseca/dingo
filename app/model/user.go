@@ -9,26 +9,30 @@ import (
 )
 
 type User struct {
-	Id       int64
-	Name     string
-	Slug     string
-	Avatar   string
-	Email    string
-	Image    string // NULL
-	Cover    string // NULL
-	Bio      string // NULL
-	Website  string // NULL
-	Location string // NULL
-	Role     int    //1 = Administrator, 2 = Editor, 3 = Author, 4 = Owner
+	Id        int64
+	Name      string
+	Slug      string
+	Avatar    string
+	Email     string
+	Image     string // NULL
+	Cover     string // NULL
+	Bio       string // NULL
+	Website   string // NULL
+	Location  string // NULL
+	Role      int    //1 = Administrator, 2 = Editor, 3 = Author, 4 = Owner
+	CreatedAt *time.Time
+	UpdatedAt *time.Time
 }
 
 var ghostUser = &User{Id: 0, Name: "Dingo User", Email: "example@example.com"}
 
 func NewUser(email, name string) *User {
-	user := new(User)
-	user.Email = email
-	user.Name = name
-	return user
+	return &User{
+		Email:     email,
+		Name:      name,
+		CreatedAt: utils.Now(),
+		UpdatedAt: utils.Now(),
+	}
 }
 
 func (u *User) Create(password string) error {
@@ -40,11 +44,10 @@ func (u *User) Create(password string) error {
 }
 
 func (u *User) Save(hashedPassword string, createdBy int64) error {
-	id, err := InsertUser(u.Name, u.Slug, hashedPassword, u.Email, u.Image, u.Cover, time.Now(), createdBy)
+	err := u.Insert(hashedPassword, createdBy)
 	if err != nil {
 		return err
 	}
-	u.Id = id
 	//	err = InsertRoleUser(u.Role, userId)
 	//	if err != nil {
 	//		return err
@@ -58,7 +61,8 @@ func (u *User) Update() error {
 		writeDB.Rollback()
 		return err
 	}
-	_, err = writeDB.Exec(stmtUpdateUser, u.Name, u.Slug, u.Email, u.Image, u.Cover, u.Bio, u.Website, u.Location, time.Now(), u.Id, u.Id)
+	u.UpdatedAt = utils.Now()
+	_, err = writeDB.Exec(stmtUpdateUser, u.Name, u.Slug, u.Email, u.Image, u.Cover, u.Bio, u.Website, u.Location, u.UpdatedAt, u.Id, u.Id)
 	if err != nil {
 		writeDB.Rollback()
 		return err
@@ -176,23 +180,27 @@ func GetUserByEmail(email string) (*User, error) {
 	return user, nil
 }
 
-func InsertUser(name string, slug string, password string, email string, image string, cover string, created_at time.Time, created_by int64) (int64, error) {
+func (u *User) Insert(password string, created_by int64) error {
 	writeDB, err := db.Begin()
 	if err != nil {
 		writeDB.Rollback()
-		return 0, err
+		return err
 	}
-	result, err := writeDB.Exec(stmtInsertUser, nil, uuid.Formatter(uuid.NewV4(), uuid.CleanHyphen), name, slug, password, email, image, cover, created_at, created_by, created_at, created_by)
+	result, err := writeDB.Exec(stmtInsertUser, nil, uuid.Formatter(uuid.NewV4(), uuid.CleanHyphen), u.Name, u.Slug, password, u.Email, u.Image, u.Cover, u.CreatedAt, created_by, u.UpdatedAt, created_by)
 	if err != nil {
 		writeDB.Rollback()
-		return 0, err
+		return err
 	}
 	userId, err := result.LastInsertId()
 	if err != nil {
 		writeDB.Rollback()
-		return 0, err
+		return err
 	}
-	return userId, writeDB.Commit()
+	if err := writeDB.Commit(); err != nil {
+		return err
+	}
+	u.Id = userId
+	return nil
 }
 
 func InsertRoleUser(role_id int, user_id int64) error {
