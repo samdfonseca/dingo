@@ -144,12 +144,16 @@ func (p *Post) Insert() error {
 		writeDB.Rollback()
 		return err
 	}
-	p.Id, err = result.LastInsertId()
+	postId, err := result.LastInsertId()
 	if err != nil {
 		writeDB.Rollback()
 		return err
 	}
-	return writeDB.Commit()
+	if err := writeDB.Commit(); err != nil {
+		return err
+	}
+	p.Id = postId
+	return nil
 }
 
 func InsertPostTag(post_id int64, tag_id int64) error {
