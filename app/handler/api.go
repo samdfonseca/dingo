@@ -12,6 +12,7 @@ func APIDocumentationHandler(ctx *golf.Context) {
 	// Go doesn't display maps in the order they appear here, so if the order
 	// of these routes is important, it might be better to use a struct
 	routes := map[string]interface{}{
+		"auth_url":              "/auth/",
 		"api_documentation_url": "/api/",
 		"posts_url":             "/api/posts/",
 		"post_url":              "/api/posts/:id",
