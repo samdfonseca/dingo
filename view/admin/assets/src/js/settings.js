@@ -13,9 +13,10 @@ $(function () {
         componentHandler.upgradeDom();
         $(".del-custom").on("click", function(e) {
             e.preventDefault();
-            if(confirm("Delete this item？")){
-                $(this).parent().parent().remove();
-            }
+            var item = $(this).parent().parent()
+            alertify.confirm("Delete this item?", function() {
+                item.remove();
+            });
         });
     });
     $("#add-nav").on("click", function(e) {
@@ -24,21 +25,24 @@ $(function () {
         componentHandler.upgradeDom();
         $(".del-nav").on("click", function(e) {
             e.preventDefault();
-            if(confirm("Delete this item？")){
-                $(this).parent().parent().remove();
-            }
+            var item = $(this).parent().parent()
+            alertify.confirm("Delete this item?", function() {
+                item.remove();
+            });
         });
     });
     $(".del-nav").on("click", function(e) {
         e.preventDefault();
-        if(confirm("Delete this item？")){
-            $(this).parent().parent().remove();
-        }
+        var item = $(this).parent().parent()
+        alertify.confirm("Delete this item?", function() {
+            item.remove();
+        });
     });
     $(".del-custom").on("click", function(e) {
         e.preventDefault();
-        if(confirm("Delete this item？")){
-            $(this).parent().parent().remove();
-        }
+        var item = $(this).parent().parent()
+        alertify.confirm("Delete this item?", function() {
+            item.remove();
+        });
     });
 })
