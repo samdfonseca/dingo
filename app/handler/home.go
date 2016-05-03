@@ -36,20 +36,19 @@ func HomeHandler(ctx *golf.Context) {
 
 func ContentHandler(ctx *golf.Context) {
 	slug := ctx.Param("slug")
-	article, err := model.GetPostBySlug(slug)
-	if err != nil {
-		log.Printf("[Error]: %v", err)
+	post, err := model.GetPostBySlug(slug)
+	if err != nil || !post.IsPublished {
 		ctx.Abort(404)
 		return
 	}
-	article.Hits++
+	post.Hits++
 	data := map[string]interface{}{
-		"Title":    article.Title,
-		"Article":  article,
-		"Content":  article,
-		"Comments": article.Comments,
+		"Title":    post.Title,
+		"Article":  post,
+		"Content":  post,
+		"Comments": post.Comments,
 	}
-	if article.IsPage {
+	if post.IsPage {
 		ctx.Loader("theme").Render("page.html", data)
 	} else {
 		ctx.Loader("theme").Render("article.html", data)
@@ -65,7 +64,7 @@ func CommentHandler(ctx *golf.Context) {
 			"status": "error",
 		})
 	}
-	c := new(model.Comment)
+	c := model.NewComment()
 	c.Author = ctx.Request.FormValue("author")
 	c.Email = ctx.Request.FormValue("email")
 	c.Website = ctx.Request.FormValue("website")
@@ -77,12 +76,9 @@ func CommentHandler(ctx *golf.Context) {
 	c.Ip = ctx.Request.RemoteAddr
 	c.UserAgent = ctx.Request.UserAgent()
 	c.UserId = 0
-	createdAt := time.Now()
-	c.CreatedAt = &createdAt
-	msg := validateComment(c)
+	msg := c.ValidateComment()
 	if msg == "" {
-		_, err := c.Save()
-		if err != nil {
+		if err := c.Save(); err != nil {
 			ctx.JSON(map[string]interface{}{
 				"status": "error",
 				"msg":    "Can not comment on this post.",
@@ -97,26 +93,15 @@ func CommentHandler(ctx *golf.Context) {
 			"res":     true,
 			"comment": c.ToJson(),
 		})
-		model.NewMessage("comment", c)
+		if err = model.NewMessage("comment", c).Save(); err != nil {
+			panic(err)
+		}
 	} else {
 		ctx.JSON(map[string]interface{}{
 			"status": "error",
 			"msg":    msg,
 		})
 	}
-}
-
-func validateComment(c *model.Comment) string {
-	if utils.IsEmptyString(c.Author) || utils.IsEmptyString(c.Content) {
-		return "Name, Email and Content are required fields."
-	}
-	if !utils.IsEmail(c.Email) {
-		return "Email format not valid."
-	}
-	if !utils.IsEmptyString(c.Website) && !utils.IsURL(c.Website) {
-		return "Website URL format not valid."
-	}
-	return ""
 }
 
 func TagHandler(ctx *golf.Context) {

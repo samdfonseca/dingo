@@ -19,7 +19,8 @@ func fileExists(filename string) bool {
 	return err == nil
 }
 
-func Init(dbPath string) {
+func Init(dbPath, privKey, pubKey string) {
+	model.InitializeKey(privKey, pubKey)
 	if err := model.Initialize(dbPath, fileExists(dbPath)); err != nil {
 		err = fmt.Errorf("failed to intialize db: %v", err)
 		panic(err)
@@ -135,9 +136,35 @@ func registerHomeHandler() {
 	App.Get("/:slug/", statsChain.Final(handler.ContentHandler))
 }
 
+func registerAPIHandler() {
+	// Auth
+	App.Post("/auth", handler.JWTAuthLoginHandler)
+	App.Get("/auth", handler.JWTAuthValidateHandler)
+
+	// register the API handler
+	App.Get("/api", handler.APIDocumentationHandler)
+
+	// Posts
+	App.Get("/api/posts", handler.APIPostsHandler)
+	App.Get("/api/posts/:id", handler.APIPostHandler)
+	App.Get("/api/posts/slug/:slug", handler.APIPostSlugHandler)
+
+	// Tags
+	App.Get("/api/tags", handler.APITagsHandler)
+	App.Get("/api/tags/:id", handler.APITagHandler)
+	App.Get("/api/tags/slug/:slug", handler.APITagSlugHandler)
+
+	// Users
+	App.Get("/api/users", handler.APIUsersHandler)
+	App.Get("/api/users/:id", handler.APIUserHandler)
+	App.Get("/api/users/slug/:slug", handler.APIUserSlugHandler)
+	App.Get("/api/users/email/:email", handler.APIUserEmailHandler)
+}
+
 func Run(portNumber string) {
 	registerAdminURLHandlers()
 	registerHomeHandler()
+	registerAPIHandler()
 	fmt.Printf("Application Started on port %s\n", portNumber)
 	App.Run(":" + portNumber)
 }

@@ -1,10 +1,11 @@
 package model
 
 import (
-	"github.com/dinever/dingo/app/utils"
 	"log"
 	"strings"
 	"time"
+
+	"github.com/dinever/dingo/app/utils"
 )
 
 var (
@@ -35,10 +36,6 @@ func NewMessage(tp string, data interface{}) *Message {
 	}
 	m.CreatedAt = utils.Now()
 	m.IsRead = false
-	err := m.Save()
-	if err != nil {
-		panic(err)
-	}
 	return m
 }
 

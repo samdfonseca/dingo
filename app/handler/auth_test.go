@@ -1,18 +1,23 @@
 package handler
 
 import (
-	"github.com/dinever/dingo/app/model"
-	"github.com/dinever/golf"
-	. "github.com/smartystreets/goconvey/convey"
+	"fmt"
 	"net/http"
 	"net/http/httptest"
 	"os"
+	"path/filepath"
 	"testing"
+	"time"
+
+	"github.com/dinever/dingo/app/model"
+	"github.com/dinever/golf"
+	. "github.com/smartystreets/goconvey/convey"
 )
 
 func TestUserSignUpWithCorrectInformation(t *testing.T) {
 	Convey("Initialize database", t, func() {
-		model.Initialize("test.db", false)
+		testDB := fmt.Sprintf(filepath.Join(os.TempDir(), "ding-testdb-%s"), fmt.Sprintf(time.Now().Format("20060102T150405.000")))
+		model.Initialize(testDB, true)
 
 		Convey("When the form data is correct", func() {
 			ctx := mockSignUpPostRequest("johndoe@email.com", "johndoe", "somepassword", "somepassword")
@@ -46,14 +51,15 @@ func TestUserSignUpWithCorrectInformation(t *testing.T) {
 		})
 
 		Reset(func() {
-			os.Remove("test.db")
+			os.Remove(testDB)
 		})
 	})
 }
 
 func TestUserSignUpWithIncorrectInformation(t *testing.T) {
 	Convey("Initialize database", t, func() {
-		model.Initialize("test.db", false)
+		testDB := fmt.Sprintf(filepath.Join(os.TempDir(), "ding-testdb-%s"), fmt.Sprintf(time.Now().Format("20060102T150405.000")))
+		model.Initialize(testDB, true)
 
 		Convey("When the email is illegal", func() {
 
@@ -115,17 +121,18 @@ func TestUserSignUpWithIncorrectInformation(t *testing.T) {
 		})
 
 		Reset(func() {
-			os.Remove("test.db")
+			os.Remove(testDB)
 		})
 	})
 }
 
 func TestUserLogInWithCorrectInformation(t *testing.T) {
 	Convey("Initialize database", t, func() {
-		model.Initialize("test.db", false)
+		testDB := fmt.Sprintf(filepath.Join(os.TempDir(), "ding-testdb-%s"), fmt.Sprintf(time.Now().Format("20060102T150405.000")))
+		model.Initialize(testDB, true)
 
 		Convey("Create a user first", func() {
-			err := model.CreateNewUser(email, name, password)
+			err := model.NewUser(email, name).Create(password)
 			So(err, ShouldBeNil)
 
 			Convey("Login with correct information", func() {
@@ -162,7 +169,7 @@ func TestUserLogInWithCorrectInformation(t *testing.T) {
 		})
 
 		Reset(func() {
-			os.Remove("test.db")
+			os.Remove(testDB)
 		})
 	})
 }
@@ -170,7 +177,8 @@ func TestUserLogInWithCorrectInformation(t *testing.T) {
 func TestUserWithoutAuthentication(t *testing.T) {
 
 	Convey("Initialize database", t, func() {
-		model.Initialize("test.db", false)
+		testDB := fmt.Sprintf(filepath.Join(os.TempDir(), "ding-testdb-%s"), fmt.Sprintf(time.Now().Format("20060102T150405.000")))
+		model.Initialize(testDB, true)
 
 		Convey("Visit admin dashbaord", func() {
 			ctx := mockContext(nil, "GET", "/admin/")
@@ -182,7 +190,7 @@ func TestUserWithoutAuthentication(t *testing.T) {
 		})
 
 		Reset(func() {
-			os.Remove("test.db")
+			os.Remove(testDB)
 		})
 	})
 }
