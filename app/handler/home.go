@@ -37,12 +37,7 @@ func HomeHandler(ctx *golf.Context) {
 func ContentHandler(ctx *golf.Context) {
 	slug := ctx.Param("slug")
 	post, err := model.GetPostBySlug(slug)
-	if !post.IsPublished {
-		ctx.Abort(404)
-		return
-	}
-	if err != nil {
-		log.Printf("[Error]: %v", err)
+	if err != nil || !post.IsPublished {
 		ctx.Abort(404)
 		return
 	}
