@@ -10,18 +10,29 @@
 
         {{ range .Posts }}
         <div id="dingo-post-{{ .Id }}" class="mdl-cell mdl-cell--6-col mdl-cell--4-col-tablet">
-          <div class="mdl-card dingo-card dingo-card-post mdl-shadow--0dp">
-            <div class="p-15 mdl-card--expand">
+          <div class="mdl-card dingo-card dingo-card-short dingo-card-post mdl-shadow--0dp">
+            <div class="p-15 mdl-card--expand p-b-5">
               <h3 class="no-margin w600">{{ .Title }}</h3>
-              <span class="timestamp">{{DateFormat .CreatedAt "%Y-%m-%d"}}</span>
             </div>
-            <div class="mdl-card__supporting-text">
+            <div class="mdl-card__supporting-text p-t-5">
               {{ .Excerpt }}
               <div class="tags m-t-20">
+
+                <p class="timestamp"><i class="material-icons md-18 f-left">access_time</i>{{DateFormat .CreatedAt "%Y-%m-%d"}}</p>
+                {{ if .IsPublished }}
+                {{ else }}
+                <p class="status mdl-color-text--amber"><i class="material-icons md-18 f-left">description</i>draft</p>
+                {{ end }}
                 <div class="f-right">
+                  {{ if .IsPublished }}
                   <a href="{{ .Url }}" class="mdl-button mdl-button--icon mdl-js-button mdl-js-ripple-effect">
                     <i class="material-icons f18">pageview</i>
                   </a>
+                  {{ else }}
+                  <button href="{{ .Url }}" class="mdl-button mdl-button--icon mdl-js-button mdl-js-ripple-effect" disabled>
+                    <i class="material-icons f18">pageview</i>
+                  </button>
+                  {{ end }}
                   <a href="/admin/editor/{{ .Id }}/" class="mdl-button mdl-button--icon mdl-js-button mdl-js-ripple-effect" data-upgraded=",MaterialButton,MaterialRipple">
                     <i class="material-icons f18">edit</i>
                   </a>
