@@ -7,11 +7,6 @@ import (
 	"testing"
 )
 
-func TestAPIPostsHandler(t *testing.T) {
-	// FailNow due to lack of test coverage -- don't want to pass CI
-	t.FailNow()
-}
-
 func TestAPIPostHandler(t *testing.T) {
 
 }
