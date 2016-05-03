@@ -1,8 +1,11 @@
 package model
 
 import (
+	"fmt"
 	"os"
+	"path/filepath"
 	"testing"
+	"time"
 
 	. "github.com/smartystreets/goconvey/convey"
 )
@@ -14,7 +17,8 @@ func mockMessage(c *Comment) *Message {
 
 func TestMessage(t *testing.T) {
 	Convey("Initialize database", t, func() {
-		Initialize("test.db", true)
+		testDB := fmt.Sprintf(filepath.Join(os.TempDir(), "ding-testdb-%s"), fmt.Sprintf(time.Now().Format("20060102T150405.000")))
+		Initialize(testDB, true)
 
 		Convey("Test Message", func() {
 			p := mockPost()
@@ -44,7 +48,7 @@ func TestMessage(t *testing.T) {
 			})
 		})
 		Reset(func() {
-			os.Remove("test.db")
+			os.Remove(testDB)
 		})
 	})
 }
