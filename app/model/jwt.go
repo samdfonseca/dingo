@@ -22,18 +22,13 @@ type JWT struct {
 	Token      string `json:"token"`
 }
 
-const (
-	privKeyPath = "dingo.rsa"
-	pubKeyPath  = "dingo.rsa.pub"
-)
-
 var (
 	verifyKey *rsa.PublicKey
 	signKey   *rsa.PrivateKey
 )
 
-func init() {
-	createJWTKeyFiles()
+func InitializeKey(privKeyPath, pubKeyPath string) {
+	createJWTKeyFiles(privKeyPath, pubKeyPath)
 
 	signBytes, err := ioutil.ReadFile(privKeyPath)
 	if err != nil {
@@ -149,15 +144,15 @@ func GenerateJWTKeys(bits int) ([]byte, []byte, error) {
 	return privateKeyPem, publicKeyPem, nil
 }
 
-func createJWTKeyFiles() {
-	_, privErr := os.Stat("dingo.rsa")
-	_, pubErr := os.Stat("dingo.rsa.pub")
+func createJWTKeyFiles(privKeyPath, pubKeyPath string) {
+	_, privErr := os.Stat(privKeyPath)
+	_, pubErr := os.Stat(pubKeyPath)
 	if os.IsNotExist(privErr) || os.IsNotExist(pubErr) {
 		privKey, pubKey, err := GenerateJWTKeys(4096)
 		if err != nil {
 			log.Fatalf("Unable to create JWT keys: %s\n", err)
 		}
-		ioutil.WriteFile("dingo.rsa", privKey, 0600)
-		ioutil.WriteFile("dingo.rsa.pub", pubKey, 0600)
+		ioutil.WriteFile(privKeyPath, privKey, 0600)
+		ioutil.WriteFile(pubKeyPath, pubKey, 0600)
 	}
 }

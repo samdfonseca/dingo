@@ -1,9 +1,12 @@
 package model
 
 import (
+	"fmt"
 	"net/http"
 	"os"
+	"path/filepath"
 	"testing"
+	"time"
 
 	"github.com/dinever/golf"
 	. "github.com/smartystreets/goconvey/convey"
@@ -16,7 +19,8 @@ func mockSimpleContext() *golf.Context {
 
 func TestToken(t *testing.T) {
 	Convey("Initialize database", t, func() {
-		Initialize("test.db", true)
+		testDB := fmt.Sprintf(filepath.Join(os.TempDir(), "ding-testdb-%s"), fmt.Sprintf(time.Now().Format("20060102T150405.000")))
+		Initialize(testDB, true)
 
 		Convey("Test Token", func() {
 			ctx := mockSimpleContext()
@@ -47,7 +51,7 @@ func TestToken(t *testing.T) {
 			})
 		})
 		Reset(func() {
-			os.Remove("test.db")
+			os.Remove(testDB)
 		})
 	})
 }

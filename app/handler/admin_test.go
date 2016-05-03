@@ -1,15 +1,19 @@
 package handler
 
 import (
-	"github.com/dinever/dingo/app/model"
-	"github.com/dinever/golf"
-	. "github.com/smartystreets/goconvey/convey"
+	"fmt"
 	"net/http"
 	"net/http/httptest"
 	"net/url"
 	"os"
+	"path/filepath"
 	"strings"
 	"testing"
+	"time"
+
+	"github.com/dinever/dingo/app/model"
+	"github.com/dinever/golf"
+	. "github.com/smartystreets/goconvey/convey"
 )
 
 func authenticatedContext(form url.Values, method, path string) *golf.Context {
@@ -27,7 +31,12 @@ func authenticatedContext(form url.Values, method, path string) *golf.Context {
 
 func TestViewHandler(t *testing.T) {
 	Convey("Initialize database", t, func() {
-		model.Initialize("test.db", true)
+		testDB := fmt.Sprintf(filepath.Join(os.TempDir(), "ding-testdb-%s"), fmt.Sprintf(time.Now().Format("20060102T150405.000")))
+		model.Initialize(testDB, true)
+
+		testPrivKey := filepath.Join(os.TempDir(), "ding-test.rsa")
+		testPubKey := filepath.Join(os.TempDir(), "ding-test.rsa.pub")
+		model.InitializeKey(testPrivKey, testPubKey)
 
 		Convey("Dashboard view", func() {
 			ctx := authenticatedContext(nil, "GET", "/admin/")
@@ -162,13 +171,18 @@ func TestViewHandler(t *testing.T) {
 				So(ctx.Response.(*httptest.ResponseRecorder).Code, ShouldEqual, 200)
 			})
 		})
-
+		Reset(func() {
+			os.Remove(testDB)
+			os.Remove(testPubKey)
+			os.Remove(testPrivKey)
+		})
 	})
 }
 
 func TestProfileChangeHandler(t *testing.T) {
 	Convey("Initialize database", t, func() {
-		model.Initialize("test.db", true)
+		testDB := fmt.Sprintf(filepath.Join(os.TempDir(), "ding-testdb-%s"), fmt.Sprintf(time.Now().Format("20060102T150405.000")))
+		model.Initialize(testDB, true)
 
 		Convey("Authenticated user", func() {
 			form := url.Values{}
@@ -183,12 +197,16 @@ func TestProfileChangeHandler(t *testing.T) {
 				So(ctx.Response.(*httptest.ResponseRecorder).Code, ShouldEqual, 200)
 			})
 		})
+		Reset(func() {
+			os.Remove(testDB)
+		})
 	})
 }
 
 func TestPostHandler(t *testing.T) {
 	Convey("Initialize database", t, func() {
-		model.Initialize("test.db", true)
+		testDB := fmt.Sprintf(filepath.Join(os.TempDir(), "ding-testdb-%s"), fmt.Sprintf(time.Now().Format("20060102T150405.000")))
+		model.Initialize(testDB, true)
 
 		Convey("Create a post with incorrect format", func() {
 			form := url.Values{}
@@ -370,14 +388,15 @@ func TestPostHandler(t *testing.T) {
 		})
 
 		Reset(func() {
-			os.Remove("test.db")
+			os.Remove(testDB)
 		})
 	})
 }
 
 func TestCommentHandler(t *testing.T) {
 	Convey("Initialize database", t, func() {
-		model.Initialize("test.db", true)
+		testDB := fmt.Sprintf(filepath.Join(os.TempDir(), "ding-testdb-%s"), fmt.Sprintf(time.Now().Format("20060102T150405.000")))
+		model.Initialize(testDB, true)
 
 		Convey("Create a new post", func() {
 			form := url.Values{}
@@ -466,14 +485,15 @@ func TestCommentHandler(t *testing.T) {
 		})
 
 		Reset(func() {
-			os.Remove("test.db")
+			os.Remove(testDB)
 		})
 	})
 }
 
 func TestSettingHandler(t *testing.T) {
 	Convey("Initialize database", t, func() {
-		model.Initialize("test.db", true)
+		testDB := fmt.Sprintf(filepath.Join(os.TempDir(), "ding-testdb-%s"), fmt.Sprintf(time.Now().Format("20060102T150405.000")))
+		model.Initialize(testDB, true)
 
 		Convey("Save settings", func() {
 			settings := []struct {
@@ -553,14 +573,15 @@ func TestSettingHandler(t *testing.T) {
 		})
 
 		Reset(func() {
-			os.Remove("test.db")
+			os.Remove(testDB)
 		})
 	})
 }
 
 func TestPasswordHandler(t *testing.T) {
 	Convey("Initialize database", t, func() {
-		model.Initialize("test.db", true)
+		testDB := fmt.Sprintf(filepath.Join(os.TempDir(), "ding-testdb-%s"), fmt.Sprintf(time.Now().Format("20060102T150405.000")))
+		model.Initialize(testDB, true)
 
 		Convey("Change password with wrong old password", func() {
 			form := url.Values{}
@@ -587,7 +608,7 @@ func TestPasswordHandler(t *testing.T) {
 		})
 
 		Reset(func() {
-			os.Remove("test.db")
+			os.Remove(testDB)
 		})
 	})
 }

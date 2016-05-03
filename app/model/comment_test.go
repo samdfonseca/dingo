@@ -3,7 +3,9 @@ package model
 import (
 	"fmt"
 	"os"
+	"path/filepath"
 	"testing"
+	"time"
 
 	"github.com/dinever/dingo/app/utils"
 	. "github.com/smartystreets/goconvey/convey"
@@ -41,7 +43,8 @@ func commentEqualCheck(c *Comment, expected *Comment) {
 
 func TestComment(t *testing.T) {
 	Convey("Initialize database", t, func() {
-		Initialize("test.db", true)
+		testDB := fmt.Sprintf(filepath.Join(os.TempDir(), "ding-testdb-%s"), fmt.Sprintf(time.Now().Format("20060102T150405.000")))
+		Initialize(testDB, true)
 
 		Convey("Test Message", func() {
 			pc := mockComment()
@@ -102,7 +105,7 @@ func TestComment(t *testing.T) {
 			})
 		})
 		Reset(func() {
-			os.Remove("test.db")
+			os.Remove(testDB)
 		})
 	})
 }
