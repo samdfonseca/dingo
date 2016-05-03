@@ -3,6 +3,7 @@ package handler
 import (
 	"github.com/dinever/dingo/app/model"
 	"github.com/dinever/golf"
+	"net/http"
 	"strconv"
 )
 
@@ -37,4 +38,21 @@ func AuthMiddleware(next golf.HandlerFunc) golf.HandlerFunc {
 		next(ctx)
 	}
 	return fn
+}
+
+func JWTAuthMiddleware(next golf.HandlerFunc) golf.HandlerFunc {
+	return func(ctx *golf.Context) {
+		tokenHeader := ctx.Header("X-SESSION-TOKEN")
+		if tokenHeader == "" {
+			ctx.SendStatus(http.StatusUnauthorized)
+			return
+		}
+		token, err := model.ValidateJWT(tokenHeader)
+		if err != nil {
+			ctx.SendStatus(http.StatusUnauthorized)
+			return
+		}
+		ctx.Session.Set("jwt", model.NewJWTFromToken(token))
+		next(ctx)
+	}
 }
