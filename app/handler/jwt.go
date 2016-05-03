@@ -5,6 +5,7 @@ import (
 	"io/ioutil"
 	"log"
 	"net/http"
+	"strings"
 
 	"github.com/dinever/dingo/app/model"
 	"github.com/dinever/golf"
@@ -18,7 +19,10 @@ type JWTPostBody struct {
 func JWTAuthLoginHandler(ctx *golf.Context) {
 	var email string
 	var password string
-	if ctx.Header("Content-Type") == "application/json" {
+	contentType := ctx.Header("Content-Type")
+	ctx.SetHeader("Content-Type", "application/json")
+	switch {
+	case strings.Contains(contentType, "application/json"):
 		defer ctx.Request.Body.Close()
 		body, err := ioutil.ReadAll(ctx.Request.Body)
 		if err != nil {
@@ -30,9 +34,13 @@ func JWTAuthLoginHandler(ctx *golf.Context) {
 		json.Unmarshal(body, &unmarshalledRequestBody)
 		email = unmarshalledRequestBody.Email
 		password = unmarshalledRequestBody.Password
-	} else {
+	case strings.Contains(contentType, "application/x-www-form-urlencoded"):
 		email = ctx.Request.FormValue("email")
 		password = ctx.Request.FormValue("password")
+	default:
+		ctx.SendStatus(http.StatusBadRequest)
+		ctx.JSON(map[string]interface{}{"status": "error: unrecognized Content-Type"})
+		return
 	}
 
 	user, err := model.GetUserByEmail(email)
@@ -61,6 +69,7 @@ func JWTAuthLoginHandler(ctx *golf.Context) {
 
 func JWTAuthValidateHandler(ctx *golf.Context) {
 	tokenHeader := ctx.Header("X-SESSION-TOKEN")
+	ctx.SetHeader("Content-Type", "application/json")
 	if tokenHeader == "" {
 		ctx.SendStatus(http.StatusBadRequest)
 		ctx.JSON(map[string]interface{}{"status": "error"})
