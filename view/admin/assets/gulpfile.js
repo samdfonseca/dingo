@@ -2,9 +2,11 @@
 
 var gulp = require('gulp'),
   gutil = require('gulp-util'),
-  jshint     = require('gulp-jshint'),
+  jshint = require('gulp-jshint'),
+  uglify = require('gulp-uglify'),
   sass = require('gulp-sass'),
   concat = require('gulp-concat'),
+  cssmin = require('gulp-minify-css'),
   sourcemaps = require('gulp-sourcemaps'),
   livereload = require('gulp-livereload');
 
@@ -18,6 +20,7 @@ gulp.task('css', function() {
   .pipe(sourcemaps.init())
   .pipe(sass())
   .pipe(sourcemaps.write())
+  .pipe(gutil.env.type === 'production' ? cssmin() : gutil.noop())
   .pipe(gulp.dest('dist/css/'))
   .pipe(livereload());
 });
@@ -25,9 +28,9 @@ gulp.task('css', function() {
 gulp.task('js', function() {
   return gulp.src('src/js/**/*.js')
     .pipe(sourcemaps.init())
-      .pipe(concat('app.js'))
-      //only uglify if gulp is ran with '--type production'
-      .pipe(gutil.env.type === 'production' ? uglify() : gutil.noop())
+    .pipe(concat('app.js'))
+    //only uglify if gulp is ran with '--type production'
+    .pipe(gutil.env.type === 'production' ? uglify() : gutil.noop())
     .pipe(sourcemaps.write())
     .pipe(gulp.dest('dist/js'))
     .pipe(livereload());
@@ -39,12 +42,14 @@ gulp.task('vendor-js', function() {
     'src/vendor/js/*.js'
   ])
   .pipe(concat('vendor.js'))
+  .pipe(gutil.env.type === 'production' ? uglify() : gutil.noop())
   .pipe(gulp.dest('dist/js/'))
 });
 
 gulp.task('vendor-css', function() {
   return gulp.src('src/vendor/css/*.css')
   .pipe(concat('vendor.css'))
+  .pipe(gutil.env.type === 'production' ? cssmin() : gutil.noop())
   .pipe(gulp.dest('dist/css/'))
 });
 
