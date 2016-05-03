@@ -34,6 +34,10 @@ func TestViewHandler(t *testing.T) {
 		testDB := fmt.Sprintf(filepath.Join(os.TempDir(), "ding-testdb-%s"), fmt.Sprintf(time.Now().Format("20060102T150405.000")))
 		model.Initialize(testDB, true)
 
+		testPrivKey := filepath.Join(os.TempDir(), "ding-test.rsa")
+		testPubKey := filepath.Join(os.TempDir(), "ding-test.rsa.pub")
+		model.InitializeKey(testPrivKey, testPubKey)
+
 		Convey("Dashboard view", func() {
 			ctx := authenticatedContext(nil, "GET", "/admin/")
 			app := ctx.App
@@ -169,6 +173,8 @@ func TestViewHandler(t *testing.T) {
 		})
 		Reset(func() {
 			os.Remove(testDB)
+			os.Remove(testPubKey)
+			os.Remove(testPrivKey)
 		})
 	})
 }
@@ -190,6 +196,9 @@ func TestProfileChangeHandler(t *testing.T) {
 			Convey("Should return HTTP response 200 OK", func() {
 				So(ctx.Response.(*httptest.ResponseRecorder).Code, ShouldEqual, 200)
 			})
+		})
+		Reset(func() {
+			os.Remove(testDB)
 		})
 	})
 }
@@ -380,7 +389,6 @@ func TestPostHandler(t *testing.T) {
 
 		Reset(func() {
 			os.Remove(testDB)
-
 		})
 	})
 }

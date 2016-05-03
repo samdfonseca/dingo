@@ -19,7 +19,8 @@ func fileExists(filename string) bool {
 	return err == nil
 }
 
-func Init(dbPath string) {
+func Init(dbPath, privKey, pubKey string) {
+	model.InitializeKey(privKey, pubKey)
 	if err := model.Initialize(dbPath, fileExists(dbPath)); err != nil {
 		err = fmt.Errorf("failed to intialize db: %v", err)
 		panic(err)
