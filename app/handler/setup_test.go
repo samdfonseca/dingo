@@ -8,8 +8,6 @@ import (
 	"path/filepath"
 	"strings"
 
-	"github.com/dinever/dingo/app/model"
-	"github.com/dinever/dingo/app/utils"
 	"github.com/dinever/golf"
 )
 
@@ -20,16 +18,9 @@ const password = "passwordfortest"
 func InitTestApp() *golf.Application {
 	app := Initialize()
 
-	utils.RegisterFuncMap(app)
-	app.View.FuncMap["Setting"] = model.GetSettingValue
-	app.View.FuncMap["Navigator"] = model.GetNavigators
-
-	app.Use(golf.RecoverMiddleware, golf.SessionMiddleware)
 	app.View.SetTemplateLoader("base", "view")
 	app.View.SetTemplateLoader("admin", filepath.Join("..", "..", "view", "admin"))
 	app.View.SetTemplateLoader("theme", filepath.Join("..", "..", "view", "default"))
-	app.SessionManager = golf.NewMemorySessionManager()
-	app.Error(404, NotFoundHandler)
 	return app
 }
 
