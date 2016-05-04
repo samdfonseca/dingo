@@ -257,4 +257,3 @@ var stmtGetUnreadMessages = messageSelector.Copy().Where(`is_read = 0`).OrderBy(
 var stmtGetAllMessagesByPage = messageSelector.Copy().OrderBy(`created_at DESC`).Limit(`?`).Offset(`?`).SQL()
 
 const stmtInsertMessage = `INSERT INTO messages (id, type, data, is_read, created_at) VALUES (?, ?, ?, ?, ?)`
-const stmtReadMessage = `UPDATE messages SET is_read = 1 WHERE id = ?`
