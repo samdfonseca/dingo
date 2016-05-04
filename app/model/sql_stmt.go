@@ -8,7 +8,6 @@ const schema = `
 CREATE TABLE IF NOT EXISTS
 posts (
   id                 integer NOT NULL PRIMARY KEY AUTOINCREMENT,
-  uuid               varchar(36) NOT NULL,
   title              varchar(150) NOT NULL,
   slug               varchar(150) NOT NULL,
   markdown           text,
@@ -42,7 +41,6 @@ tokens (
 CREATE TABLE IF NOT EXISTS
 users (
   id               integer NOT NULL PRIMARY KEY AUTOINCREMENT,
-  uuid             varchar(36) NOT NULL,
   name             varchar(150) NOT NULL,
   slug             varchar(150) NOT NULL,
   password         varchar(60) NOT NULL,
@@ -67,7 +65,6 @@ users (
 CREATE TABLE IF NOT EXISTS
 categories (
   id                integer NOT NULL PRIMARY KEY AUTOINCREMENT,
-  uuid              varchar(36) NOT NULL,
   name              varchar(150) NOT NULL,
   slug              varchar(150) NOT NULL,
   description       varchar(200),
@@ -83,7 +80,6 @@ categories (
 CREATE TABLE IF NOT EXISTS
 tags (
   id                integer NOT NULL PRIMARY KEY AUTOINCREMENT,
-  uuid              varchar(36) NOT NULL,
   name              varchar(150) NOT NULL,
   slug              varchar(150) NOT NULL,
   description       varchar(200),
@@ -101,7 +97,6 @@ tags (
 CREATE TABLE IF NOT EXISTS
 comments (
   id            integer NOT NULL PRIMARY KEY AUTOINCREMENT,
-  uuid          varchar(36) NOT NULL,
   post_id       varchar(150) NOT NULL,
   author        varchar(150) NOT NULL,
   author_email  varchar(150) NOT NULL,
@@ -133,7 +128,6 @@ posts_categories (
 CREATE TABLE IF NOT EXISTS
 settings (
   id          integer NOT NULL PRIMARY KEY AUTOINCREMENT,
-  uuid        varchar(36) NOT NULL,
   key         varchar(150) NOT NULL,
   value       varchar(20) NOT NULL,
   type        varchar(150) NOT NULL DEFAULT 'core',
@@ -146,7 +140,6 @@ settings (
 CREATE TABLE IF NOT EXISTS
 roles (
   id           integer NOT NULL PRIMARY KEY AUTOINCREMENT,
-  uuid         varchar(36) NOT NULL,
   name         varchar(150) NOT NULL,
   description  varchar(200),
   created_at   datetime NOT NULL,
@@ -172,7 +165,7 @@ var stmtGetAllPostsCount = postCountSelector.Copy().SQL()
 var stmtGetPostsCountByUser = postCountSelector.Copy().Where(`author_id = ?`).SQL()
 var stmtGetPostsCountByTag = postCountSelector.Copy().From(`posts, posts_tags`).Where(`posts_tags.post_id = posts.id`, `posts_tags.tag_id = ?`, `status = 'published'`).SQL()
 
-var postSelector = SQL.Select(`id, uuid, title, slug, markdown, html, featured, page, allow_comment, comment_num, status, image, author_id, created_at, created_by, updated_at, updated_by, published_at, published_by`).From(`posts`)
+var postSelector = SQL.Select(`id, title, slug, markdown, html, featured, page, allow_comment, comment_num, status, image, author_id, created_at, created_by, updated_at, updated_by, published_at, published_by`).From(`posts`)
 var stmtGetPublishedPostList = postSelector.Copy().Where(`status = "published"`).OrderBy(`published_at DESC`).Limit(`?`).Offset(`?`).SQL()
 var stmtGetAllPostList = postSelector.Copy().OrderBy(`published_at DESC`).Limit(`?`).Offset(`?`).SQL()
 var stmtGetPostsByUser = postSelector.Copy().Where(`status = 'published'`, `author_id = ?`).OrderBy(`published_at DESC`).Limit(`?`).Offset(`?`).SQL()
@@ -180,7 +173,7 @@ var stmtGetPostsByUser = postSelector.Copy().Where(`status = 'published'`, `auth
 var stmtGetPostById = postSelector.Copy().Where(`id = ?`).SQL()
 var stmtGetPostBySlug = postSelector.Copy().Where(`slug = ?`).SQL()
 
-var postsTagsSelector = SQL.Select(`posts.id, posts.uuid, posts.title, posts.slug, posts.markdown, posts.html, posts.featured, posts.page, posts.allow_comment, posts.comment_num, posts.status, posts.image, posts.author_id, posts.created_at, posts.created_by, posts.updated_at, posts.updated_by, posts.published_at, posts.published_by`).From(`posts, posts_tags`)
+var postsTagsSelector = SQL.Select(`posts.id, posts.title, posts.slug, posts.markdown, posts.html, posts.featured, posts.page, posts.allow_comment, posts.comment_num, posts.status, posts.image, posts.author_id, posts.created_at, posts.created_by, posts.updated_at, posts.updated_by, posts.published_at, posts.published_by`).From(`posts, posts_tags`)
 var stmtGetPostsByTag = postsTagsSelector.Copy().Where(`status = 'published'`, `posts_tags.post_id = posts.id`, `posts_tags.tag_id = ?`).OrderBy(`published_at DESC`).Limit(`?`).Offset(`?`).SQL()
 var stmtGetAllPostsByTag = postsTagsSelector.Copy().Where(`posts_tags.post_id = posts.id`, `posts_tags.tag_id = ?`).OrderBy(`published_at DESC`).SQL()
 
@@ -190,19 +183,19 @@ var stmtGetAllPagesCount = pageCountSelector.Copy().SQL()
 var stmtGetPagesCountByUser = pageCountSelector.Copy().Where(`author_id = ?`).SQL()
 var stmtGetPagesCountByTag = pageCountSelector.Copy().Where(`posts_tags.post_id = posts.id`, `posts_tags.tag_id = ?`, `status = 'published'`).SQL()
 
-var pageSelector = SQL.Select(`id, uuid, title, slug, markdown, html, featured, page, status, image, author_id, created_at, created_by, updated_at, updated_by, published_at, published_by`).From(`posts`).Where(`page = 1`)
+var pageSelector = SQL.Select(`id, title, slug, markdown, html, featured, page, status, image, author_id, created_at, created_by, updated_at, updated_by, published_at, published_by`).From(`posts`).Where(`page = 1`)
 
 // Comments
 
 var commentCountSelector = SQL.Select(`count(*)`).From(`comments`)
 var stmtGetAllCommentCount = commentCountSelector.SQL()
-var commentSelector = SQL.Select(`id, uuid, post_id, author, author_email, author_url, created_at, content, approved, agent, parent, user_id`).From(`comments`)
+var commentSelector = SQL.Select(`id, post_id, author, author_email, author_url, created_at, content, approved, agent, parent, user_id`).From(`comments`)
 var stmtGetAllCommentList = commentSelector.Copy().OrderBy(`created_at DESC`).Limit(`?`).Offset(`?`).SQL()
 var stmtGetApprovedCommentList = commentSelector.Copy().Where(`approved = 1`).OrderBy(`created_at DESC`).Limit(`?`).Offset(`?`).SQL()
 var stmtGetCommentById = commentSelector.Copy().Where(`id = ?`).SQL()
 var stmtGetApprovedCommentListByPostId = commentSelector.Copy().Where(`post_id = ?`, `approved = 1`).OrderBy(`created_at DESC`).SQL()
 
-const stmtInsertComment = `INSERT OR REPLACE INTO comments (id, uuid, post_id, author, author_email, author_url, author_ip, created_at, content, approved, agent, parent, user_id) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
+const stmtInsertComment = `INSERT OR REPLACE INTO comments (id, post_id, author, author_email, author_url, author_ip, created_at, content, approved, agent, parent, user_id) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
 const stmtDeleteCommentById = `DELETE FROM comments WHERE id = ?`
 
 // Users
@@ -228,12 +221,12 @@ const stmtGetTagBySlug = `SELECT id, name, slug, hidden FROM tags WHERE slug = ?
 const stmtGetBlog = `SELECT value FROM settings WHERE key = ?`
 const stmtGetPostCreationDateById = `SELECT created_at FROM posts WHERE id = ?`
 
-const stmtInsertPost = `INSERT INTO posts (id, uuid, title, slug, markdown, html, featured, page, allow_comment, status, image, author_id, created_at, created_by, updated_at, updated_by, published_at, published_by) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
-const stmtInsertUser = `INSERT INTO users (id, uuid, name, slug, password, email, image, cover, created_at, created_by, updated_at, updated_by) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
+const stmtInsertPost = `INSERT INTO posts (id, title, slug, markdown, html, featured, page, allow_comment, status, image, author_id, created_at, created_by, updated_at, updated_by, published_at, published_by) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
+const stmtInsertUser = `INSERT INTO users (id, name, slug, password, email, image, cover, created_at, created_by, updated_at, updated_by) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
 const stmtInsertRoleUser = `INSERT INTO roles_users (id, role_id, user_id) VALUES (?, ?, ?)`
-const stmtInsertTag = `INSERT INTO tags (id, uuid, name, slug, created_at, created_by, updated_at, updated_by, hidden) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`
+const stmtInsertTag = `INSERT INTO tags (id, name, slug, created_at, created_by, updated_at, updated_by, hidden) VALUES (?, ?, ?, ?, ?, ?, ?, ?)`
 const stmtInsertPostTag = `INSERT INTO posts_tags (id, post_id, tag_id) VALUES (?, ?, ?)`
-const stmtInsertSetting = `INSERT INTO settings (id, uuid, key, value, type, created_at, created_by, updated_at, updated_by) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`
+const stmtInsertSetting = `INSERT INTO settings (id, key, value, type, created_at, created_by, updated_at, updated_by) VALUES (?, ?, ?, ?, ?, ?, ?, ?)`
 
 const stmtUpdatePost = `UPDATE posts SET title = ?, slug = ?, markdown = ?, html = ?, featured = ?, page = ?, allow_comment = ?, status = ?, image = ?, updated_at = ?, updated_by = ? WHERE id = ?`
 const stmtUpdatePostPublished = `UPDATE posts SET title = ?, slug = ?, markdown = ?, html = ?, featured = ?, page = ?, allow_comment = ?, status = ?, image = ?, updated_at = ?, updated_by = ?, published_at = ?, published_by = ? WHERE id = ?`
@@ -241,7 +234,7 @@ const stmtUpdateSettings = `UPDATE settings SET value = ?, updated_at = ?, updat
 const stmtUpdateUser = `UPDATE users SET name = ?, slug = ?, email = ?, image = ?, cover = ?, bio = ?, website = ?, location = ?, updated_at = ?, updated_by = ? WHERE id = ?`
 const stmtUpdateLastLogin = `UPDATE users SET last_login = ? WHERE id = ?`
 const stmtUpdateUserPassword = `UPDATE users SET password = ?, updated_at = ?, updated_by = ? WHERE id = ?`
-const stmtUpdateTag = `UPDATE tags SET uuid = ?, name = ?, slug =?, updated_at = ?, updated_by = ?, hidden = ? WHERE id = ?`
+const stmtUpdateTag = `UPDATE tags SET name = ?, slug =?, updated_at = ?, updated_by = ?, hidden = ? WHERE id = ?`
 
 const stmtDeletePostTagsByPostId = `DELETE FROM posts_tags WHERE post_id = ?`
 const stmtDeletePostById = `DELETE FROM posts WHERE id = ?`
