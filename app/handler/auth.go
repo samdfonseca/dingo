@@ -93,21 +93,21 @@ func AuthSignUpHandler(ctx *golf.Context) {
 	rememberMe := ctx.Request.FormValue("remember-me")
 	var (
 		exp int
-		s   *model.Token
+		t   *model.Token
 	)
 	if rememberMe == "on" {
 		exp = 3600 * 24 * 3
-		s = model.NewToken(user, ctx, int64(exp))
+		t = model.NewToken(user, ctx, int64(exp))
 	} else {
 		exp = 0
-		s = model.NewToken(user, ctx, 3600)
+		t = model.NewToken(user, ctx, 3600)
 	}
-	if err = s.Save(); err != nil {
+	if err = t.Save(); err != nil {
 		ctx.Abort(500)
 		return
 	}
-	ctx.SetCookie("token-user", strconv.Itoa(int(s.UserId)), exp)
-	ctx.SetCookie("token-value", s.Value, exp)
+	ctx.SetCookie("token-user", strconv.Itoa(int(t.UserId)), exp)
+	ctx.SetCookie("token-value", t.Value, exp)
 	ctx.JSON(map[string]interface{}{
 		"status": "success",
 	})
