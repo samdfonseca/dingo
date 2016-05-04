@@ -1,12 +1,11 @@
 package handler
 
 import (
+	"strconv"
+
 	"github.com/dinever/dingo/app/model"
 	"github.com/dinever/dingo/app/utils"
 	"github.com/dinever/golf"
-	"github.com/twinj/uuid"
-	"strconv"
-	"time"
 )
 
 func AdminHandler(ctx *golf.Context) {
@@ -313,16 +312,9 @@ func SettingUpdateHandler(ctx *golf.Context) {
 	var err error
 	ctx.Request.ParseForm()
 	for key, value := range ctx.Request.Form {
-		setting := new(model.Setting)
-		setting.UUID = uuid.Formatter(uuid.NewV4(), uuid.CleanHyphen)
-		setting.Key = key
-		setting.Value = value[0]
-		setting.Type = ""
-		setting.CreatedBy = u.Id
-		now := time.Now()
-		setting.CreatedAt = &now
-		err = setting.Save()
-		if err != nil {
+		s := model.NewSetting(key, value[0], "")
+		s.CreatedBy = u.Id
+		if err = s.Save(); err != nil {
 			panic(err)
 			ctx.JSON(map[string]interface{}{
 				"status": "error",

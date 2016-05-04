@@ -70,12 +70,6 @@ func registerMiddlewares() {
 	)
 }
 
-func CreateSampleData() {
-	model.NewSetting("site_url", "http://example.com/", "blog").Save()
-	model.NewSetting("title", "Dingo Blog", "blog").Save()
-	model.NewSetting("sub_title", "Another blog created by Dingo", "blog").Save()
-}
-
 func registerAdminURLHandlers() {
 	authChain := golf.NewChain(handler.AuthMiddleware)
 	App.Get("/login/", handler.AuthLoginPageHandler)
