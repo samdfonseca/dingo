@@ -30,13 +30,14 @@ func authenticatedContext(form url.Values, method, path string) *golf.Context {
 }
 
 func TestViewHandler(t *testing.T) {
+
+	testPrivKey := filepath.Join(os.TempDir(), "ding-test.rsa")
+	testPubKey := filepath.Join(os.TempDir(), "ding-test.rsa.pub")
+	model.InitializeKey(testPrivKey, testPubKey)
+
 	Convey("Initialize database", t, func() {
 		testDB := fmt.Sprintf(filepath.Join(os.TempDir(), "ding-testdb-%s"), fmt.Sprintf(time.Now().Format("20060102T150405.000")))
 		model.Initialize(testDB, true)
-
-		testPrivKey := filepath.Join(os.TempDir(), "ding-test.rsa")
-		testPubKey := filepath.Join(os.TempDir(), "ding-test.rsa.pub")
-		model.InitializeKey(testPrivKey, testPubKey)
 
 		Convey("Dashboard view", func() {
 			ctx := authenticatedContext(nil, "GET", "/admin/")

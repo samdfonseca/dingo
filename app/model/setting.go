@@ -3,8 +3,10 @@ package model
 import (
 	"database/sql"
 	"encoding/json"
-	"github.com/twinj/uuid"
 	"time"
+
+	"github.com/dinever/dingo/app/utils"
+	"github.com/twinj/uuid"
 )
 
 type Setting struct {
@@ -93,16 +95,15 @@ func GetSettings(t string) []*Setting {
 		settings = append(settings, setting)
 	}
 	return settings
-
 }
 
-func (setting *Setting) Save() error {
+func (s *Setting) Save() error {
 	writeDB, err := db.Begin()
 	if err != nil {
 		writeDB.Rollback()
 		return err
 	}
-	_, err = db.Exec(`INSERT OR REPLACE INTO settings (id, uuid, key, value, type, created_at, created_by) VALUES ((SELECT id FROM settings WHERE key = ?), ?, ?, ?, ?, ?, ?)`, setting.Key, setting.UUID, setting.Key, setting.Value, setting.Type, setting.CreatedAt, setting.CreatedBy)
+	_, err = db.Exec(`INSERT OR REPLACE INTO settings (id, uuid, key, value, type, created_at, created_by) VALUES ((SELECT id FROM settings WHERE key = ?), ?, ?, ?, ?, ?, ?)`, s.Key, s.UUID, s.Key, s.Value, s.Type, s.CreatedAt, s.CreatedBy)
 	if err != nil {
 		writeDB.Rollback()
 		return err
@@ -111,14 +112,13 @@ func (setting *Setting) Save() error {
 }
 
 func NewSetting(k, v, t string) *Setting {
-	setting := new(Setting)
-	setting.UUID = uuid.Formatter(uuid.NewV4(), uuid.CleanHyphen)
-	setting.Key = k
-	setting.Value = v
-	setting.Type = t
-	now := time.Now()
-	setting.CreatedAt = &now
-	return setting
+	return &Setting{
+		UUID:      uuid.Formatter(uuid.NewV4(), uuid.CleanHyphen),
+		Key:       k,
+		Value:     v,
+		Type:      t,
+		CreatedAt: utils.Now(),
+	}
 }
 
 func SetSettingIfNotExists(k, v, t string) error {
