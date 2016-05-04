@@ -14,6 +14,9 @@ func APIDocumentationHandler(ctx *golf.Context) {
 	routes := map[string]interface{}{
 		"auth_url":              "/auth/",
 		"api_documentation_url": "/api/",
+		"comments_url":          "/api/comments",
+		"comment_url":           "/api/comments/:id",
+		"comment_post_url":      "/api/comments/post/:id",
 		"posts_url":             "/api/posts/",
 		"post_url":              "/api/posts/:id",
 		"post_slug_url":         "/api/posts/slug/:slug",
@@ -26,6 +29,43 @@ func APIDocumentationHandler(ctx *golf.Context) {
 		"user_email_url":        "/api/users/email/:email",
 	}
 	ctx.JSONIndent(routes, "", "  ")
+}
+
+// APICommentsHandler retrieves all the comments.
+func APICommentsHandler(ctx *golf.Context) {
+	ctx.JSONIndent(map[string]interface{}{
+		"message": "Not implemented",
+	}, "", "  ")
+}
+
+// APICommentHandler retrieves a comment with the given comment id.
+func APICommentHandler(ctx *golf.Context) {
+	id, err := strconv.Atoi(ctx.Param("id"))
+	if err != nil {
+		handleErr(ctx, 500, err)
+		return
+	}
+	comment, err := model.GetCommentById(int64(id))
+	if err != nil {
+		handleErr(ctx, 404, err)
+		return
+	}
+	ctx.JSONIndent(comment, "", "  ")
+}
+
+// APICommentPostHandler retrives the tag with the given post id.
+func APICommentPostHandler(ctx *golf.Context) {
+	id, err := strconv.Atoi(ctx.Param("id"))
+	if err != nil {
+		handleErr(ctx, 500, err)
+		return
+	}
+	comment, err := model.GetCommentByPostId(int64(id))
+	if err != nil {
+		handleErr(ctx, 404, err)
+		return
+	}
+	ctx.JSONIndent(comment, "", "  ")
 }
 
 // APIPostsHandler gets every page, ordered by publication date.
