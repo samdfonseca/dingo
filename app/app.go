@@ -135,13 +135,18 @@ func registerAPIHandler() {
 	App.Post("/auth", handler.JWTAuthLoginHandler)
 	App.Get("/auth", handler.JWTAuthValidateHandler)
 
-	// register the API handler
+	// Register the API handler
 	App.Get("/api", handler.APIDocumentationHandler)
 
 	// Posts
 	App.Get("/api/posts", handler.APIPostsHandler)
 	App.Get("/api/posts/:id", handler.APIPostHandler)
 	App.Get("/api/posts/slug/:slug", handler.APIPostSlugHandler)
+
+	// Comments
+	App.Get("/api/comments", handler.APICommentsHandler)
+	App.Get("/api/comments/:id", handler.APICommentHandler)
+	App.Get("/api/comments/post/:id", handler.APICommentPostHandler)
 
 	// Tags
 	App.Get("/api/tags", handler.APITagsHandler)
