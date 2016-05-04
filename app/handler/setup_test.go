@@ -1,15 +1,14 @@
 package handler
 
 import (
-	"github.com/dinever/dingo/app/model"
-	"github.com/dinever/dingo/app/utils"
-	"github.com/dinever/golf"
 	"io"
 	"net/http"
 	"net/http/httptest"
 	"net/url"
 	"path/filepath"
 	"strings"
+
+	"github.com/dinever/golf"
 )
 
 const name = "Shawn Ding"
@@ -17,21 +16,11 @@ const email = "dingpeixuan911@gmail.com"
 const password = "passwordfortest"
 
 func InitTestApp() *golf.Application {
-	app := golf.New()
+	app := Initialize()
 
-	RegisterAdminURLHandlers(app)
-	RegisterHomeHandler(app)
-	utils.RegisterFuncMap(app)
-	app.View.FuncMap["Setting"] = model.GetSettingValue
-	app.View.FuncMap["Navigator"] = model.GetNavigators
-	RegisterFunctions(app)
-
-	app.Use(golf.RecoverMiddleware, golf.SessionMiddleware)
 	app.View.SetTemplateLoader("base", "view")
 	app.View.SetTemplateLoader("admin", filepath.Join("..", "..", "view", "admin"))
 	app.View.SetTemplateLoader("theme", filepath.Join("..", "..", "view", "default"))
-	app.SessionManager = golf.NewMemorySessionManager()
-	app.Error(404, NotFoundHandler)
 	return app
 }
 
@@ -45,7 +34,8 @@ func makeTestHTTPRequest(body io.Reader, method, url string) *http.Request {
 
 func mockSignUpPostRequest(email, name, password, rePassword string) *golf.Context {
 	w := httptest.NewRecorder()
-	app := InitTestApp()
+	Initialize()
+
 	form := url.Values{}
 	form.Add("email", email)
 	form.Add("name", name)
@@ -59,7 +49,8 @@ func mockSignUpPostRequest(email, name, password, rePassword string) *golf.Conte
 
 func mockContext(form url.Values, method, path string) *golf.Context {
 	w := httptest.NewRecorder()
-	app := InitTestApp()
+	Initialize()
+
 	r := makeTestHTTPRequest(strings.NewReader(form.Encode()), method, path)
 	r.PostForm = form
 	return golf.NewContext(r, w, app)
@@ -67,7 +58,8 @@ func mockContext(form url.Values, method, path string) *golf.Context {
 
 func mockLogInPostContext() *golf.Context {
 	w := httptest.NewRecorder()
-	app := InitTestApp()
+	Initialize()
+
 	form := url.Values{}
 	form.Add("email", email)
 	form.Add("password", password)
