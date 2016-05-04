@@ -20,11 +20,10 @@ func Init(dbPath, privKey, pubKey string) {
 		panic(err)
 	}
 	fmt.Printf("Database is used at %s\n", dbPath)
-
-	handler.Initialize()
 }
 
 func Run(portNumber string) {
+	app := handler.Initialize()
 	fmt.Printf("Application Started on port %s\n", portNumber)
-	handler.App.Run(":" + portNumber)
+	app.Run(":" + portNumber)
 }

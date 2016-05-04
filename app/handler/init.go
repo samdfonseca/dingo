@@ -9,52 +9,52 @@ import (
 	"github.com/dinever/golf"
 )
 
-var (
-	App *golf.Application
-)
+var app *golf.Application
 
-func Initialize() {
-	App = golf.New()
+func Initialize() *golf.Application {
+	app = golf.New()
 
-	App.Config.Set("app/static_dir", "static")
-	App.Config.Set("app.log_dir", "tmp/log")
-	App.Config.Set("app/upload_dir", "upload")
-	upload_dir, _ := App.Config.GetString("app/upload_dir", "upload")
+	app.Config.Set("app/static_dir", "static")
+	app.Config.Set("app.log_dir", "tmp/log")
+	app.Config.Set("app/upload_dir", "upload")
+	upload_dir, _ := app.Config.GetString("app/upload_dir", "upload")
 	registerMiddlewares()
 	registerFuncMap()
-	RegisterFunctions(App)
+	RegisterFunctions(app)
 	theme := model.GetSettingValue("theme")
-	App.View.SetTemplateLoader("base", "view")
-	App.View.SetTemplateLoader("admin", filepath.Join("view", "admin"))
-	App.View.SetTemplateLoader("theme", filepath.Join("view", theme))
-	//      static_dir, _ := App.Config.GetString("app/static_dir", "static")
-	App.Static("/upload/", upload_dir)
-	App.Static("/", filepath.Join("view", "admin", "assets"))
-	App.Static("/", filepath.Join("view", theme, "assets"))
+	app.View.SetTemplateLoader("base", "view")
+	app.View.SetTemplateLoader("admin", filepath.Join("view", "admin"))
+	app.View.SetTemplateLoader("theme", filepath.Join("view", theme))
+	//      static_dir, _ := app.Config.GetString("app/static_dir", "static")
+	app.Static("/upload/", upload_dir)
+	app.Static("/", filepath.Join("view", "admin", "assets"))
+	app.Static("/", filepath.Join("view", theme, "assets"))
 
-	App.SessionManager = golf.NewMemorySessionManager()
-	App.Error(404, NotFoundHandler)
+	app.SessionManager = golf.NewMemorySessionManager()
+	app.Error(404, NotFoundHandler)
 
 	registerAdminURLHandlers()
 	registerHomeHandler()
 	registerAPIHandler()
+
+	return app
 }
 
 func registerFuncMap() {
-	App.View.FuncMap["DateFormat"] = utils.DateFormat
-	App.View.FuncMap["DateInt64"] = utils.DateInt64
-	App.View.FuncMap["DateString"] = utils.DateString
-	App.View.FuncMap["DateTime"] = utils.DateTime
-	App.View.FuncMap["Now"] = utils.Now
-	App.View.FuncMap["Html2Str"] = utils.Html2Str
-	App.View.FuncMap["FileSize"] = utils.FileSize
-	App.View.FuncMap["Setting"] = model.GetSettingValue
-	App.View.FuncMap["Navigator"] = model.GetNavigators
-	App.View.FuncMap["Md2html"] = utils.Markdown2HtmlTemplate
+	app.View.FuncMap["DateFormat"] = utils.DateFormat
+	app.View.FuncMap["DateInt64"] = utils.DateInt64
+	app.View.FuncMap["DateString"] = utils.DateString
+	app.View.FuncMap["DateTime"] = utils.DateTime
+	app.View.FuncMap["Now"] = utils.Now
+	app.View.FuncMap["Html2Str"] = utils.Html2Str
+	app.View.FuncMap["FileSize"] = utils.FileSize
+	app.View.FuncMap["Setting"] = model.GetSettingValue
+	app.View.FuncMap["Navigator"] = model.GetNavigators
+	app.View.FuncMap["Md2html"] = utils.Markdown2HtmlTemplate
 }
 
 func registerMiddlewares() {
-	App.Use(
+	app.Use(
 		golf.LoggingMiddleware(os.Stdout),
 		golf.RecoverMiddleware,
 		golf.SessionMiddleware,
@@ -63,85 +63,85 @@ func registerMiddlewares() {
 
 func registerAdminURLHandlers() {
 	authChain := golf.NewChain(AuthMiddleware)
-	App.Get("/login/", AuthLoginPageHandler)
-	App.Post("/login/", AuthLoginHandler)
+	app.Get("/login/", AuthLoginPageHandler)
+	app.Post("/login/", AuthLoginHandler)
 
-	App.Get("/signup/", AuthSignUpPageHandler)
-	App.Post("/signup/", AuthSignUpHandler)
+	app.Get("/signup/", AuthSignUpPageHandler)
+	app.Post("/signup/", AuthSignUpHandler)
 
-	App.Get("/logout/", AuthLogoutHandler)
+	app.Get("/logout/", AuthLogoutHandler)
 
-	App.Get("/admin/", authChain.Final(AdminHandler))
+	app.Get("/admin/", authChain.Final(AdminHandler))
 
-	App.Get("/admin/profile/", authChain.Final(ProfileHandler))
-	App.Post("/admin/profile/", authChain.Final(ProfileChangeHandler))
+	app.Get("/admin/profile/", authChain.Final(ProfileHandler))
+	app.Post("/admin/profile/", authChain.Final(ProfileChangeHandler))
 
-	App.Get("/admin/editor/post/", authChain.Final(PostCreateHandler))
-	App.Post("/admin/editor/post/", authChain.Final(PostSaveHandler))
+	app.Get("/admin/editor/post/", authChain.Final(PostCreateHandler))
+	app.Post("/admin/editor/post/", authChain.Final(PostSaveHandler))
 
-	App.Get("/admin/editor/page/", authChain.Final(PageCreateHandler))
-	App.Post("/admin/editor/page/", authChain.Final(PageSaveHandler))
+	app.Get("/admin/editor/page/", authChain.Final(PageCreateHandler))
+	app.Post("/admin/editor/page/", authChain.Final(PageSaveHandler))
 
-	App.Get("/admin/posts/", authChain.Final(AdminPostHandler))
-	App.Get("/admin/editor/:id/", authChain.Final(PostEditHandler))
-	App.Post("/admin/editor/:id/", authChain.Final(PostSaveHandler))
-	App.Delete("/admin/editor/:id/", authChain.Final(PostRemoveHandler))
+	app.Get("/admin/posts/", authChain.Final(AdminPostHandler))
+	app.Get("/admin/editor/:id/", authChain.Final(PostEditHandler))
+	app.Post("/admin/editor/:id/", authChain.Final(PostSaveHandler))
+	app.Delete("/admin/editor/:id/", authChain.Final(PostRemoveHandler))
 
-	App.Get("/admin/pages/", authChain.Final(AdminPageHandler))
+	app.Get("/admin/pages/", authChain.Final(AdminPageHandler))
 
-	App.Get("/admin/comments/", authChain.Final(CommentViewHandler))
-	App.Post("/admin/comments/", authChain.Final(CommentAddHandler))
-	App.Put("/admin/comments/", authChain.Final(CommentUpdateHandler))
-	App.Delete("/admin/comments/", authChain.Final(CommentRemoveHandler))
+	app.Get("/admin/comments/", authChain.Final(CommentViewHandler))
+	app.Post("/admin/comments/", authChain.Final(CommentAddHandler))
+	app.Put("/admin/comments/", authChain.Final(CommentUpdateHandler))
+	app.Delete("/admin/comments/", authChain.Final(CommentRemoveHandler))
 
-	App.Get("/admin/setting/", authChain.Final(SettingViewHandler))
-	App.Post("/admin/setting/", authChain.Final(SettingUpdateHandler))
-	App.Post("/admin/setting/custom/", authChain.Final(SettingCustomHandler))
-	App.Post("/admin/setting/nav/", authChain.Final(SettingNavHandler))
+	app.Get("/admin/setting/", authChain.Final(SettingViewHandler))
+	app.Post("/admin/setting/", authChain.Final(SettingUpdateHandler))
+	app.Post("/admin/setting/custom/", authChain.Final(SettingCustomHandler))
+	app.Post("/admin/setting/nav/", authChain.Final(SettingNavHandler))
 	//
-	App.Get("/admin/files/", authChain.Final(FileViewHandler))
-	App.Delete("/admin/files/", authChain.Final(FileRemoveHandler))
-	App.Post("/admin/files/upload/", authChain.Final(FileUploadHandler))
+	app.Get("/admin/files/", authChain.Final(FileViewHandler))
+	app.Delete("/admin/files/", authChain.Final(FileRemoveHandler))
+	app.Post("/admin/files/upload/", authChain.Final(FileUploadHandler))
 
-	App.Get("/admin/password/", authChain.Final(AdminPasswordPage))
-	App.Post("/admin/password/", authChain.Final(AdminPasswordChange))
+	app.Get("/admin/password/", authChain.Final(AdminPasswordPage))
+	app.Post("/admin/password/", authChain.Final(AdminPasswordChange))
 
-	App.Get("/admin/monitor/", authChain.Final(AdminMonitorPage))
+	app.Get("/admin/monitor/", authChain.Final(AdminMonitorPage))
 }
 
 func registerHomeHandler() {
 	statsChain := golf.NewChain()
-	App.Get("/", statsChain.Final(HomeHandler))
-	App.Get("/page/:page/", HomeHandler)
-	App.Post("/comment/:id/", CommentHandler)
-	App.Get("/tag/:tag/", TagHandler)
-	App.Get("/tag/:tag/page/:page/", TagHandler)
-	App.Get("/feed/", RssHandler)
-	App.Get("/sitemap.xml", SiteMapHandler)
-	App.Get("/:slug/", statsChain.Final(ContentHandler))
+	app.Get("/", statsChain.Final(HomeHandler))
+	app.Get("/page/:page/", HomeHandler)
+	app.Post("/comment/:id/", CommentHandler)
+	app.Get("/tag/:tag/", TagHandler)
+	app.Get("/tag/:tag/page/:page/", TagHandler)
+	app.Get("/feed/", RssHandler)
+	app.Get("/sitemap.xml", SiteMapHandler)
+	app.Get("/:slug/", statsChain.Final(ContentHandler))
 }
 
 func registerAPIHandler() {
 	// Auth
-	App.Post("/auth", JWTAuthLoginHandler)
-	App.Get("/auth", JWTAuthValidateHandler)
+	app.Post("/auth", JWTAuthLoginHandler)
+	app.Get("/auth", JWTAuthValidateHandler)
 
 	// register the API handler
-	App.Get("/api", APIDocumentationHandler)
+	app.Get("/api", APIDocumentationHandler)
 
 	// Posts
-	App.Get("/api/posts", APIPostsHandler)
-	App.Get("/api/posts/:id", APIPostHandler)
-	App.Get("/api/posts/slug/:slug", APIPostSlugHandler)
+	app.Get("/api/posts", APIPostsHandler)
+	app.Get("/api/posts/:id", APIPostHandler)
+	app.Get("/api/posts/slug/:slug", APIPostSlugHandler)
 
 	// Tags
-	App.Get("/api/tags", APITagsHandler)
-	App.Get("/api/tags/:id", APITagHandler)
-	App.Get("/api/tags/slug/:slug", APITagSlugHandler)
+	app.Get("/api/tags", APITagsHandler)
+	app.Get("/api/tags/:id", APITagHandler)
+	app.Get("/api/tags/slug/:slug", APITagSlugHandler)
 
 	// Users
-	App.Get("/api/users", APIUsersHandler)
-	App.Get("/api/users/:id", APIUserHandler)
-	App.Get("/api/users/slug/:slug", APIUserSlugHandler)
-	App.Get("/api/users/email/:email", APIUserEmailHandler)
+	app.Get("/api/users", APIUsersHandler)
+	app.Get("/api/users/:id", APIUserHandler)
+	app.Get("/api/users/slug/:slug", APIUserSlugHandler)
+	app.Get("/api/users/email/:email", APIUserEmailHandler)
 }
