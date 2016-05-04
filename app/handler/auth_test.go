@@ -154,7 +154,8 @@ func TestUserLogInWithCorrectInformation(t *testing.T) {
 				Convey("Visit admin dashboard", func() {
 
 					w := httptest.NewRecorder()
-					app := InitTestApp()
+					app := Initialize()
+
 					req := makeTestHTTPRequest(nil, "GET", "/admin/")
 					req.Header = http.Header{"Cookie": rec.HeaderMap["Set-Cookie"]}
 					ctx = golf.NewContext(req, w, app)
