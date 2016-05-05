@@ -160,15 +160,23 @@ messages (
 
 // Posts
 var postCountSelector = SQL.Select(`count(*)`).From(`posts`)
-var stmtGetPostsCountByTag = postCountSelector.Copy().From(`posts, posts_tags`).Where(`posts_tags.post_id = posts.id`, `posts_tags.tag_id = ?`, `status = 'published'`).SQL()
-
 var postSelector = SQL.Select(`id, title, slug, markdown, html, featured, page, allow_comment, comment_num, status, image, author_id, created_at, created_by, updated_at, updated_by, published_at, published_by`).From(`posts`)
+var postsTagsSelector = SQL.Select(`posts.id, posts.title, posts.slug, posts.markdown, posts.html, posts.featured, posts.page, posts.allow_comment, posts.comment_num, posts.status, posts.image, posts.author_id, posts.created_at, posts.created_by, posts.updated_at, posts.updated_by, posts.published_at, posts.published_by`).From(`posts, posts_tags`)
+
+var stmtGetPostsCountByTag = postCountSelector.Copy().From(`posts, posts_tags`).Where(`posts_tags.post_id = posts.id`, `posts_tags.tag_id = ?`, `status = 'published'`).SQL()
 var stmtGetPostById = postSelector.Copy().Where(`id = ?`).SQL()
 var stmtGetPostBySlug = postSelector.Copy().Where(`slug = ?`).SQL()
-
-var postsTagsSelector = SQL.Select(`posts.id, posts.title, posts.slug, posts.markdown, posts.html, posts.featured, posts.page, posts.allow_comment, posts.comment_num, posts.status, posts.image, posts.author_id, posts.created_at, posts.created_by, posts.updated_at, posts.updated_by, posts.published_at, posts.published_by`).From(`posts, posts_tags`)
 var stmtGetPostsByTag = postsTagsSelector.Copy().Where(`status = 'published'`, `posts_tags.post_id = posts.id`, `posts_tags.tag_id = ?`).OrderBy(`published_at DESC`).Limit(`?`).Offset(`?`).SQL()
 var stmtGetAllPostsByTag = postsTagsSelector.Copy().Where(`posts_tags.post_id = posts.id`, `posts_tags.tag_id = ?`).OrderBy(`published_at DESC`).SQL()
+
+const stmtInsertPost = `INSERT INTO posts (id, title, slug, markdown, html, featured, page, allow_comment, status, image, author_id, created_at, created_by, updated_at, updated_by, published_at, published_by) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
+const stmtUpdatePost = `UPDATE posts SET title = ?, slug = ?, markdown = ?, html = ?, featured = ?, page = ?, allow_comment = ?, status = ?, image = ?, updated_at = ?, updated_by = ? WHERE id = ?`
+const stmtUpdatePostPublished = `UPDATE posts SET title = ?, slug = ?, markdown = ?, html = ?, featured = ?, page = ?, allow_comment = ?, status = ?, image = ?, updated_at = ?, updated_by = ?, published_at = ?, published_by = ? WHERE id = ?`
+const stmtDeletePostById = `DELETE FROM posts WHERE id = ?`
+
+//PostTags
+const stmtDeletePostTagsByPostId = `DELETE FROM posts_tags WHERE post_id = ?`
+const stmtInsertPostTag = `INSERT INTO posts_tags (id, post_id, tag_id) VALUES (?, ?, ?)`
 
 // Comments
 var commentCountSelector = SQL.Select(`count(*)`).From(`comments`)
@@ -189,6 +197,11 @@ const stmtGetUserByName = `SELECT id, name, slug, email, image, cover, bio, webs
 const stmtGetUserByEmail = `SELECT id, name, slug, email, image, cover, bio, website, location FROM users WHERE email = ?`
 const stmtGetHashedPasswordByEmail = `SELECT password FROM users WHERE email = ?`
 const stmtGetUsersCountByEmail = `SELECT count(*) FROM users where email = ?`
+const stmtInsertUser = `INSERT INTO users (id, name, slug, password, email, image, cover, created_at, created_by, updated_at, updated_by) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
+const stmtUpdateUser = `UPDATE users SET name = ?, slug = ?, email = ?, image = ?, cover = ?, bio = ?, website = ?, location = ?, updated_at = ?, updated_by = ? WHERE id = ?`
+
+// RoleUser
+const stmtInsertRoleUser = `INSERT INTO roles_users (id, role_id, user_id) VALUES (?, ?, ?)`
 
 // Tokens
 const stmtGetTokenByValue = `SELECT value, user_id, created_at, expired_at FROM tokens WHERE value = ?`
@@ -199,23 +212,14 @@ const stmtGetAllTags = `SELECT id, name, slug FROM tags`
 const stmtGetTags = `SELECT tag_id FROM posts_tags WHERE post_id = ?`
 const stmtGetTagById = `SELECT id, name, slug FROM tags WHERE id = ?`
 const stmtGetTagBySlug = `SELECT id, name, slug, hidden FROM tags WHERE slug = ?`
+const stmtInsertTag = `INSERT INTO tags (id, name, slug, created_at, created_by, updated_at, updated_by, hidden) VALUES (?, ?, ?, ?, ?, ?, ?, ?)`
+const stmtUpdateTag = `UPDATE tags SET name = ?, slug =?, updated_at = ?, updated_by = ?, hidden = ? WHERE id = ?`
+const stmtDeleteOldTags = `DELETE FROM tags WHERE id IN (SELECT id FROM tags EXCEPT SELECT tag_id FROM posts_tags)`
 
 // Settings
-const stmtInsertPost = `INSERT INTO posts (id, title, slug, markdown, html, featured, page, allow_comment, status, image, author_id, created_at, created_by, updated_at, updated_by, published_at, published_by) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
-const stmtInsertUser = `INSERT INTO users (id, name, slug, password, email, image, cover, created_at, created_by, updated_at, updated_by) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
-const stmtInsertRoleUser = `INSERT INTO roles_users (id, role_id, user_id) VALUES (?, ?, ?)`
-const stmtInsertTag = `INSERT INTO tags (id, name, slug, created_at, created_by, updated_at, updated_by, hidden) VALUES (?, ?, ?, ?, ?, ?, ?, ?)`
-const stmtInsertPostTag = `INSERT INTO posts_tags (id, post_id, tag_id) VALUES (?, ?, ?)`
-const stmtInsertSetting = `INSERT INTO settings (id, key, value, type, created_at, created_by, updated_at, updated_by) VALUES (?, ?, ?, ?, ?, ?, ?, ?)`
-
-const stmtUpdatePost = `UPDATE posts SET title = ?, slug = ?, markdown = ?, html = ?, featured = ?, page = ?, allow_comment = ?, status = ?, image = ?, updated_at = ?, updated_by = ? WHERE id = ?`
-const stmtUpdatePostPublished = `UPDATE posts SET title = ?, slug = ?, markdown = ?, html = ?, featured = ?, page = ?, allow_comment = ?, status = ?, image = ?, updated_at = ?, updated_by = ?, published_at = ?, published_by = ? WHERE id = ?`
-const stmtUpdateUser = `UPDATE users SET name = ?, slug = ?, email = ?, image = ?, cover = ?, bio = ?, website = ?, location = ?, updated_at = ?, updated_by = ? WHERE id = ?`
-const stmtUpdateTag = `UPDATE tags SET name = ?, slug =?, updated_at = ?, updated_by = ?, hidden = ? WHERE id = ?`
-
-const stmtDeletePostTagsByPostId = `DELETE FROM posts_tags WHERE post_id = ?`
-const stmtDeletePostById = `DELETE FROM posts WHERE id = ?`
-const stmtDeleteOldTags = `DELETE FROM tags WHERE id IN (SELECT id FROM tags EXCEPT SELECT tag_id FROM posts_tags)`
+const stmtGetSettingByKey = `SELECT id, key, value, type, created_at, created_by from settings where key = ?`
+const stmtGetSettingsByType = `SELECT id, key, value, type, created_at, created_by from settings where type = ?`
+const stmtUpdateSetting = `INSERT OR REPLACE INTO settings (id, key, value, type, created_at, created_by) VALUES ((SELECT id FROM settings WHERE key = ?), ?, ?, ?, ?, ?)`
 
 // Messages
 var messageSelector = SQL.Select(`id, type, data, is_read, created_at`).From(`messages`)
