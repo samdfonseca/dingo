@@ -2,10 +2,10 @@ package model
 
 import (
 	"database/sql"
-	"github.com/dinever/dingo/app/utils"
-	"github.com/twinj/uuid"
-	"golang.org/x/crypto/bcrypt"
 	"time"
+
+	"github.com/dinever/dingo/app/utils"
+	"golang.org/x/crypto/bcrypt"
 )
 
 type User struct {
@@ -186,7 +186,7 @@ func (u *User) Insert(password string, created_by int64) error {
 		writeDB.Rollback()
 		return err
 	}
-	result, err := writeDB.Exec(stmtInsertUser, nil, uuid.Formatter(uuid.NewV4(), uuid.CleanHyphen), u.Name, u.Slug, password, u.Email, u.Image, u.Cover, u.CreatedAt, created_by, u.UpdatedAt, created_by)
+	result, err := writeDB.Exec(stmtInsertUser, nil, u.Name, u.Slug, password, u.Email, u.Image, u.Cover, u.CreatedAt, created_by, u.UpdatedAt, created_by)
 	if err != nil {
 		writeDB.Rollback()
 		return err

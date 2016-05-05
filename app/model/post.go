@@ -4,7 +4,6 @@ import (
 	"database/sql"
 	"fmt"
 	"github.com/dinever/dingo/app/utils"
-	"github.com/twinj/uuid"
 	"log"
 	"strconv"
 	"strings"
@@ -13,7 +12,6 @@ import (
 
 type Post struct {
 	Id              int64
-	UUID            string
 	Title           string
 	Slug            string
 	Markdown        string
@@ -44,7 +42,6 @@ type Post struct {
 
 func NewPost() *Post {
 	return &Post{
-		UUID:      uuid.Formatter(uuid.NewV4(), uuid.CleanHyphen),
 		CreatedAt: utils.Now(),
 	}
 }
@@ -136,9 +133,9 @@ func (p *Post) Insert() error {
 	}
 	var result sql.Result
 	if p.IsPublished {
-		result, err = writeDB.Exec(stmtInsertPost, nil, uuid.Formatter(uuid.NewV4(), uuid.CleanHyphen), p.Title, p.Slug, p.Markdown, p.Html, p.IsFeatured, p.IsPage, p.AllowComment, p.status, p.Image, p.CreatedBy, p.CreatedAt, p.CreatedBy, p.UpdatedAt, p.UpdatedBy, p.PublishedAt, p.PublishedBy)
+		result, err = writeDB.Exec(stmtInsertPost, nil, p.Title, p.Slug, p.Markdown, p.Html, p.IsFeatured, p.IsPage, p.AllowComment, p.status, p.Image, p.CreatedBy, p.CreatedAt, p.CreatedBy, p.UpdatedAt, p.UpdatedBy, p.PublishedAt, p.PublishedBy)
 	} else {
-		result, err = writeDB.Exec(stmtInsertPost, nil, uuid.Formatter(uuid.NewV4(), uuid.CleanHyphen), p.Title, p.Slug, p.Markdown, p.Html, p.IsFeatured, p.IsPage, p.AllowComment, p.status, p.Image, p.CreatedBy, p.CreatedAt, p.CreatedBy, p.UpdatedAt, p.UpdatedBy, nil, nil)
+		result, err = writeDB.Exec(stmtInsertPost, nil, p.Title, p.Slug, p.Markdown, p.Html, p.IsFeatured, p.IsPage, p.AllowComment, p.status, p.Image, p.CreatedBy, p.CreatedAt, p.CreatedBy, p.UpdatedAt, p.UpdatedBy, nil, nil)
 	}
 	if err != nil {
 		writeDB.Rollback()
@@ -374,7 +371,7 @@ func scanPost(rows Row, post *Post) error {
 		nullUpdatedBy   sql.NullInt64
 		nullPublishedBy sql.NullInt64
 	)
-	err := rows.Scan(&post.Id, &post.UUID, &post.Title, &post.Slug, &post.Markdown,
+	err := rows.Scan(&post.Id, &post.Title, &post.Slug, &post.Markdown,
 		&post.Html, &post.IsFeatured, &post.IsPage, &post.AllowComment, &post.CommentNum, &post.status, &nullImage,
 		&post.userId, &post.CreatedAt, &post.CreatedBy, &post.UpdatedAt, &nullUpdatedBy, &post.PublishedAt, &nullPublishedBy)
 	post.UpdatedBy = nullUpdatedBy.Int64

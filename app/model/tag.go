@@ -6,7 +6,6 @@ import (
 	"time"
 
 	"github.com/dinever/dingo/app/utils"
-	"github.com/twinj/uuid"
 )
 
 type Tag struct {
@@ -82,7 +81,7 @@ func (t *Tag) Insert() error {
 		writeDB.Rollback()
 		return err
 	}
-	result, err := writeDB.Exec(stmtInsertTag, nil, uuid.Formatter(uuid.NewV4(), uuid.CleanHyphen), t.Name, t.Slug, t.CreatedAt, t.CreatedBy, t.CreatedAt, t.CreatedBy, t.Hidden)
+	result, err := writeDB.Exec(stmtInsertTag, nil, t.Name, t.Slug, t.CreatedAt, t.CreatedBy, t.CreatedAt, t.CreatedBy, t.Hidden)
 	if err != nil {
 		writeDB.Rollback()
 		return err
@@ -105,7 +104,7 @@ func (t *Tag) Update() error {
 		writeDB.Rollback()
 		return err
 	}
-	_, err = writeDB.Exec(stmtUpdateTag, uuid.Formatter(uuid.NewV4(), uuid.CleanHyphen), t.Name, t.Slug, t.CreatedAt, t.CreatedBy, t.Hidden, t.Id)
+	_, err = writeDB.Exec(stmtUpdateTag, t.Name, t.Slug, t.CreatedAt, t.CreatedBy, t.Hidden, t.Id)
 	if err != nil {
 		writeDB.Rollback()
 		return err
