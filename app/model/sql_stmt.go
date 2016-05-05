@@ -160,16 +160,9 @@ messages (
 
 // Posts
 var postCountSelector = SQL.Select(`count(*)`).From(`posts`)
-var stmtGetPublishedPostsCount = postCountSelector.Copy().Where(`status = "published"`).SQL()
-var stmtGetAllPostsCount = postCountSelector.Copy().SQL()
-var stmtGetPostsCountByUser = postCountSelector.Copy().Where(`author_id = ?`).SQL()
 var stmtGetPostsCountByTag = postCountSelector.Copy().From(`posts, posts_tags`).Where(`posts_tags.post_id = posts.id`, `posts_tags.tag_id = ?`, `status = 'published'`).SQL()
 
 var postSelector = SQL.Select(`id, title, slug, markdown, html, featured, page, allow_comment, comment_num, status, image, author_id, created_at, created_by, updated_at, updated_by, published_at, published_by`).From(`posts`)
-var stmtGetPublishedPostList = postSelector.Copy().Where(`status = "published"`).OrderBy(`published_at DESC`).Limit(`?`).Offset(`?`).SQL()
-var stmtGetAllPostList = postSelector.Copy().OrderBy(`published_at DESC`).Limit(`?`).Offset(`?`).SQL()
-var stmtGetPostsByUser = postSelector.Copy().Where(`status = 'published'`, `author_id = ?`).OrderBy(`published_at DESC`).Limit(`?`).Offset(`?`).SQL()
-
 var stmtGetPostById = postSelector.Copy().Where(`id = ?`).SQL()
 var stmtGetPostBySlug = postSelector.Copy().Where(`slug = ?`).SQL()
 
@@ -177,16 +170,7 @@ var postsTagsSelector = SQL.Select(`posts.id, posts.title, posts.slug, posts.mar
 var stmtGetPostsByTag = postsTagsSelector.Copy().Where(`status = 'published'`, `posts_tags.post_id = posts.id`, `posts_tags.tag_id = ?`).OrderBy(`published_at DESC`).Limit(`?`).Offset(`?`).SQL()
 var stmtGetAllPostsByTag = postsTagsSelector.Copy().Where(`posts_tags.post_id = posts.id`, `posts_tags.tag_id = ?`).OrderBy(`published_at DESC`).SQL()
 
-var pageCountSelector = SQL.Select(`count(*)`).From(`posts`).Where(`page = 1`)
-var stmtGetPublishedPagesCount = pageCountSelector.Copy().Where(`status = "published"`).SQL()
-var stmtGetAllPagesCount = pageCountSelector.Copy().SQL()
-var stmtGetPagesCountByUser = pageCountSelector.Copy().Where(`author_id = ?`).SQL()
-var stmtGetPagesCountByTag = pageCountSelector.Copy().Where(`posts_tags.post_id = posts.id`, `posts_tags.tag_id = ?`, `status = 'published'`).SQL()
-
-var pageSelector = SQL.Select(`id, title, slug, markdown, html, featured, page, status, image, author_id, created_at, created_by, updated_at, updated_by, published_at, published_by`).From(`posts`).Where(`page = 1`)
-
 // Comments
-
 var commentCountSelector = SQL.Select(`count(*)`).From(`comments`)
 var stmtGetAllCommentCount = commentCountSelector.SQL()
 var commentSelector = SQL.Select(`id, post_id, author, author_email, author_url, created_at, content, approved, agent, parent, user_id`).From(`comments`)
@@ -204,7 +188,6 @@ const stmtGetUserBySlug = `SELECT id, name, slug, email, image, cover, bio, webs
 const stmtGetUserByName = `SELECT id, name, slug, email, image, cover, bio, website, location FROM users WHERE name = ?`
 const stmtGetUserByEmail = `SELECT id, name, slug, email, image, cover, bio, website, location FROM users WHERE email = ?`
 const stmtGetHashedPasswordByEmail = `SELECT password FROM users WHERE email = ?`
-const stmtGetUsersCount = `SELECT count(*) FROM users`
 const stmtGetUsersCountByEmail = `SELECT count(*) FROM users where email = ?`
 
 // Tokens
@@ -218,9 +201,6 @@ const stmtGetTagById = `SELECT id, name, slug FROM tags WHERE id = ?`
 const stmtGetTagBySlug = `SELECT id, name, slug, hidden FROM tags WHERE slug = ?`
 
 // Settings
-const stmtGetBlog = `SELECT value FROM settings WHERE key = ?`
-const stmtGetPostCreationDateById = `SELECT created_at FROM posts WHERE id = ?`
-
 const stmtInsertPost = `INSERT INTO posts (id, title, slug, markdown, html, featured, page, allow_comment, status, image, author_id, created_at, created_by, updated_at, updated_by, published_at, published_by) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
 const stmtInsertUser = `INSERT INTO users (id, name, slug, password, email, image, cover, created_at, created_by, updated_at, updated_by) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
 const stmtInsertRoleUser = `INSERT INTO roles_users (id, role_id, user_id) VALUES (?, ?, ?)`
@@ -230,10 +210,7 @@ const stmtInsertSetting = `INSERT INTO settings (id, key, value, type, created_a
 
 const stmtUpdatePost = `UPDATE posts SET title = ?, slug = ?, markdown = ?, html = ?, featured = ?, page = ?, allow_comment = ?, status = ?, image = ?, updated_at = ?, updated_by = ? WHERE id = ?`
 const stmtUpdatePostPublished = `UPDATE posts SET title = ?, slug = ?, markdown = ?, html = ?, featured = ?, page = ?, allow_comment = ?, status = ?, image = ?, updated_at = ?, updated_by = ?, published_at = ?, published_by = ? WHERE id = ?`
-const stmtUpdateSettings = `UPDATE settings SET value = ?, updated_at = ?, updated_by = ? WHERE key = ?`
 const stmtUpdateUser = `UPDATE users SET name = ?, slug = ?, email = ?, image = ?, cover = ?, bio = ?, website = ?, location = ?, updated_at = ?, updated_by = ? WHERE id = ?`
-const stmtUpdateLastLogin = `UPDATE users SET last_login = ? WHERE id = ?`
-const stmtUpdateUserPassword = `UPDATE users SET password = ?, updated_at = ?, updated_by = ? WHERE id = ?`
 const stmtUpdateTag = `UPDATE tags SET name = ?, slug =?, updated_at = ?, updated_by = ?, hidden = ? WHERE id = ?`
 
 const stmtDeletePostTagsByPostId = `DELETE FROM posts_tags WHERE post_id = ?`
@@ -241,12 +218,7 @@ const stmtDeletePostById = `DELETE FROM posts WHERE id = ?`
 const stmtDeleteOldTags = `DELETE FROM tags WHERE id IN (SELECT id FROM tags EXCEPT SELECT tag_id FROM posts_tags)`
 
 // Messages
-var messageCountSelector = SQL.Select(`count(*)`).From(`messages`)
-var sttmGetUnreadMessageCount = messageCountSelector.Copy().Where(`is_read = 0`).From(`messages`).SQL()
-
 var messageSelector = SQL.Select(`id, type, data, is_read, created_at`).From(`messages`)
-var stmtGetAllMessages = messageSelector.Copy().OrderBy(`created_at DESC`).SQL()
 var stmtGetUnreadMessages = messageSelector.Copy().Where(`is_read = 0`).OrderBy(`created_at DESC`).Limit(`?`).Offset(`?`).SQL()
-var stmtGetAllMessagesByPage = messageSelector.Copy().OrderBy(`created_at DESC`).Limit(`?`).Offset(`?`).SQL()
 
 const stmtInsertMessage = `INSERT INTO messages (id, type, data, is_read, created_at) VALUES (?, ?, ?, ?, ?)`
