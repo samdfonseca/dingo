@@ -1,6 +1,7 @@
 package model
 
 import (
+	"database/sql"
 	"log"
 	"strings"
 	"time"
@@ -31,12 +32,13 @@ func NewTag(name, slug string) *Tag {
 
 func (t *Tag) Save() error {
 	oldTag, err := GetTagBySlug(t.Slug)
-	if err != nil {
-		// Tag is probably not in database yet
+	if err != nil && err == sql.ErrNoRows {
 		if err := t.Insert(); err != nil {
 			log.Printf("[Error] Can not insert tag: %v", err.Error())
 			return err
 		}
+	} else if err != nil {
+		return err
 	} else {
 		t.Id = oldTag.Id
 		// If oldTag.Hidden != t.Hidden, we need to decide whether change the hidden status of oldTag
