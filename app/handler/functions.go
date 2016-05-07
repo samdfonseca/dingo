@@ -10,6 +10,7 @@ func getAllTags() []*model.Tag {
 }
 
 func getRecentPosts() []*model.Post {
-	posts, _, _ := model.GetPostList(1, 5, false, true, "published_at DESC")
-	return posts
+	posts := new(model.Posts)
+	_, _ = posts.GetPostList(1, 5, false, true, "published_at DESC")
+	return *posts
 }

@@ -37,6 +37,16 @@ type Post struct {
 	Category        string     `meddler:"-"`
 }
 
+type Posts []*Post
+
+func (p Posts) Len() int {
+	return len(p)
+}
+
+func (p Posts) Get(i int) *Post {
+	return p[i]
+}
+
 func NewPost() *Post {
 	return &Post{
 		CreatedAt: utils.Now(),
@@ -131,7 +141,6 @@ func (p *Post) Insert() error {
 		p.Slug = generateNewSlug(p.Slug, 1)
 	}
 	err := meddler.Insert(db, "posts", p)
-
 	return err
 }
 
@@ -150,7 +159,8 @@ func InsertPostTag(post_id int64, tag_id int64) error {
 }
 
 func (p *Post) Update() error {
-	currentPost, err := GetPostById(p.Id)
+	currentPost := &Post{Id: p.Id}
+	err := currentPost.GetPostById()
 	if err != nil {
 		return err
 	}
@@ -197,19 +207,17 @@ func DeletePostById(id int64) error {
 	return DeleteOldTags()
 }
 
-func GetPostById(id int64) (*Post, error) {
-	post := new(Post)
-	err := meddler.QueryRow(db, post, "select * from posts where id = ?", id)
-	return post, err
+func (post *Post) GetPostById() error {
+	err := meddler.QueryRow(db, post, "SELECT * FROM posts WHERE id = ?", post.Id)
+	return err
 }
 
-func GetPostBySlug(slug string) (*Post, error) {
-	post := new(Post)
-	err := meddler.QueryRow(db, post, "select * from posts where slug = ?", slug)
-	return post, err
+func (post *Post) GetPostBySlug(slug string) error {
+	err := meddler.QueryRow(db, post, "SELECT * FROM posts WHERE slug = ?", slug)
+	return err
 }
 
-func GetPostsByTag(tagId, page, size int64, onlyPublished bool, orderBy string) ([]*Post, *utils.Pager, error) {
+func (posts *Posts) GetPostsByTag(tagId, page, size int64, onlyPublished bool) (*utils.Pager, error) {
 	var (
 		pager *utils.Pager
 		count int64
@@ -218,36 +226,20 @@ func GetPostsByTag(tagId, page, size int64, onlyPublished bool, orderBy string) 
 	err := row.Scan(&count)
 	if err != nil {
 		log.Printf("[Error]: ", err.Error())
-		return nil, nil, err
+		return nil, err
 	}
 	pager = utils.NewPager(page, size, count)
-	rows, err := db.Query(stmtGetPostsByTag, tagId, size, pager.Begin-1)
-	defer rows.Close()
-	if err != nil {
-		log.Printf("[Error]: ", err.Error())
-		return nil, nil, err
+	var where string
+	if onlyPublished {
+		where = "published AND"
 	}
-	posts, err := extractPosts(rows)
-	if err != nil {
-		return nil, nil, err
-	}
-	return posts, pager, nil
+	err = meddler.QueryAll(db, posts, fmt.Sprintf("SELECT * FROM posts WHERE %s id IN ( SELECT post_id FROM posts_tags WHERE tag_id = ? ) ORDER BY published_at DESC LIMIT ? OFFSET ?", where), tagId, size, pager.Begin-1)
+	return pager, err
 }
 
-func GetAllPostsByTag(tagId int64) ([]*Post, error) {
-	// Get posts
-	rows, err := db.Query(stmtGetAllPostsByTag, tagId)
-	defer rows.Close()
-	if err != nil {
-		log.Printf("[Error] Can not get posts from tag: %v", err.Error())
-		return nil, err
-	}
-	posts, err := extractPosts(rows)
-	if err != nil {
-		log.Printf("[Error] Can not scan posts from tag: %v", err.Error())
-		return nil, err
-	}
-	return posts, nil
+func (posts *Posts) GetAllPostsByTag(tagId int64) error {
+	err := meddler.QueryAll(db, posts, "SELECT * FROM posts WHERE id IN ( SELECT post_id FROM posts_tags WHERE tag_id = ?) ORDER BY published_at DESC ", tagId)
+	return err
 }
 
 func GetNumberOfPosts(isPage bool, published bool) (int64, error) {
@@ -271,70 +263,42 @@ func GetNumberOfPosts(isPage bool, published bool) (int64, error) {
 	return count, nil
 }
 
-func GetPostList(page, size int64, isPage bool, onlyPublished bool, orderBy string) ([]*Post, *utils.Pager, error) {
+func (posts *Posts) GetPostList(page, size int64, isPage bool, onlyPublished bool, orderBy string) (*utils.Pager, error) {
 	var pager *utils.Pager
 	count, err := GetNumberOfPosts(isPage, onlyPublished)
 	pager = utils.NewPager(page, size, count)
-	selector := postSelector.Copy()
-	if onlyPublished {
-		selector.Where(`status = "published"`)
-	}
+
+	var where string
 	if isPage {
-		selector.Where(`page = 1`)
+		where = `page = 1`
 	} else {
-		selector.Where(`page = 0`)
+		where = `page = 0`
 	}
-	selector.OrderBy(orderBy)
-	// Get posts
-	rows, err := db.Query(selector.Limit(`?`).Offset(`?`).SQL(), size, pager.Begin-1)
-	defer rows.Close()
-	if err != nil {
-		log.Printf("[Error]: ", err.Error())
-		return nil, nil, err
+	if onlyPublished {
+		where = where + `AND published`
 	}
-	posts, err := extractPosts(rows)
-	if err != nil {
-		return nil, nil, err
-	}
-	return posts, pager, nil
+
+	err = meddler.QueryAll(db, posts, fmt.Sprintf("SELECT * FROM posts WHERE %s ORDER BY ? LIMIT ? OFFSET ?", where), orderBy, size, pager.Begin-1)
+	return pager, err
 }
 
-func GetAllPostList(isPage bool, onlyPublished bool, orderBy string) ([]*Post, error) {
-	selector := postSelector.Copy()
-	if onlyPublished {
-		selector.Where(`status = "published"`)
-	}
+func (posts *Posts) GetAllPostList(isPage bool, onlyPublished bool, orderBy string) error {
+	var where string
 	if isPage {
-		selector.Where(`page = 1`)
+		where = `page = 1`
 	} else {
-		selector.Where(`page = 0`)
+		where = `page = 0`
 	}
-	selector.OrderBy(orderBy)
-	// Get posts
-	rows, err := db.Query(selector.SQL())
-	defer rows.Close()
-	if err != nil {
-		log.Printf("[Error]: ", err.Error())
-		return nil, err
+	if onlyPublished {
+		where = where + `AND published`
 	}
-	posts, err := extractPosts(rows)
-	if err != nil {
-		return nil, err
-	}
-
-	return posts, nil
-}
-
-func extractPosts(rows *sql.Rows) ([]*Post, error) {
-	posts := make([]*Post, 0)
-	if err := meddler.ScanAll(rows, &posts); err != nil {
-		return nil, err
-	}
-	return posts, nil
+	err := meddler.QueryAll(db, posts, fmt.Sprintf("SELECT * FROM posts WHERE %s ORDER BY ?", where), orderBy)
+	return err
 }
 
 func PostChangeSlug(slug string) bool {
-	_, err := GetPostBySlug(slug)
+	post := new(Post)
+	err := post.GetPostBySlug(slug)
 	if err != nil {
 		return true
 	}

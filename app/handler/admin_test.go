@@ -275,7 +275,8 @@ func TestPostHandler(t *testing.T) {
 			})
 
 			Convey("Successfully retrieve the post", func() {
-				post, _ := model.GetPostById(1)
+				post := &model.Post{Id: 1}
+				_ = post.GetPostById()
 
 				Convey("Should have correct title", func() {
 					So(post.Title, ShouldEqual, "Hello World")
@@ -334,7 +335,8 @@ func TestPostHandler(t *testing.T) {
 				app.ServeHTTP(ctx.Response, ctx.Request)
 
 				Convey("Successfully retrieve the post", func() {
-					post, _ := model.GetPostById(1)
+					post := &model.Post{Id: 1}
+					_ = post.GetPostById()
 
 					Convey("Should have correct title", func() {
 						So(post.Title, ShouldEqual, "Hello World Modified")

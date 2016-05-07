@@ -104,7 +104,8 @@ func AdminPostHandler(ctx *golf.Context) {
 	userObj, _ := ctx.Session.Get("user")
 	u := userObj.(*model.User)
 	i, _ := strconv.Atoi(ctx.Request.FormValue("page"))
-	posts, pager, err := model.GetPostList(int64(i), 10, false, false, "created_at DESC")
+	posts := new(model.Posts)
+	pager, err := posts.GetPostList(int64(i), 10, false, false, "created_at DESC")
 	if err != nil {
 		panic(err)
 	}
@@ -121,7 +122,8 @@ func PostEditHandler(ctx *golf.Context) {
 	u := userObj.(*model.User)
 	id := ctx.Param("id")
 	postId, _ := strconv.Atoi(id)
-	p, err := model.GetPostById(int64(postId))
+	p := &model.Post{Id: int64(postId)}
+	err := p.GetPostById()
 	if p == nil || err != nil {
 		ctx.Redirect("/admin/posts/")
 		return
@@ -163,13 +165,14 @@ func AdminPageHandler(ctx *golf.Context) {
 	userObj, _ := ctx.Session.Get("user")
 	u := userObj.(*model.User)
 	i, _ := strconv.Atoi(ctx.Request.FormValue("page"))
-	pages, pager, err := model.GetPostList(int64(i), 10, true, false, `created_at`)
+	posts := new(model.Posts)
+	pager, err := posts.GetPostList(int64(i), 10, true, false, `created_at`)
 	if err != nil {
 		panic(err)
 	}
 	ctx.Loader("admin").Render("pages.html", map[string]interface{}{
 		"Title": "Pages",
-		"Pages": pages,
+		"Pages": posts,
 		"User":  u,
 		"Pager": pager,
 	})
