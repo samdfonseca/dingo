@@ -26,7 +26,6 @@ func mockPost() *model.Post {
 	p.UpdatedBy = 0
 	p.IsPublished = false
 	p.IsPage = false
-	p.Author = &model.User{Id: 0, Name: "Dingo User", Email: "example@example.com"}
 	return p
 }
 

@@ -135,7 +135,6 @@ func createWelcomeData() error {
 	p.UpdatedBy = 0
 	p.IsPublished = true
 	p.IsPage = false
-	p.Author = ghostUser
 	err = p.Save()
 	if err != nil {
 		return err

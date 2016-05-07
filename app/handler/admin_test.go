@@ -302,7 +302,6 @@ func TestPostHandler(t *testing.T) {
 				})
 
 				Convey("Should have correct author", func() {
-					So(post.Author.Id, ShouldEqual, 1)
 					So(post.CreatedBy, ShouldEqual, 1)
 					So(post.UpdatedBy, ShouldEqual, 1)
 					So(post.PublishedBy, ShouldEqual, 1)
@@ -361,7 +360,6 @@ func TestPostHandler(t *testing.T) {
 					})
 
 					Convey("Should have correct author", func() {
-						So(post.Author.Id, ShouldEqual, 1)
 						So(post.CreatedBy, ShouldEqual, 1)
 						So(post.UpdatedBy, ShouldEqual, 1)
 						So(post.PublishedBy, ShouldEqual, 1)

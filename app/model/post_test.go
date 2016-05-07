@@ -18,13 +18,12 @@ func mockPost() *Post {
 	p.Markdown = samplePostContent
 	p.Html = utils.Markdown2Html(p.Markdown)
 	p.Tags = GenerateTagsFromCommaString("Welcome, Dingo")
+	p.IsPage = false
 	p.AllowComment = true
 	p.Category = ""
 	p.CreatedBy = 0
 	p.UpdatedBy = 0
 	p.IsPublished = true
-	p.IsPage = false
-	p.Author = ghostUser
 	return p
 }
 
@@ -178,11 +177,6 @@ func TestPost(t *testing.T) {
 
 				So(err, ShouldBeNil)
 				So(post.Title, ShouldEqual, "Welcome to Dingo!")
-
-				Convey("Get the comment", func() {
-					So(post.Comments, ShouldHaveLength, 1)
-					So(post.Comments[0].Email, ShouldEqual, "dingpeixuan911@gmail.com")
-				})
 			})
 		})
 

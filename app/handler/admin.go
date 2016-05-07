@@ -83,7 +83,6 @@ func PostSaveHandler(ctx *golf.Context) {
 	p.UpdatedBy = u.Id
 	p.IsPublished = ctx.Request.FormValue("status") == "on"
 	p.IsPage = false
-	p.Author = u
 	p.Hits = 1
 	var e error
 	e = p.Save()
@@ -198,7 +197,6 @@ func PageSaveHandler(ctx *golf.Context) {
 	p.UpdatedBy = u.Id
 	p.IsPublished = ctx.Request.FormValue("status") == "on"
 	p.IsPage = true
-	p.Author = u
 	p.Hits = 1
 	var e error
 	e = p.Save()
