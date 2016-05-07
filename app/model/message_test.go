@@ -30,21 +30,22 @@ func TestMessage(t *testing.T) {
 
 			um := mockMessage(c)
 
-			err := um.Save()
+			err := um.Insert()
 			So(err, ShouldBeNil)
 
 			rm := mockMessage(c)
 			rm.IsRead = true
 
-			err = rm.Save()
+			err = rm.Insert()
 			So(err, ShouldBeNil)
 
 			Convey("Get UnreadMessages", func() {
-				messages := GetUnreadMessages()
+				messages := new(Messages)
+				messages.GetUnreadMessages()
 
 				So(messages, ShouldHaveLength, 1)
-				So(messages[0].Type, ShouldEqual, um.Type)
-				So(messages[0].Data, ShouldEqual, um.Data)
+				So(messages.Get(0).Type, ShouldEqual, um.Type)
+				So(messages.Get(0).Data, ShouldEqual, um.Data)
 			})
 		})
 		Reset(func() {

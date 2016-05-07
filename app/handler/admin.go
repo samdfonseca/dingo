@@ -11,11 +11,13 @@ import (
 func AdminHandler(ctx *golf.Context) {
 	userObj, _ := ctx.Session.Get("user")
 	u := userObj.(*model.User)
+	m := new(model.Messages)
+	m.GetUnreadMessages()
 	ctx.Loader("admin").Render("home.html", map[string]interface{}{
 		"Title":    "Dashboard",
 		"Statis":   model.NewStatis(ctx.App),
 		"User":     u,
-		"Messages": model.GetUnreadMessages(),
+		"Messages": m,
 		"Monitor":  utils.ReadMemStats(),
 	})
 }
@@ -259,7 +261,7 @@ func CommentAddHandler(ctx *golf.Context) {
 		"status":  "success",
 		"comment": c.ToJson(),
 	})
-	if err := model.NewMessage("comment", c).Save(); err != nil {
+	if err := model.NewMessage("comment", c).Insert(); err != nil {
 		panic(err)
 	}
 }

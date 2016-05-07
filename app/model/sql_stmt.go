@@ -223,6 +223,6 @@ const stmtUpdateSetting = `INSERT OR REPLACE INTO settings (id, key, value, type
 
 // Messages
 var messageSelector = SQL.Select(`id, type, data, is_read, created_at`).From(`messages`)
-var stmtGetUnreadMessages = messageSelector.Copy().Where(`is_read = 0`).OrderBy(`created_at DESC`).Limit(`?`).Offset(`?`).SQL()
 
-const stmtInsertMessage = `INSERT INTO messages (id, type, data, is_read, created_at) VALUES (?, ?, ?, ?, ?)`
+//var stmtGetUnreadMessages = messageSelector.Copy().Where(`is_read = 0`).OrderBy(`created_at DESC`).Limit(`?`).Offset(`?`).SQL()
+var stmtGetUnreadMessages = messageSelector.Copy().Where(`is_read = 0`).OrderBy(`created_at DESC`).Limit(`10`).Offset(`0`).SQL()
