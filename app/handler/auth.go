@@ -151,14 +151,3 @@ func AuthLogoutHandler(ctx *golf.Context) {
 	ctx.SetCookie("token-value", "", -3600)
 	ctx.Redirect("/login/")
 }
-
-func verifyUser(ctx *golf.Context) bool {
-	tokenStr, err := ctx.Request.Cookie("token-value")
-	if err == nil {
-		token, err := model.GetTokenByValue(tokenStr.Value)
-		if err == nil && token.IsValid() {
-			return true
-		}
-	}
-	return false
-}

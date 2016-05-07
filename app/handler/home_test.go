@@ -2,6 +2,7 @@ package handler
 
 import (
 	"fmt"
+	"net/http/httptest"
 	"os"
 	"path/filepath"
 	"testing"
@@ -10,9 +11,7 @@ import (
 	"github.com/dinever/dingo/app/model"
 	"github.com/dinever/dingo/app/utils"
 	. "github.com/smartystreets/goconvey/convey"
-	"net/http/httptest"
 )
-
 
 func mockPost() *model.Post {
 	p := model.NewPost()
@@ -58,4 +57,3 @@ func TestPost(t *testing.T) {
 		})
 	})
 }
-

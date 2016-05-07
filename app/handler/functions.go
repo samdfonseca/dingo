@@ -4,11 +4,6 @@ import (
 	"github.com/dinever/dingo/app/model"
 )
 
-func getAllPosts() []*model.Post {
-	posts, _ := model.GetAllPostList(false, true, "published_at DESC")
-	return posts
-}
-
 func getAllTags() []*model.Tag {
 	tags, _ := model.GetAllTags()
 	return tags

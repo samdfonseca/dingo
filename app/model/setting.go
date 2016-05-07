@@ -6,12 +6,10 @@ import (
 	"time"
 
 	"github.com/dinever/dingo/app/utils"
-	"github.com/twinj/uuid"
 )
 
 type Setting struct {
 	Id        int
-	UUID      string
 	Key       string
 	Value     string
 	Type      string // general, content, navigation, custom
@@ -49,22 +47,21 @@ func SetNavigators(labels, urls []string) error {
 }
 
 func GetSetting(k string) (*Setting, error) {
-	row := db.QueryRow(`SELECT id, uuid, key, value, type, created_at, created_by from settings where key = ?`, k)
+	row := db.QueryRow(stmtGetSettingByKey, k)
 	s := new(Setting)
 	err := scanSetting(row, s)
 	return s, err
 }
 
 func GetSettingValue(k string) string {
-	row := db.QueryRow(`SELECT id, uuid, key, value, type, created_at, created_by from settings where key = ?`, k)
-	s := new(Setting)
-	scanSetting(row, s)
+	// TODO: error handling
+	s, _ := GetSetting(k)
 	return s.Value
 }
 
 func scanSetting(row Row, setting *Setting) error {
 	var nullValue sql.NullString
-	err := row.Scan(&setting.Id, &setting.UUID, &setting.Key, &nullValue, &setting.Type, &setting.CreatedAt, &setting.CreatedBy)
+	err := row.Scan(&setting.Id, &setting.Key, &nullValue, &setting.Type, &setting.CreatedAt, &setting.CreatedBy)
 	if err != nil {
 		return err
 	}
@@ -78,7 +75,7 @@ func GetCustomSettings() []*Setting {
 
 func GetSettings(t string) []*Setting {
 	settings := make([]*Setting, 0)
-	rows, err := db.Query(`SELECT id, uuid, key, value, type, created_at, created_by from settings where type = ?`, t)
+	rows, err := db.Query(stmtGetSettingsByType, t)
 	if err != nil {
 		return settings
 	}
@@ -103,7 +100,7 @@ func (s *Setting) Save() error {
 		writeDB.Rollback()
 		return err
 	}
-	_, err = db.Exec(`INSERT OR REPLACE INTO settings (id, uuid, key, value, type, created_at, created_by) VALUES ((SELECT id FROM settings WHERE key = ?), ?, ?, ?, ?, ?, ?)`, s.Key, s.UUID, s.Key, s.Value, s.Type, s.CreatedAt, s.CreatedBy)
+	_, err = db.Exec(stmtUpdateSetting, s.Key, s.Key, s.Value, s.Type, s.CreatedAt, s.CreatedBy)
 	if err != nil {
 		writeDB.Rollback()
 		return err
@@ -113,7 +110,6 @@ func (s *Setting) Save() error {
 
 func NewSetting(k, v, t string) *Setting {
 	return &Setting{
-		UUID:      uuid.Formatter(uuid.NewV4(), uuid.CleanHyphen),
 		Key:       k,
 		Value:     v,
 		Type:      t,

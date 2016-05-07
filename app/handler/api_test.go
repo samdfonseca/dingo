@@ -1,11 +1,22 @@
 package handler
 
 import (
-	// . "github.com/smartystreets/goconvey/convey"
-	// "net/http"
 	// "net/http/httptest"
 	"testing"
+	// . "github.com/smartystreets/goconvey/convey"
 )
+
+func TestAPICommentsHandler(t *testing.T) {
+
+}
+
+func TestAPICommentHandler(t *testing.T) {
+
+}
+
+func TestAPICommentPostHandler(t *testing.T) {
+
+}
 
 func TestAPIPostHandler(t *testing.T) {
 

@@ -5,13 +5,11 @@ import (
 	"time"
 
 	"github.com/dinever/dingo/app/utils"
-	"github.com/twinj/uuid"
 )
 
 // Comment struct defines a comment item data.
 type Comment struct {
 	Id        int64
-	UUID      string
 	Author    string
 	Email     string
 	Website   string
@@ -41,9 +39,9 @@ func (c *Comment) Save() error {
 	}
 	var result sql.Result
 	if c.Id > 0 {
-		result, err = writeDB.Exec(stmtInsertComment, c.Id, uuid.Formatter(uuid.NewV4(), uuid.CleanHyphen), c.PostId, c.Author, c.Email, c.Website, c.Ip, c.CreatedAt, c.Content, c.Approved, c.UserAgent, c.Parent, c.UserId)
+		result, err = writeDB.Exec(stmtInsertComment, c.Id, c.PostId, c.Author, c.Email, c.Website, c.Ip, c.CreatedAt, c.Content, c.Approved, c.UserAgent, c.Parent, c.UserId)
 	} else {
-		result, err = writeDB.Exec(stmtInsertComment, nil, uuid.Formatter(uuid.NewV4(), uuid.CleanHyphen), c.PostId, c.Author, c.Email, c.Website, c.Ip, c.CreatedAt, c.Content, c.Approved, c.UserAgent, c.Parent, c.UserId)
+		result, err = writeDB.Exec(stmtInsertComment, nil, c.PostId, c.Author, c.Email, c.Website, c.Ip, c.CreatedAt, c.Content, c.Approved, c.UserAgent, c.Parent, c.UserId)
 	}
 	if err != nil {
 		writeDB.Rollback()
@@ -138,7 +136,7 @@ func scanComment(rows Row, comment *Comment) error {
 		nullParent sql.NullInt64
 		nullUserId sql.NullInt64
 	)
-	err := rows.Scan(&comment.Id, &comment.UUID, &comment.PostId, &comment.Author, &comment.Email, &comment.Website, &comment.CreatedAt, &comment.Content, &comment.Approved, &comment.UserAgent, &nullParent, &nullUserId)
+	err := rows.Scan(&comment.Id, &comment.PostId, &comment.Author, &comment.Email, &comment.Website, &comment.CreatedAt, &comment.Content, &comment.Approved, &comment.UserAgent, &nullParent, &nullUserId)
 	comment.Avatar = utils.Gravatar(comment.Email, "50")
 	comment.Parent = nullParent.Int64
 	comment.UserId = nullUserId.Int64
