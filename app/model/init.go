@@ -128,14 +128,14 @@ func createWelcomeData() error {
 	p.Slug = "welcome-to-dingo"
 	p.Markdown = samplePostContent
 	p.Html = utils.Markdown2Html(p.Markdown)
-	p.Tags = GenerateTagsFromCommaString("Welcome, Dingo")
 	p.AllowComment = true
 	p.Category = ""
 	p.CreatedBy = 0
 	p.UpdatedBy = 0
 	p.IsPublished = true
 	p.IsPage = false
-	err = p.Save()
+	tags := GenerateTagsFromCommaString("Welcome, Dingo")
+	err = p.Save(tags...)
 	if err != nil {
 		return err
 	}

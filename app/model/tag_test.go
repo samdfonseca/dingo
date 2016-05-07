@@ -25,7 +25,8 @@ func TestTag(t *testing.T) {
 
 		Convey("Test Tag", func() {
 			p := mockPost()
-			err := p.Save()
+			tags := GenerateTagsFromCommaString("Welcome, Dingo")
+			err := p.Save(tags...)
 
 			name := "test-tag"
 			slug := GenerateSlug(name, "tags")

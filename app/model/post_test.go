@@ -17,7 +17,6 @@ func mockPost() *Post {
 	p.Slug = "welcome-to-dingo"
 	p.Markdown = samplePostContent
 	p.Html = utils.Markdown2Html(p.Markdown)
-	p.Tags = GenerateTagsFromCommaString("Welcome, Dingo")
 	p.IsPage = false
 	p.AllowComment = true
 	p.Category = ""
@@ -34,7 +33,8 @@ func TestPost(t *testing.T) {
 
 		Convey("Create a published post", func() {
 			p := mockPost()
-			err := p.Save()
+			tags := GenerateTagsFromCommaString("Welcome, Dingo")
+			err := p.Save(tags...)
 
 			So(err, ShouldBeNil)
 
@@ -49,8 +49,8 @@ func TestPost(t *testing.T) {
 			So(p.PublishedAt, ShouldNotBeNil)
 
 			Convey("Update post tag", func() {
-				p.Tags = GenerateTagsFromCommaString("Welcome")
-				err = p.Save()
+				updateTags := GenerateTagsFromCommaString("Welcome")
+				err = p.Save(updateTags...)
 
 				So(err, ShouldBeNil)
 
@@ -63,8 +63,9 @@ func TestPost(t *testing.T) {
 					newPost, err := GetPostById(1)
 
 					So(err, ShouldBeNil)
-					So(newPost.Tags, ShouldHaveLength, 1)
-					So(newPost.Tags[0].Slug, ShouldEqual, "welcome")
+					tags, _ := GetTagsByPostId(newPost.Id)
+					So(tags, ShouldHaveLength, 1)
+					So(tags[0].Slug, ShouldEqual, "welcome")
 					//					So((*newPost.UpdatedAt).After(*p.UpdatedAt), ShouldBeTrue)
 				})
 			})

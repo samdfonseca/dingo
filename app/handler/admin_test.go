@@ -282,7 +282,8 @@ func TestPostHandler(t *testing.T) {
 				})
 
 				Convey("Should have correct tag length", func() {
-					So(post.Tags, ShouldHaveLength, 2)
+					tags, _ := model.GetTagsByPostId(post.Id)
+					So(tags, ShouldHaveLength, 2)
 				})
 
 				Convey("Should have correct content", func() {
@@ -340,7 +341,8 @@ func TestPostHandler(t *testing.T) {
 					})
 
 					Convey("Should have correct tag length", func() {
-						So(post.Tags, ShouldHaveLength, 1)
+						tags, _ := model.GetTagsByPostId(post.Id)
+						So(tags, ShouldHaveLength, 1)
 					})
 
 					Convey("Should have correct content", func() {

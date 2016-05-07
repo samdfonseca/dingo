@@ -35,7 +35,6 @@ type Post struct {
 	PublishedBy     int64      `meddler:"published_by"`
 	Hits            int64      `meddler:"-"`
 	Category        string     `meddler:"-"`
-	Tags            []*Tag     `meddler:"-"`
 }
 
 func NewPost() *Post {
@@ -45,9 +44,10 @@ func NewPost() *Post {
 }
 
 func (p *Post) TagString() string {
+	tags, _ := GetTagsByPostId(p.Id)
 	var tagString string
-	for i, t := range p.Tags {
-		if i != len(p.Tags)-1 {
+	for i, t := range tags {
+		if i != len(tags)-1 {
 			tagString += t.Name + ", "
 		} else {
 			tagString += t.Name
@@ -60,6 +60,14 @@ func (p *Post) Url() string {
 	return "/" + p.Slug
 }
 
+func (p *Post) Tags() []*Tag {
+	tags, err := GetTagsByPostId(p.Id)
+	if err != nil {
+		return nil
+	}
+	return tags
+}
+
 func (p *Post) Summary() string {
 	text := strings.Split(p.Markdown, "<!--more-->")[0]
 	return utils.Markdown2Html(text)
@@ -69,7 +77,7 @@ func (p *Post) Excerpt() string {
 	return utils.Html2Excerpt(p.Html, 255)
 }
 
-func (p *Post) Save() error {
+func (p *Post) Save(tags ...*Tag) error {
 	p.Slug = strings.TrimLeft(p.Slug, "/")
 	p.Slug = strings.TrimRight(p.Slug, "/")
 	if p.Slug == "" {
@@ -96,7 +104,7 @@ func (p *Post) Save() error {
 	}
 	tagIds := make([]int64, 0)
 	// Insert tags
-	for _, t := range p.Tags {
+	for _, t := range tags {
 		t.CreatedAt = utils.Now()
 		t.CreatedBy = p.CreatedBy
 		t.Hidden = !p.IsPublished
@@ -190,31 +198,15 @@ func DeletePostById(id int64) error {
 }
 
 func GetPostById(id int64) (*Post, error) {
-	// Get post
 	post := new(Post)
-	//TODO: error
 	err := meddler.QueryRow(db, post, "select * from posts where id = ?", id)
-	paddingPostData(post)
 	return post, err
 }
 
 func GetPostBySlug(slug string) (*Post, error) {
-	// Get post
 	post := new(Post)
 	err := meddler.QueryRow(db, post, "select * from posts where slug = ?", slug)
-	paddingPostData(post)
 	return post, err
-}
-
-func paddingPostData(post *Post) error {
-	// Evaluate status
-	var err error
-	// Get tags
-	post.Tags, err = GetTagsByPostId(post.Id)
-	if err != nil {
-		return err
-	}
-	return nil
 }
 
 func GetPostsByTag(tagId, page, size int64, onlyPublished bool, orderBy string) ([]*Post, *utils.Pager, error) {

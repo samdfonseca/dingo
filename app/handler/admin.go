@@ -76,7 +76,6 @@ func PostSaveHandler(ctx *golf.Context) {
 	p.Slug = ctx.Request.FormValue("slug")
 	p.Markdown = ctx.Request.FormValue("content")
 	p.Html = utils.Markdown2Html(p.Markdown)
-	p.Tags = model.GenerateTagsFromCommaString(ctx.Request.FormValue("tag"))
 	p.AllowComment = ctx.Request.FormValue("comment") == "on"
 	p.Category = ctx.Request.FormValue("category")
 	p.CreatedBy = u.Id
@@ -84,8 +83,9 @@ func PostSaveHandler(ctx *golf.Context) {
 	p.IsPublished = ctx.Request.FormValue("status") == "on"
 	p.IsPage = false
 	p.Hits = 1
+	tags := model.GenerateTagsFromCommaString(ctx.Request.FormValue("tag"))
 	var e error
-	e = p.Save()
+	e = p.Save(tags...)
 	if e != nil {
 		ctx.SendStatus(400)
 		ctx.JSON(map[string]interface{}{
@@ -190,7 +190,6 @@ func PageSaveHandler(ctx *golf.Context) {
 	p.Slug = ctx.Request.FormValue("slug")
 	p.Markdown = ctx.Request.FormValue("content")
 	p.Html = utils.Markdown2Html(p.Markdown)
-	p.Tags = model.GenerateTagsFromCommaString(ctx.Request.FormValue("tag"))
 	p.AllowComment = ctx.Request.FormValue("comment") == "on"
 	p.Category = ctx.Request.FormValue("category")
 	p.CreatedBy = u.Id
@@ -198,8 +197,9 @@ func PageSaveHandler(ctx *golf.Context) {
 	p.IsPublished = ctx.Request.FormValue("status") == "on"
 	p.IsPage = true
 	p.Hits = 1
+	tags := model.GenerateTagsFromCommaString(ctx.Request.FormValue("tag"))
 	var e error
-	e = p.Save()
+	e = p.Save(tags...)
 	if e != nil {
 		ctx.JSON(map[string]interface{}{
 			"status": "error",
