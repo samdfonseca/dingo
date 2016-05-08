@@ -291,7 +291,7 @@ func (posts *Posts) GetPostList(page, size int64, isPage bool, onlyPublished boo
 		where = `page = 0`
 	}
 	if onlyPublished {
-		where = where + `AND published`
+		where = where + ` AND published`
 	}
 
 	err = meddler.QueryAll(db, posts, fmt.Sprintf("SELECT * FROM posts WHERE %s ORDER BY ? LIMIT ? OFFSET ?", where), orderBy, size, pager.Begin-1)
