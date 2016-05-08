@@ -78,6 +78,22 @@ func (p *Post) Tags() []*Tag {
 	return tags
 }
 
+func (p *Post) Author() *User {
+	author, err := GetUserById(p.CreatedBy)
+	if err != nil {
+		return ghostUser
+	}
+	return author
+}
+
+func (p *Post) Comments() []*Comment {
+	comments, err := GetCommentByPostId(p.Id)
+	if err != nil {
+		return nil
+	}
+	return comments
+}
+
 func (p *Post) Summary() string {
 	text := strings.Split(p.Markdown, "<!--more-->")[0]
 	return utils.Markdown2Html(text)

@@ -44,12 +44,11 @@ func ContentHandler(ctx *golf.Context) {
 		return
 	}
 	post.Hits++
-	comments, _ := model.GetCommentByPostId(post.Id)
 	data := map[string]interface{}{
 		"Title":    post.Title,
 		"Article":  post,
 		"Content":  post,
-		"Comments": comments,
+		"Comments": post.Comments,
 	}
 	if post.IsPage {
 		ctx.Loader("theme").Render("page.html", data)
@@ -176,11 +175,10 @@ func RssHandler(ctx *golf.Context) {
 	_, _ = posts.GetPostList(1, 20, false, true, "published_at DESC")
 	articleMap := make([]map[string]string, posts.Len())
 	for i := 0; i < posts.Len(); i++ {
-		author, _ := model.GetUserById(posts.Get(i).CreatedBy)
 		m := make(map[string]string)
 		m["Title"] = posts.Get(i).Title
 		m["Link"] = posts.Get(i).Url()
-		m["Author"] = author.Name
+		m["Author"] = posts.Get(i).Author().Name
 		m["Desc"] = posts.Get(i).Excerpt()
 		m["Created"] = posts.Get(i).CreatedAt.Format(time.RFC822)
 		articleMap[i] = m
