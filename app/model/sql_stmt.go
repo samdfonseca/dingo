@@ -180,9 +180,6 @@ const stmtInsertRoleUser = `INSERT INTO roles_users (id, role_id, user_id) VALUE
 const stmtDeleteOldTags = `DELETE FROM tags WHERE id IN (SELECT id FROM tags EXCEPT SELECT tag_id FROM posts_tags)`
 
 // Settings
-const stmtGetSettingByKey = `SELECT id, key, value, type, created_at, created_by from settings where key = ?`
-const stmtGetSettingsByType = `SELECT id, key, value, type, created_at, created_by from settings where type = ?`
-const stmtUpdateSetting = `INSERT OR REPLACE INTO settings (id, key, value, type, created_at, created_by) VALUES ((SELECT id FROM settings WHERE key = ?), ?, ?, ?, ?, ?)`
 
 // Messages
 var messageSelector = SQL.Select(`id, type, data, is_read, created_at`).From(`messages`)
