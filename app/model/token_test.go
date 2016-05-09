@@ -34,7 +34,9 @@ func TestToken(t *testing.T) {
 			So(err, ShouldBeNil)
 
 			Convey("Get Token", func() {
-				t, err := GetTokenByValue(token.Value)
+				t := &Token{Value: token.Value, UserId: token.UserId}
+				err = token.GetTokenByValue()
+				//t, err := GetTokenByValue(token.Value)
 
 				// So(token, ShouldEqual, t) should work here,
 				// but due to the goconvey's transformation, it failed.

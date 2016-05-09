@@ -2,16 +2,19 @@ package model
 
 import (
 	"fmt"
+	"time"
+
 	"github.com/dinever/dingo/app/utils"
 	"github.com/dinever/golf"
-	"time"
+	"github.com/russross/meddler"
 )
 
 type Token struct {
-	Value     string
-	UserId    int64
-	CreatedAt *time.Time
-	ExpiredAt *time.Time
+	Id        int64      `meddler:"id,pk"`
+	Value     string     `meddler:"value"`
+	UserId    int64      `meddler:"user_id"`
+	CreatedAt *time.Time `meddler:"created_at"`
+	ExpiredAt *time.Time `meddler:"expired_at"`
 }
 
 func NewToken(u *User, ctx *golf.Context, expire int64) *Token {
@@ -25,12 +28,14 @@ func NewToken(u *User, ctx *golf.Context, expire int64) *Token {
 }
 
 func (t *Token) Save() error {
+	// NOTE: since medder.Save doesn't support UNIQUE field, it is different from INSERT OR REPLACE...
+	// err := meddler.Save(db, "tokens", t) doens't work...
 	writeDB, err := db.Begin()
 	if err != nil {
 		writeDB.Rollback()
 		return err
 	}
-	_, err = writeDB.Exec(stmtUpdateToken, t.Value, t.UserId, t.CreatedAt, t.ExpiredAt)
+	_, err = writeDB.Exec("INSERT OR REPLACE INTO tokens (id,value, user_id, created_at, expired_at) VALUES (?,?, ?, ?, ?)", t.Id, t.Value, t.UserId, t.CreatedAt, t.ExpiredAt)
 	if err != nil {
 		writeDB.Rollback()
 		return err
@@ -38,14 +43,9 @@ func (t *Token) Save() error {
 	return writeDB.Commit()
 }
 
-func GetTokenByValue(v string) (*Token, error) {
-	t := new(Token)
-	row := db.QueryRow(stmtGetTokenByValue, v)
-	err := row.Scan(&t.Value, &t.UserId, &t.CreatedAt, &t.ExpiredAt)
-	if err != nil {
-		return nil, err
-	}
-	return t, nil
+func (t *Token) GetTokenByValue() error {
+	err := meddler.QueryRow(db, t, "SELECT * FROM tokens WHERE value = ?", t.Value)
+	return err
 }
 
 func (t *Token) IsValid() bool {

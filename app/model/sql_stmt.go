@@ -31,7 +31,8 @@ posts (
 
 CREATE TABLE IF NOT EXISTS
 tokens (
-  value       varchar(40) NOT NULL PRIMARY KEY,
+  id          integer NOT NULL PRIMARY KEY AUTOINCREMENT,
+  value       varchar(40) NOT NULL,
   user_id     integer UNIQUE,
   created_at  datetime,
   expired_at  datetime
@@ -185,8 +186,6 @@ const stmtGetUsersCountByEmail = `SELECT count(*) FROM users where email = ?`
 const stmtInsertRoleUser = `INSERT INTO roles_users (id, role_id, user_id) VALUES (?, ?, ?)`
 
 // Tokens
-const stmtGetTokenByValue = `SELECT value, user_id, created_at, expired_at FROM tokens WHERE value = ?`
-const stmtUpdateToken = `INSERT OR REPLACE INTO tokens (value, user_id, created_at, expired_at) VALUES (?, ?, ?, ?)`
 
 // Tags
 const stmtGetAllTags = `SELECT id, name, slug FROM tags`
