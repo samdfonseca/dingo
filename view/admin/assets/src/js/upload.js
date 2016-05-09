@@ -20,6 +20,7 @@ function initUpload(p) {
                             bar.remove();
                         }, 5000);
                     } else {
+                        alertify.success("File has been uploaded.")
                         bar.html("/" + json.file.url + "&nbsp;&nbsp;&nbsp;(@" + json.file.name + ")");
                     }
                     $('#attach-upload').val("");
