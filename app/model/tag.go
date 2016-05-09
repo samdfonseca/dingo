@@ -47,7 +47,8 @@ func (t *Tag) Save() error {
 				return t.Update()
 			} else {
 				// oldTag.Hidden is false and t.Hidden is true
-				posts, err := GetAllPostsByTag(oldTag.Id)
+				var posts Posts
+				err := posts.GetAllPostsByTag(oldTag.Id)
 				if err != nil {
 					return err
 				}

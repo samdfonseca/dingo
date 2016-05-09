@@ -19,14 +19,12 @@ func mockPost() *model.Post {
 	p.Slug = "welcome-to-dingo"
 	p.Markdown = "sample content"
 	p.Html = utils.Markdown2Html(p.Markdown)
-	p.Tags = model.GenerateTagsFromCommaString("Welcome, Dingo")
 	p.AllowComment = true
 	p.Category = ""
 	p.CreatedBy = 0
 	p.UpdatedBy = 0
 	p.IsPublished = false
 	p.IsPage = false
-	p.Author = &model.User{Id: 0, Name: "Dingo User", Email: "example@example.com"}
 	return p
 }
 
@@ -44,7 +42,8 @@ func TestPost(t *testing.T) {
 
 		Convey("When the post is not published yet", func() {
 			p := mockPost()
-			p.Save()
+			tags := model.GenerateTagsFromCommaString("Welcome, Dingo")
+			p.Save(tags...)
 
 			ctx := mockContext(nil, "GET", "/welcome-to-dingo/")
 			ctx.App.ServeHTTP(ctx.Response, ctx.Request)

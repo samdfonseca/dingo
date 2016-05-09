@@ -11,11 +11,13 @@ import (
 func AdminHandler(ctx *golf.Context) {
 	userObj, _ := ctx.Session.Get("user")
 	u := userObj.(*model.User)
+	m := new(model.Messages)
+	m.GetUnreadMessages()
 	ctx.Loader("admin").Render("home.html", map[string]interface{}{
 		"Title":    "Dashboard",
 		"Statis":   model.NewStatis(ctx.App),
 		"User":     u,
-		"Messages": model.GetUnreadMessages(),
+		"Messages": m,
 		"Monitor":  utils.ReadMemStats(),
 	})
 }
@@ -74,17 +76,16 @@ func PostSaveHandler(ctx *golf.Context) {
 	p.Slug = ctx.Request.FormValue("slug")
 	p.Markdown = ctx.Request.FormValue("content")
 	p.Html = utils.Markdown2Html(p.Markdown)
-	p.Tags = model.GenerateTagsFromCommaString(ctx.Request.FormValue("tag"))
 	p.AllowComment = ctx.Request.FormValue("comment") == "on"
 	p.Category = ctx.Request.FormValue("category")
 	p.CreatedBy = u.Id
 	p.UpdatedBy = u.Id
 	p.IsPublished = ctx.Request.FormValue("status") == "on"
 	p.IsPage = false
-	p.Author = u
 	p.Hits = 1
+	tags := model.GenerateTagsFromCommaString(ctx.Request.FormValue("tag"))
 	var e error
-	e = p.Save()
+	e = p.Save(tags...)
 	if e != nil {
 		ctx.SendStatus(400)
 		ctx.JSON(map[string]interface{}{
@@ -103,7 +104,8 @@ func AdminPostHandler(ctx *golf.Context) {
 	userObj, _ := ctx.Session.Get("user")
 	u := userObj.(*model.User)
 	i, _ := strconv.Atoi(ctx.Request.FormValue("page"))
-	posts, pager, err := model.GetPostList(int64(i), 10, false, false, "created_at DESC")
+	posts := new(model.Posts)
+	pager, err := posts.GetPostList(int64(i), 10, false, false, "created_at DESC")
 	if err != nil {
 		panic(err)
 	}
@@ -120,7 +122,8 @@ func PostEditHandler(ctx *golf.Context) {
 	u := userObj.(*model.User)
 	id := ctx.Param("id")
 	postId, _ := strconv.Atoi(id)
-	p, err := model.GetPostById(int64(postId))
+	p := &model.Post{Id: int64(postId)}
+	err := p.GetPostById()
 	if p == nil || err != nil {
 		ctx.Redirect("/admin/posts/")
 		return
@@ -162,13 +165,14 @@ func AdminPageHandler(ctx *golf.Context) {
 	userObj, _ := ctx.Session.Get("user")
 	u := userObj.(*model.User)
 	i, _ := strconv.Atoi(ctx.Request.FormValue("page"))
-	pages, pager, err := model.GetPostList(int64(i), 10, true, false, `created_at`)
+	posts := new(model.Posts)
+	pager, err := posts.GetPostList(int64(i), 10, true, false, `created_at`)
 	if err != nil {
 		panic(err)
 	}
 	ctx.Loader("admin").Render("pages.html", map[string]interface{}{
 		"Title": "Pages",
-		"Pages": pages,
+		"Pages": posts,
 		"User":  u,
 		"Pager": pager,
 	})
@@ -189,17 +193,16 @@ func PageSaveHandler(ctx *golf.Context) {
 	p.Slug = ctx.Request.FormValue("slug")
 	p.Markdown = ctx.Request.FormValue("content")
 	p.Html = utils.Markdown2Html(p.Markdown)
-	p.Tags = model.GenerateTagsFromCommaString(ctx.Request.FormValue("tag"))
 	p.AllowComment = ctx.Request.FormValue("comment") == "on"
 	p.Category = ctx.Request.FormValue("category")
 	p.CreatedBy = u.Id
 	p.UpdatedBy = u.Id
 	p.IsPublished = ctx.Request.FormValue("status") == "on"
 	p.IsPage = true
-	p.Author = u
 	p.Hits = 1
+	tags := model.GenerateTagsFromCommaString(ctx.Request.FormValue("tag"))
 	var e error
-	e = p.Save()
+	e = p.Save(tags...)
 	if e != nil {
 		ctx.JSON(map[string]interface{}{
 			"status": "error",
@@ -259,7 +262,7 @@ func CommentAddHandler(ctx *golf.Context) {
 		"status":  "success",
 		"comment": c.ToJson(),
 	})
-	if err := model.NewMessage("comment", c).Save(); err != nil {
+	if err := model.NewMessage("comment", c).Insert(); err != nil {
 		panic(err)
 	}
 }

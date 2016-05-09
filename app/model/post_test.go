@@ -17,14 +17,12 @@ func mockPost() *Post {
 	p.Slug = "welcome-to-dingo"
 	p.Markdown = samplePostContent
 	p.Html = utils.Markdown2Html(p.Markdown)
-	p.Tags = GenerateTagsFromCommaString("Welcome, Dingo")
+	p.IsPage = false
 	p.AllowComment = true
 	p.Category = ""
 	p.CreatedBy = 0
 	p.UpdatedBy = 0
 	p.IsPublished = true
-	p.IsPage = false
-	p.Author = ghostUser
 	return p
 }
 
@@ -35,7 +33,8 @@ func TestPost(t *testing.T) {
 
 		Convey("Create a published post", func() {
 			p := mockPost()
-			err := p.Save()
+			tags := GenerateTagsFromCommaString("Welcome, Dingo")
+			err := p.Save(tags...)
 
 			So(err, ShouldBeNil)
 
@@ -50,8 +49,8 @@ func TestPost(t *testing.T) {
 			So(p.PublishedAt, ShouldNotBeNil)
 
 			Convey("Update post tag", func() {
-				p.Tags = GenerateTagsFromCommaString("Welcome")
-				err = p.Save()
+				updateTags := GenerateTagsFromCommaString("Welcome")
+				err = p.Save(updateTags...)
 
 				So(err, ShouldBeNil)
 
@@ -61,11 +60,14 @@ func TestPost(t *testing.T) {
 				})
 
 				Convey("Tags should be updated", func() {
-					newPost, err := GetPostById(1)
+					newPost := new(Post)
+					newPost.Id = 1
+					err := newPost.GetPostById()
 
 					So(err, ShouldBeNil)
-					So(newPost.Tags, ShouldHaveLength, 1)
-					So(newPost.Tags[0].Slug, ShouldEqual, "welcome")
+					tags, _ := GetTagsByPostId(newPost.Id)
+					So(tags, ShouldHaveLength, 1)
+					So(tags[0].Slug, ShouldEqual, "welcome")
 					//					So((*newPost.UpdatedAt).After(*p.UpdatedAt), ShouldBeTrue)
 				})
 			})
@@ -78,10 +80,11 @@ func TestPost(t *testing.T) {
 				So(err, ShouldBeNil)
 
 				Convey("Slug should be updated", func() {
-					newPost, err := GetPostById(1)
+					p := &Post{Id: 1}
+					err := p.GetPostById()
 
 					So(err, ShouldBeNil)
-					So(newPost.Slug, ShouldEqual, newSlug)
+					So(p.Slug, ShouldEqual, newSlug)
 				})
 			})
 
@@ -93,7 +96,9 @@ func TestPost(t *testing.T) {
 				So(err, ShouldBeNil)
 
 				Convey("Title should be updated", func() {
-					newPost, err := GetPostById(1)
+					newPost := new(Post)
+					newPost.Id = 1
+					err := newPost.GetPostById()
 
 					So(err, ShouldBeNil)
 					So(newPost.Title, ShouldEqual, newTitle)
@@ -102,8 +107,8 @@ func TestPost(t *testing.T) {
 
 			Convey("Delete post by ID", func() {
 				DeletePostById(1)
-
-				_, err := GetPostById(1)
+				p := &Post{Id: 1}
+				err := p.GetPostById()
 
 				So(err, ShouldNotBeNil)
 
@@ -115,7 +120,8 @@ func TestPost(t *testing.T) {
 			})
 
 			Convey("Get post by Tag", func() {
-				posts, pager, err := GetPostsByTag(1, 1, 1, false, "created_at")
+				posts := new(Posts)
+				pager, err := posts.GetPostsByTag(1, 1, 1, false)
 
 				So(posts, ShouldHaveLength, 1)
 				So(pager.Begin, ShouldEqual, 1)
@@ -123,7 +129,8 @@ func TestPost(t *testing.T) {
 			})
 
 			Convey("Get all posts by Tag", func() {
-				posts, err := GetAllPostsByTag(1)
+				posts := new(Posts)
+				err := posts.GetAllPostsByTag(1)
 
 				So(posts, ShouldHaveLength, 1)
 				So(err, ShouldBeNil)
@@ -137,7 +144,8 @@ func TestPost(t *testing.T) {
 			})
 
 			Convey("Get post list", func() {
-				posts, pager, err := GetPostList(1, 1, false, false, "created_at")
+				posts := new(Posts)
+				pager, err := posts.GetPostList(1, 1, false, false, "created_at")
 
 				So(posts, ShouldHaveLength, 1)
 				So(pager.Begin, ShouldEqual, 1)
@@ -145,7 +153,8 @@ func TestPost(t *testing.T) {
 			})
 
 			Convey("Get all posts list", func() {
-				posts, err := GetAllPostList(false, false, "created_at")
+				posts := new(Posts)
+				err := posts.GetAllPostList(false, false, "created_at")
 
 				So(posts, ShouldHaveLength, 1)
 				So(err, ShouldBeNil)
@@ -174,15 +183,12 @@ func TestPost(t *testing.T) {
 			createWelcomeData()
 
 			Convey("Get the welcome post", func() {
-				post, err := GetPostById(1)
+				post := new(Post)
+				post.Id = 1
+				err := post.GetPostById()
 
 				So(err, ShouldBeNil)
 				So(post.Title, ShouldEqual, "Welcome to Dingo!")
-
-				Convey("Get the comment", func() {
-					So(post.Comments, ShouldHaveLength, 1)
-					So(post.Comments[0].Email, ShouldEqual, "dingpeixuan911@gmail.com")
-				})
 			})
 		})
 

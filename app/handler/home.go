@@ -20,14 +20,15 @@ func RegisterFunctions(app *golf.Application) {
 func HomeHandler(ctx *golf.Context) {
 	p := ctx.Param("page")
 	page, _ := strconv.Atoi(p)
-	articles, pager, err := model.GetPostList(int64(page), 5, false, true, "published_at DESC")
+	posts := new(model.Posts)
+	pager, err := posts.GetPostList(int64(page), 5, false, true, "published_at DESC")
 	if err != nil {
 		panic(err)
 	}
 	// theme := model.GetSetting("site_theme")
 	data := map[string]interface{}{
 		"Title":    "Home",
-		"Articles": articles,
+		"Articles": posts,
 		"Pager":    pager,
 	}
 	//	updateSidebarData(data)
@@ -36,7 +37,8 @@ func HomeHandler(ctx *golf.Context) {
 
 func ContentHandler(ctx *golf.Context) {
 	slug := ctx.Param("slug")
-	post, err := model.GetPostBySlug(slug)
+	post := new(model.Post)
+	err := post.GetPostBySlug(slug)
 	if err != nil || !post.IsPublished {
 		ctx.Abort(404)
 		return
@@ -58,7 +60,9 @@ func ContentHandler(ctx *golf.Context) {
 func CommentHandler(ctx *golf.Context) {
 	id := ctx.Param("id")
 	cid, _ := strconv.Atoi(id)
-	post, err := model.GetPostById(int64(cid))
+	post := new(model.Post)
+	post.Id = int64(cid)
+	err := post.GetPostById()
 	if cid < 1 || err != nil {
 		ctx.JSON(map[string]interface{}{
 			"status": "error",
@@ -93,7 +97,7 @@ func CommentHandler(ctx *golf.Context) {
 			"res":     true,
 			"comment": c.ToJson(),
 		})
-		if err = model.NewMessage("comment", c).Save(); err != nil {
+		if err = model.NewMessage("comment", c).Insert(); err != nil {
 			panic(err)
 		}
 	} else {
@@ -114,7 +118,8 @@ func TagHandler(ctx *golf.Context) {
 		NotFoundHandler(ctx)
 		return
 	}
-	posts, pager, err := model.GetPostsByTag(tag.Id, int64(page), 5, true, "published_at DESC")
+	posts := new(model.Posts)
+	pager, err := posts.GetPostsByTag(tag.Id, int64(page), 5, true)
 	data := map[string]interface{}{
 		"Articles": posts,
 		"Pager":    pager,
@@ -126,15 +131,16 @@ func TagHandler(ctx *golf.Context) {
 
 func SiteMapHandler(ctx *golf.Context) {
 	baseUrl := model.GetSettingValue("site_url")
-	articles, _, _ := model.GetPostList(1, 50, false, true, "published_at DESC")
+	posts := new(model.Posts)
+	_, _ = posts.GetPostList(1, 50, false, true, "published_at DESC")
 	navigators := model.GetNavigators()
 	now := utils.Now().Format(time.RFC3339)
 
-	articleMap := make([]map[string]string, len(articles))
-	for i, a := range articles {
+	articleMap := make([]map[string]string, posts.Len())
+	for i := 0; i < posts.Len(); i++ {
 		m := make(map[string]string)
-		m["Link"] = strings.Replace(baseUrl+a.Url(), baseUrl+"/", baseUrl, -1)
-		m["Created"] = a.PublishedAt.Format(time.RFC3339)
+		m["Link"] = strings.Replace(baseUrl+posts.Get(i).Url(), baseUrl+"/", baseUrl, -1)
+		m["Created"] = posts.Get(i).PublishedAt.Format(time.RFC3339)
 		articleMap[i] = m
 	}
 
@@ -165,18 +171,18 @@ func SiteMapHandler(ctx *golf.Context) {
 
 func RssHandler(ctx *golf.Context) {
 	baseUrl := model.GetSettingValue("site_url")
-	articles, _, _ := model.GetPostList(1, 20, false, true, "published_at DESC")
-	articleMap := make([]map[string]string, len(articles))
-	for i, a := range articles {
+	posts := new(model.Posts)
+	_, _ = posts.GetPostList(1, 20, false, true, "published_at DESC")
+	articleMap := make([]map[string]string, posts.Len())
+	for i := 0; i < posts.Len(); i++ {
 		m := make(map[string]string)
-		m["Title"] = a.Title
-		m["Link"] = a.Url()
-		m["Author"] = a.Author.Name
-		m["Desc"] = a.Excerpt()
-		m["Created"] = a.CreatedAt.Format(time.RFC822)
+		m["Title"] = posts.Get(i).Title
+		m["Link"] = posts.Get(i).Url()
+		m["Author"] = posts.Get(i).Author().Name
+		m["Desc"] = posts.Get(i).Excerpt()
+		m["Created"] = posts.Get(i).CreatedAt.Format(time.RFC822)
 		articleMap[i] = m
 	}
-
 	ctx.SetHeader("Content-Type", "text/xml; charset=utf-8")
 
 	ctx.Loader("base").Loader("base").Render("rss.xml", map[string]interface{}{

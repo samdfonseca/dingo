@@ -70,7 +70,8 @@ func APICommentPostHandler(ctx *golf.Context) {
 
 // APIPostsHandler gets every page, ordered by publication date.
 func APIPostsHandler(ctx *golf.Context) {
-	posts, err := model.GetAllPostList(false, true, "published_at DESC")
+	posts := new(model.Posts)
+	err := posts.GetAllPostList(false, true, "published_at DESC")
 	if err != nil {
 		handleErr(ctx, 404, err)
 		return
@@ -85,7 +86,8 @@ func APIPostHandler(ctx *golf.Context) {
 		handleErr(ctx, 500, err)
 		return
 	}
-	post, err := model.GetPostById(int64(id))
+	post := &model.Post{Id: int64(id)}
+	err = post.GetPostById()
 	if err != nil {
 		handleErr(ctx, 404, err)
 		return
@@ -96,12 +98,13 @@ func APIPostHandler(ctx *golf.Context) {
 // APIPostSlugHandler retrieves the post with the given slug.
 func APIPostSlugHandler(ctx *golf.Context) {
 	slug := ctx.Param("slug")
-	posts, err := model.GetPostBySlug(slug)
+	post := new(model.Post)
+	err := post.GetPostBySlug(slug)
 	if err != nil {
 		handleErr(ctx, 404, err)
 		return
 	}
-	ctx.JSONIndent(posts, "", "  ")
+	ctx.JSONIndent(post, "", "  ")
 }
 
 // APITagsHandler retrieves all the tags.

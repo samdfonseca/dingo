@@ -275,14 +275,16 @@ func TestPostHandler(t *testing.T) {
 			})
 
 			Convey("Successfully retrieve the post", func() {
-				post, _ := model.GetPostById(1)
+				post := &model.Post{Id: 1}
+				_ = post.GetPostById()
 
 				Convey("Should have correct title", func() {
 					So(post.Title, ShouldEqual, "Hello World")
 				})
 
 				Convey("Should have correct tag length", func() {
-					So(post.Tags, ShouldHaveLength, 2)
+					tags, _ := model.GetTagsByPostId(post.Id)
+					So(tags, ShouldHaveLength, 2)
 				})
 
 				Convey("Should have correct content", func() {
@@ -302,7 +304,6 @@ func TestPostHandler(t *testing.T) {
 				})
 
 				Convey("Should have correct author", func() {
-					So(post.Author.Id, ShouldEqual, 1)
 					So(post.CreatedBy, ShouldEqual, 1)
 					So(post.UpdatedBy, ShouldEqual, 1)
 					So(post.PublishedBy, ShouldEqual, 1)
@@ -334,14 +335,16 @@ func TestPostHandler(t *testing.T) {
 				app.ServeHTTP(ctx.Response, ctx.Request)
 
 				Convey("Successfully retrieve the post", func() {
-					post, _ := model.GetPostById(1)
+					post := &model.Post{Id: 1}
+					_ = post.GetPostById()
 
 					Convey("Should have correct title", func() {
 						So(post.Title, ShouldEqual, "Hello World Modified")
 					})
 
 					Convey("Should have correct tag length", func() {
-						So(post.Tags, ShouldHaveLength, 1)
+						tags, _ := model.GetTagsByPostId(post.Id)
+						So(tags, ShouldHaveLength, 1)
 					})
 
 					Convey("Should have correct content", func() {
@@ -361,7 +364,6 @@ func TestPostHandler(t *testing.T) {
 					})
 
 					Convey("Should have correct author", func() {
-						So(post.Author.Id, ShouldEqual, 1)
 						So(post.CreatedBy, ShouldEqual, 1)
 						So(post.UpdatedBy, ShouldEqual, 1)
 						So(post.PublishedBy, ShouldEqual, 1)

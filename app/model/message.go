@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"github.com/dinever/dingo/app/utils"
+	"github.com/russross/meddler"
 )
 
 var (
@@ -19,60 +20,48 @@ func init() {
 }
 
 type Message struct {
-	Id        int
-	Type      string
-	CreatedAt *time.Time
-	Data      string
-	IsRead    bool
+	Id        int        `meddler:"id,pk"`
+	Type      string     `meddler:"type"`
+	Data      string     `meddler:"data"`
+	IsRead    bool       `meddler:"is_read"`
+	CreatedAt *time.Time `meddler:"created_at"`
+}
+
+type Messages []*Message
+
+func (m Messages) Get(i int) *Message {
+	return m[i]
 }
 
 func NewMessage(tp string, data interface{}) *Message {
-	m := new(Message)
-	m.Type = tp
-	m.Data = messageGenerator[tp](data)
-	if m.Data == "" {
+	mData := messageGenerator[tp](data)
+	if mData == "" {
 		log.Printf("[Error]: message generator returns empty")
 		return nil
 	}
-	m.CreatedAt = utils.Now()
-	m.IsRead = false
-	return m
+	return &Message{
+		Type:      tp,
+		Data:      mData,
+		CreatedAt: utils.Now(),
+		IsRead:    false,
+	}
 }
 
-func (m *Message) Save() error {
-	writeDB, err := db.Begin()
-	if err != nil {
-		writeDB.Rollback()
-	}
-	_, err = writeDB.Exec(stmtInsertMessage, nil, m.Type, m.Data, m.IsRead, m.CreatedAt)
-	if err != nil {
-		writeDB.Rollback()
-	}
-	return writeDB.Commit()
+func (m *Message) Insert() error {
+	err := meddler.Insert(db, "messages", m)
+	return err
 }
 
 func SetMessageGenerator(name string, fn func(v interface{}) string) {
 	messageGenerator[name] = fn
 }
 
-func GetUnreadMessages() []*Message {
-	messages := make([]*Message, 0)
-	rows, err := db.Query(stmtGetUnreadMessages, 10, 0)
-	defer rows.Close()
+func (messages *Messages) GetUnreadMessages() {
+	err := meddler.QueryAll(db, messages, stmtGetUnreadMessages)
 	if err != nil {
 		panic(err)
-		return messages
 	}
-	for rows.Next() {
-		m := new(Message)
-		err := rows.Scan(&m.Id, &m.Type, &m.Data, &m.IsRead, &m.CreatedAt)
-		if err != nil {
-			panic(err)
-			continue
-		}
-		messages = append(messages, m)
-	}
-	return messages
+	return
 }
 
 func generateCommentMessage(co interface{}) string {
@@ -80,7 +69,8 @@ func generateCommentMessage(co interface{}) string {
 	if !ok {
 		return ""
 	}
-	post, err := GetPostById(c.PostId)
+	post := &Post{Id: c.PostId}
+	err := post.GetPostById()
 	if err != nil {
 		panic(err)
 	}

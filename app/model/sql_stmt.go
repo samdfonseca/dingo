@@ -13,15 +13,14 @@ posts (
   markdown           text,
   html               text,
   image              text,
-  featured           tinyint NOT NULL DEFAULT '0',
-  page               tinyint NOT NULL DEFAULT '0',
-  allow_comment      tinyint NOT NULL DEFAULT '0',
+  featured           BOOLEAN,
+  page               BOOLEAN,
+  allow_comment      BOOLEAN,
+  published          BOOLEAN,
   comment_num        integer NOT NULL DEFAULT '0',
-  status             varchar(150) NOT NULL DEFAULT 'draft',
   language           varchar(6) NOT NULL DEFAULT 'en_US',
   meta_title         varchar(150),
   meta_description   varchar(200),
-  author_id          integer NOT NULL,
   created_at         datetime NOT NULL,
   created_by         integer NOT NULL,
   updated_at         datetime,
@@ -160,18 +159,9 @@ messages (
 
 // Posts
 var postCountSelector = SQL.Select(`count(*)`).From(`posts`)
-var postSelector = SQL.Select(`id, title, slug, markdown, html, featured, page, allow_comment, comment_num, status, image, author_id, created_at, created_by, updated_at, updated_by, published_at, published_by`).From(`posts`)
-var postsTagsSelector = SQL.Select(`posts.id, posts.title, posts.slug, posts.markdown, posts.html, posts.featured, posts.page, posts.allow_comment, posts.comment_num, posts.status, posts.image, posts.author_id, posts.created_at, posts.created_by, posts.updated_at, posts.updated_by, posts.published_at, posts.published_by`).From(`posts, posts_tags`)
 
-var stmtGetPostsCountByTag = postCountSelector.Copy().From(`posts, posts_tags`).Where(`posts_tags.post_id = posts.id`, `posts_tags.tag_id = ?`, `status = 'published'`).SQL()
-var stmtGetPostById = postSelector.Copy().Where(`id = ?`).SQL()
-var stmtGetPostBySlug = postSelector.Copy().Where(`slug = ?`).SQL()
-var stmtGetPostsByTag = postsTagsSelector.Copy().Where(`status = 'published'`, `posts_tags.post_id = posts.id`, `posts_tags.tag_id = ?`).OrderBy(`published_at DESC`).Limit(`?`).Offset(`?`).SQL()
-var stmtGetAllPostsByTag = postsTagsSelector.Copy().Where(`posts_tags.post_id = posts.id`, `posts_tags.tag_id = ?`).OrderBy(`published_at DESC`).SQL()
+var stmtGetPostsCountByTag = postCountSelector.Copy().From(`posts, posts_tags`).Where(`posts_tags.post_id = posts.id`, `posts_tags.tag_id = ?`, `posts.published`).SQL()
 
-const stmtInsertPost = `INSERT INTO posts (id, title, slug, markdown, html, featured, page, allow_comment, status, image, author_id, created_at, created_by, updated_at, updated_by, published_at, published_by) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
-const stmtUpdatePost = `UPDATE posts SET title = ?, slug = ?, markdown = ?, html = ?, featured = ?, page = ?, allow_comment = ?, status = ?, image = ?, updated_at = ?, updated_by = ? WHERE id = ?`
-const stmtUpdatePostPublished = `UPDATE posts SET title = ?, slug = ?, markdown = ?, html = ?, featured = ?, page = ?, allow_comment = ?, status = ?, image = ?, updated_at = ?, updated_by = ?, published_at = ?, published_by = ? WHERE id = ?`
 const stmtDeletePostById = `DELETE FROM posts WHERE id = ?`
 
 //PostTags
@@ -223,6 +213,6 @@ const stmtUpdateSetting = `INSERT OR REPLACE INTO settings (id, key, value, type
 
 // Messages
 var messageSelector = SQL.Select(`id, type, data, is_read, created_at`).From(`messages`)
-var stmtGetUnreadMessages = messageSelector.Copy().Where(`is_read = 0`).OrderBy(`created_at DESC`).Limit(`?`).Offset(`?`).SQL()
 
-const stmtInsertMessage = `INSERT INTO messages (id, type, data, is_read, created_at) VALUES (?, ?, ?, ?, ?)`
+//var stmtGetUnreadMessages = messageSelector.Copy().Where(`is_read = 0`).OrderBy(`created_at DESC`).Limit(`?`).Offset(`?`).SQL()
+var stmtGetUnreadMessages = messageSelector.Copy().Where(`is_read = 0`).OrderBy(`created_at DESC`).Limit(`10`).Offset(`0`).SQL()
