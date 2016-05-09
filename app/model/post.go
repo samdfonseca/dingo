@@ -54,13 +54,14 @@ func NewPost() *Post {
 }
 
 func (p *Post) TagString() string {
-	tags, _ := GetTagsByPostId(p.Id)
+	tags := new(Tags)
+	_ = tags.GetTagsByPostId(p.Id)
 	var tagString string
-	for i, t := range tags {
-		if i != len(tags)-1 {
-			tagString += t.Name + ", "
+	for i := 0; i < tags.Len(); i++ {
+		if i != tags.Len()-1 {
+			tagString += tags.Get(i).Name + ", "
 		} else {
-			tagString += t.Name
+			tagString += tags.Get(i).Name
 		}
 	}
 	return tagString
@@ -71,11 +72,12 @@ func (p *Post) Url() string {
 }
 
 func (p *Post) Tags() []*Tag {
-	tags, err := GetTagsByPostId(p.Id)
+	tags := new(Tags)
+	err := tags.GetTagsByPostId(p.Id)
 	if err != nil {
 		return nil
 	}
-	return tags
+	return tags.GetAll()
 }
 
 func (p *Post) Author() *User {

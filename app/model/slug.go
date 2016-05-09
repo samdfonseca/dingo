@@ -47,7 +47,8 @@ func generateUniqueSlug(slug string, table string, suffix int) string {
 	}
 	var err error
 	if table == "tags" { // Not needed at the moment. Tags with the same name should have the same slug.
-		_, err = GetTagBySlug(slugToCheck)
+		tag := &Tag{Slug: slugToCheck}
+		err = tag.GetTagBySlug()
 	} else if table == "posts" {
 		post := new(Post)
 		err = post.GetPostBySlug(slugToCheck)

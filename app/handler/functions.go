@@ -5,8 +5,9 @@ import (
 )
 
 func getAllTags() []*model.Tag {
-	tags, _ := model.GetAllTags()
-	return tags
+	tags := new(model.Tags)
+	_ = tags.GetAllTags()
+	return tags.GetAll()
 }
 
 func getRecentPosts() []*model.Post {

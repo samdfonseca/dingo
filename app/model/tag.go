@@ -7,31 +7,49 @@ import (
 	"time"
 
 	"github.com/dinever/dingo/app/utils"
+	"github.com/russross/meddler"
 )
 
 type Tag struct {
-	Id        int64
-	Name      string
-	Slug      string
-	CreatedAt *time.Time
-	CreatedBy int64
-	Hidden    bool
+	Id        int64      `meddler:"id,pk"`
+	Name      string     `meddler:"name"`
+	Slug      string     `meddler:"slug"`
+	Hidden    bool       `meddler:"hidden"`
+	CreatedAt *time.Time `meddler:"created_at"`
+	CreatedBy int64      `meddler:"created_by"`
+	UpdatedAt *time.Time `meddler:"updated_at"`
+	UpdatedBy int64      `meddler:"updated_by"`
 }
 
 func (t *Tag) Url() string {
 	return "/tag/" + t.Slug
 }
 
+type Tags []*Tag
+
+func (t Tags) Len() int {
+	return len(t)
+}
+
+func (t Tags) Get(i int) *Tag {
+	return t[i]
+}
+
+func (t Tags) GetAll() []*Tag {
+	return t
+}
+
 func NewTag(name, slug string) *Tag {
 	return &Tag{
 		Name:      name,
-		CreatedAt: utils.Now(),
 		Slug:      slug,
+		CreatedAt: utils.Now(),
 	}
 }
 
 func (t *Tag) Save() error {
-	oldTag, err := GetTagBySlug(t.Slug)
+	oldTag := &Tag{Slug: t.Slug}
+	err := oldTag.GetTagBySlug()
 	if err != nil && err == sql.ErrNoRows {
 		if err := t.Insert(); err != nil {
 			log.Printf("[Error] Can not insert tag: %v", err.Error())
@@ -79,104 +97,33 @@ func GenerateTagsFromCommaString(input string) []*Tag {
 }
 
 func (t *Tag) Insert() error {
-	writeDB, err := db.Begin()
-	if err != nil {
-		writeDB.Rollback()
-		return err
-	}
-	result, err := writeDB.Exec(stmtInsertTag, nil, t.Name, t.Slug, t.CreatedAt, t.CreatedBy, t.CreatedAt, t.CreatedBy, t.Hidden)
-	if err != nil {
-		writeDB.Rollback()
-		return err
-	}
-	tagId, err := result.LastInsertId()
-	if err != nil {
-		writeDB.Rollback()
-		return err
-	}
-	if err := writeDB.Commit(); err != nil {
-		return err
-	}
-	t.Id = tagId
-	return nil
+	err := meddler.Insert(db, "tags", t)
+	return err
 }
 
 func (t *Tag) Update() error {
-	writeDB, err := db.Begin()
-	if err != nil {
-		writeDB.Rollback()
-		return err
-	}
-	_, err = writeDB.Exec(stmtUpdateTag, t.Name, t.Slug, t.CreatedAt, t.CreatedBy, t.Hidden, t.Id)
-	if err != nil {
-		writeDB.Rollback()
-		return err
-	}
-	return writeDB.Commit()
+	err := meddler.Insert(db, "tags", t)
+	return err
 }
 
-func GetTagsByPostId(postId int64) ([]*Tag, error) {
-	tags := make([]*Tag, 0)
-	// Get tags
-	rows, err := db.Query(stmtGetTags, postId)
-	defer rows.Close()
-	if err != nil {
-		return nil, err
-	}
-	for rows.Next() {
-		var tagId int64
-		err := rows.Scan(&tagId)
-		if err != nil {
-			return nil, err
-		}
-		tag, err := GetTag(tagId)
-		// TODO: Error while receiving individual tag is ignored right now. Keep it this way?
-		if err == nil {
-			tags = append(tags, tag)
-		}
-	}
-	return tags, nil
+func (tags *Tags) GetTagsByPostId(postId int64) error {
+	err := meddler.QueryAll(db, tags, "SELECT * FROM tags WHERE id IN (SELECT tag_id FROM posts_tags  WHERE post_id = ?)", postId)
+	return err
 }
 
-func GetTag(tagId int64) (*Tag, error) {
-	tag := new(Tag)
-	// Get tag
-	row := db.QueryRow(stmtGetTagById, tagId)
-	err := row.Scan(&tag.Id, &tag.Name, &tag.Slug)
-	if err != nil {
-		return nil, err
-	}
-	return tag, nil
+func (tag *Tag) GetTag() error {
+	err := meddler.QueryRow(db, tag, "SELECT * FROM tags WHERE id = ?", tag.Id)
+	return err
 }
 
-func GetTagBySlug(slug string) (*Tag, error) {
-	tag := new(Tag)
-	// Get tag
-	row := db.QueryRow(stmtGetTagBySlug, slug)
-	err := row.Scan(&tag.Id, &tag.Name, &tag.Slug, &tag.Hidden)
-	if err != nil {
-		return nil, err
-	}
-	return tag, nil
+func (tag *Tag) GetTagBySlug() error {
+	err := meddler.QueryRow(db, tag, "SELECT * FROM tags WHERE slug = ?", tag.Slug)
+	return err
 }
 
-func GetAllTags() ([]*Tag, error) {
-	tags := make([]*Tag, 0)
-	// Get tags
-	rows, err := db.Query(stmtGetAllTags)
-	defer rows.Close()
-	if err != nil {
-		return nil, err
-	}
-	for rows.Next() {
-		tag := new(Tag)
-		err := rows.Scan(&tag.Id, &tag.Name, &tag.Slug)
-		if err != nil {
-			return nil, err
-		}
-		tags = append(tags, tag)
-	}
-	return tags, nil
+func (tags *Tags) GetAllTags() error {
+	err := meddler.QueryAll(db, tags, "SELECT * FROM tags")
+	return err
 }
 
 func DeleteOldTags() error {

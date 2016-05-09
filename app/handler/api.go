@@ -111,7 +111,8 @@ func APIPostSlugHandler(ctx *golf.Context) {
 
 // APITagsHandler retrieves all the tags.
 func APITagsHandler(ctx *golf.Context) {
-	tags, err := model.GetAllTags()
+	tags := new(model.Tags)
+	err := tags.GetAllTags()
 	if err != nil {
 		handleErr(ctx, 404, err)
 		return
@@ -126,7 +127,8 @@ func APITagHandler(ctx *golf.Context) {
 		handleErr(ctx, 500, err)
 		return
 	}
-	tag, err := model.GetTag(int64(id))
+	tag := &model.Tag{Id: int64(id)}
+	err = tag.GetTag()
 	if err != nil {
 		handleErr(ctx, 404, err)
 		return
@@ -137,7 +139,8 @@ func APITagHandler(ctx *golf.Context) {
 // APITagSlugHandler retrieves the tag(s) with the given slug.
 func APITagSlugHandler(ctx *golf.Context) {
 	slug := ctx.Param("slug")
-	tags, err := model.GetTagBySlug(slug)
+	tags := &model.Tag{Slug: slug}
+	err := tags.GetTagBySlug()
 	if err != nil {
 		handleErr(ctx, 500, err)
 		return

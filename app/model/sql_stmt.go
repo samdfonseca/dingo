@@ -80,12 +80,7 @@ tags (
   id                integer NOT NULL PRIMARY KEY AUTOINCREMENT,
   name              varchar(150) NOT NULL,
   slug              varchar(150) NOT NULL,
-  description       varchar(200),
-  image             text,
   hidden            boolean NOT NULL DEFAULT 0,
-  parent_id         integer,
-  meta_title        varchar(150),
-  meta_description  varchar(200),
   created_at        datetime NOT NULL,
   created_by        integer NOT NULL,
   updated_at        datetime,
@@ -182,12 +177,6 @@ const stmtInsertRoleUser = `INSERT INTO roles_users (id, role_id, user_id) VALUE
 // Tokens
 
 // Tags
-const stmtGetAllTags = `SELECT id, name, slug FROM tags`
-const stmtGetTags = `SELECT tag_id FROM posts_tags WHERE post_id = ?`
-const stmtGetTagById = `SELECT id, name, slug FROM tags WHERE id = ?`
-const stmtGetTagBySlug = `SELECT id, name, slug, hidden FROM tags WHERE slug = ?`
-const stmtInsertTag = `INSERT INTO tags (id, name, slug, created_at, created_by, updated_at, updated_by, hidden) VALUES (?, ?, ?, ?, ?, ?, ?, ?)`
-const stmtUpdateTag = `UPDATE tags SET name = ?, slug =?, updated_at = ?, updated_by = ?, hidden = ? WHERE id = ?`
 const stmtDeleteOldTags = `DELETE FROM tags WHERE id IN (SELECT id FROM tags EXCEPT SELECT tag_id FROM posts_tags)`
 
 // Settings
