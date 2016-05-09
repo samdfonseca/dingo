@@ -85,7 +85,8 @@ func AuthSignUpHandler(ctx *golf.Context) {
 		ctx.Abort(500)
 		return
 	}
-	user, err := model.GetUserByEmail(email)
+	user := &model.User{Email: email}
+	err = user.GetUserByEmail()
 	if err != nil {
 		ctx.Abort(500)
 		return
@@ -117,7 +118,8 @@ func AuthLoginHandler(ctx *golf.Context) {
 	email := ctx.Request.FormValue("email")
 	password := ctx.Request.FormValue("password")
 	rememberMe := ctx.Request.FormValue("remember-me")
-	user, err := model.GetUserByEmail(email)
+	user := &model.User{Email: email}
+	err := user.GetUserByEmail()
 	if user == nil || err != nil {
 		ctx.JSON(map[string]interface{}{"status": "error"})
 		return

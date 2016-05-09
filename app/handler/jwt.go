@@ -42,8 +42,8 @@ func JWTAuthLoginHandler(ctx *golf.Context) {
 		ctx.JSON(map[string]interface{}{"status": "error: unrecognized Content-Type"})
 		return
 	}
-
-	user, err := model.GetUserByEmail(email)
+	user := &model.User{Email: email}
+	err := user.GetUserByEmail()
 	if user == nil || err != nil {
 		ctx.SendStatus(http.StatusUnauthorized)
 		ctx.JSON(map[string]interface{}{"status": "error"})

@@ -52,8 +52,6 @@ users (
   accessibility    text,
   status           varchar(150) NOT NULL DEFAULT 'active',
   language         varchar(6) NOT NULL DEFAULT 'en_US',
-  meta_title       varchar(150),
-  meta_description varchar(200),
   last_login       datetime,
   created_at       datetime NOT NULL,
   created_by       integer NOT NULL,
@@ -181,14 +179,7 @@ const stmtInsertComment = `INSERT OR REPLACE INTO comments (id, post_id, author,
 const stmtDeleteCommentById = `DELETE FROM comments WHERE id = ?`
 
 // Users
-const stmtGetUserById = `SELECT id, name, slug, email, image, cover, bio, website, location FROM users WHERE id = ?`
-const stmtGetUserBySlug = `SELECT id, name, slug, email, image, cover, bio, website, location FROM users WHERE slug = ?`
-const stmtGetUserByName = `SELECT id, name, slug, email, image, cover, bio, website, location FROM users WHERE name = ?`
-const stmtGetUserByEmail = `SELECT id, name, slug, email, image, cover, bio, website, location FROM users WHERE email = ?`
-const stmtGetHashedPasswordByEmail = `SELECT password FROM users WHERE email = ?`
 const stmtGetUsersCountByEmail = `SELECT count(*) FROM users where email = ?`
-const stmtInsertUser = `INSERT INTO users (id, name, slug, password, email, image, cover, created_at, created_by, updated_at, updated_by) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
-const stmtUpdateUser = `UPDATE users SET name = ?, slug = ?, email = ?, image = ?, cover = ?, bio = ?, website = ?, location = ?, updated_at = ?, updated_by = ? WHERE id = ?`
 
 // RoleUser
 const stmtInsertRoleUser = `INSERT INTO roles_users (id, role_id, user_id) VALUES (?, ?, ?)`

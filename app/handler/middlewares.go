@@ -30,7 +30,8 @@ func AuthMiddleware(next golf.HandlerFunc) golf.HandlerFunc {
 			return
 		}
 		uid, _ := strconv.Atoi(tokenUser.Value)
-		user, err := model.GetUserById(int64(uid))
+		user := &model.User{Id: int64(uid)}
+		err = user.GetUserById()
 		if err != nil {
 			panic(err)
 		}

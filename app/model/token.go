@@ -49,8 +49,9 @@ func GetTokenByValue(v string) (*Token, error) {
 }
 
 func (t *Token) IsValid() bool {
-	user, _ := GetUserById(t.UserId)
-	if user == nil {
+	u := &User{Id: t.UserId}
+	err := u.GetUserById()
+	if err != nil {
 		return false
 	}
 	return t.ExpiredAt.After(*utils.Now())

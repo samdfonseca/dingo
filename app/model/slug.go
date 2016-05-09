@@ -52,7 +52,8 @@ func generateUniqueSlug(slug string, table string, suffix int) string {
 		post := new(Post)
 		err = post.GetPostBySlug(slugToCheck)
 	} else if table == "users" {
-		_, err = GetUserBySlug(slugToCheck)
+		u := new(User)
+		err = u.GetUserBySlug()
 	}
 	if err == nil {
 		return generateUniqueSlug(slug, table, suffix+1)

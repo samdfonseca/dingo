@@ -79,11 +79,12 @@ func (p *Post) Tags() []*Tag {
 }
 
 func (p *Post) Author() *User {
-	author, err := GetUserById(p.CreatedBy)
+	user := &User{Id: p.CreatedBy}
+	err := user.GetUserById()
 	if err != nil {
 		return ghostUser
 	}
-	return author
+	return user
 }
 
 func (p *Post) Comments() []*Comment {

@@ -157,7 +157,8 @@ func APIUserHandler(ctx *golf.Context) {
 		handleErr(ctx, 500, err)
 		return
 	}
-	user, err := model.GetUserById(int64(id))
+	user := &model.User{Id: int64(id)}
+	err = user.GetUserById()
 	if err != nil {
 		handleErr(ctx, 404, err)
 		return
@@ -168,7 +169,8 @@ func APIUserHandler(ctx *golf.Context) {
 // APIUserSlugHandler retrives the user with the given slug.
 func APIUserSlugHandler(ctx *golf.Context) {
 	slug := ctx.Param("slug")
-	user, err := model.GetUserBySlug(slug)
+	user := &model.User{Slug: slug}
+	err := user.GetUserBySlug()
 	if err != nil {
 		handleErr(ctx, 404, err)
 		return
@@ -179,7 +181,8 @@ func APIUserSlugHandler(ctx *golf.Context) {
 // APIUserEmailHandler retrieves the user with the given email.
 func APIUserEmailHandler(ctx *golf.Context) {
 	email := ctx.Param("email")
-	user, err := model.GetUserByEmail(email)
+	user := &model.User{Email: email}
+	err := user.GetUserByEmail()
 	if err != nil {
 		handleErr(ctx, 404, err)
 		return
