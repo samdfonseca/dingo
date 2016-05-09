@@ -1,202 +1,277 @@
 {{ extends "/default.html" }}
 
 {{ define "body"}}
-<div class="breadcrumb grey lighten-3">
-  <h6>
-    {{.Title}}
-  </h6>
-</div>
+<section class="advanced-elements">
+  <div class="mdl-color--blue ml-header relative clear">
+    <div class="p-50"></div>
+  </div>
 
-<div class="content">
-  <div class="row">
-    <div class="col s12 m12 l12">
-      <div class="card">
-        <div class="card-content">
+  <div class="mdl-grid mdl-grid--no-spacing">
 
-          <div class="row">
-            <div class="col s12">
-              <ul class="tabs">
-                <li class="tab col s3"><a class="active" href="#general">General</a></li>
-                <li class="tab col s3"><a href="#content">Content</a></li>
-                <li class="tab col s3"><a href="#nav">Navigation</a></li>
-                <li class="tab col s3"><a href="#custom">Custom</a></li>
-              </ul>
-            </div>
-            <div id="general" class="col s12">
-              <form id="setting-form" class="setting-form form form-align setting-panel" action="/admin/setting/" method="post">
-                <p class="item">
-                <label for="site-url">Site URL</label>
-                <input id="site-url" class="ipt" type="url" name="site_url" value="{{Setting `site_url`}}"/>
-                </p>
-                <p class="item">
-                <label for="site-title">Site Title</label>
-                <input id="site-title" class="ipt" type="text" name="title" value="{{Setting `title`}}"/>
-                </p>
-                <p class="item">
-                <label for="site-sub-title">Site Subtitle</label>
-                <input id="site-sub-title" class="ipt" type="text" name="sub_title" value="{{Setting `sub_title`}}"/>
-                </p>
-                <p class="item">
-                <label for="site-keywords">Meta Keyword</label>
-                <input id="site-keywords" class="ipt" type="text" name="meta_keywords" value="{{Setting `meta_keywords`}}"/>
-                </p>
-                <p class="item">
-                <label for="site-desc">Meta Description</label>
-                <input id="site-desc" class="ipt" type="text" name="meta_description" value="{{Setting `meta_description`}}"/>
-                </p>
-                <p>
-                <label>&nbsp;</label>
-                <button class="btn waves-effect waves-light blue">Save</button>
-                </p>
-              </form>
-            </div>
-            <div id="content" class="col s12">
-              <form id="setting-content-form" class="setting-form form form-align setting-panel" action="/admin/setting/" method="post">
-                <p class="item">
-                <label for="article-size">Posts per page</label>
-                <input id="article-size" class="ipt" type="number" name="article_size" value="{{Setting `article_size`}}" max="10" min="3" required="required"/>
-                </p>
-                <p class="item">
-                <label for="popular-size">Posts in the popular list</label>
-                <input id="popular-size" class="ipt" type="number" name="popular_size" value="{{Setting `popular_size`}}" max="10" min="3"  required="required"/>
-                </p>
-                <p class="item">
-                <label for="recent-comment-size">Recent commented posts</label>
-                <input id="recent-comment-size" class="ipt" type="number" name="recent_comment_size" value="{{Setting `recent_comment_size`}}" max="10" min="3" required="required"/>
-                </p>
-                <p>
-                <button class="btn waves-effect waves-light blue">Save</button>
-                </p>
-              </form>
-            </div>
-            <div id="nav" class="col s12">
-              <form id="setting-nav-form" class="setting-form form form-align setting-panel" action="/admin/setting/nav/" method="post">
-                <div id="navigators">
-                  {{range .Navigators}}
-                  <div class="row">
-                    <div class="input-field col s5">
-                      <input id="label" name="label" type="text" class="validate" value="{{.Label}}">
-                      <label for="label">Label</label>
-                    </div>
-                    <div class="input-field col s5">
-                      <input id="url" name="url" type="text" class="validate" value="{{.Url}}">
-                      <label for="url">URL</label>
-                    </div>
-                    <div class="input-field col s12 m2 l2">
-                      <a id="del-nav" class="btn waves-effect waves-light red right" href="#">Delete</a>
-                    </div>
-                  </div>
-                  {{end}}
-                </div>
-
-                <div class="row">
-                  <button class="btn waves-effect waves-light blue">Save</button>
-                  <a class="btn waves-effect waves-light green" id="add-nav" rel="#nav-item">Add</a>
-                </div>
-
-              </form>
-
-              <script type="text/template" id="nav-item">
-<div class="row">
-                  <div class="input-field col s5">
-                    <input id="label" name="label" type="text" class="validate" value="">
-                    <label for="label">Label</label>
-                  </div>
-                  <div class="input-field col s5">
-                    <input id="url" name="url" type="text" class="validate" value="">
-                    <label for="url">URL</label>
-                  </div>
-                  <div class="input-field col s12 m2 l2">
-                    <a id="del-nav" class="btn waves-effect waves-light red right" href="#">Delete</a>
-                  </div>
-                </div>
-              </script>
-
-            </div>
-            <div id="custom" class="col s12">
-              <form id="setting-custom-form" class="setting-form form form-align setting-panel" action="/admin/setting/custom/" method="post">
-                <div id="custom-settings">
-                  {{range .Custom}}
-                  <div class="row">
-                    <div class="input-field col s5">
-                      <input name="key" type="text" class="validate" value="{{.Key}}">
-                      <label>Key</label>
-                    </div>
-                    <div class="input-field col s5">
-                      <input name="value" type="text" class="validate" value="{{.Value}}">
-                      <label>Value</label>
-                    </div>
-                    <div class="input-field col s12 m2 l2">
-                      <a id="del-custom" class="btn waves-effect waves-light red right" href="#">Delete</a>
-                    </div>
-                  </div>
-                  {{end}}
-                </div>
-                <div class="row">
-                  <button class="btn waves-effect waves-light blue">Save</button>
-                  <a class="btn waves-effect waves-light green" id="add-custom" rel="#custom-item">Add</a>
-                </div>
-
-              </form>
-
-              <script type="text/template" id="custom-item">
-                <div class="row">
-                  <div class="input-field col s5">
-                    <input name="key" type="text" class="validate" value="">
-                    <label>Key</label>
-                  </div>
-                  <div class="input-field col s5">
-                    <input name="value" type="text" class="validate" value="">
-                    <label>Value</label>
-                  </div>
-                  <div class="input-field col s12 m2 l2">
-                    <a id="del-custom" class="btn waves-effect waves-light red right" href="#">Delete</a>
-                  </div>
-                </div>
-              </script>
-
-            </div>
+    <div class="mdl-cell mdl-cell--9-col mdl-cell--12-col-tablet mdl-cell--12-col-phone no-p-l">
+      <div class="p-20 ml-card-holder ml-card-holder-first">
+        <div class="mdl-card mdl-shadow--1dp fullwidth">
+          <div class="mdl-card__title">
+            <h2 class="mdl-card__title-text">General</h2>
           </div>
+          <div class="p-15 p-20--small">
 
+            <form class="setting-form" action="/admin/setting/" method="POST">
+
+              <div class="mdl-textfield mdl-js-textfield mdl-textfield--floating-label fullwidth">
+                <input class="mdl-textfield__input" type="url" id="site_url" name="site_url" value="{{ Setting `site_url` }}">
+                <label class="mdl-textfield__label" for="site_url">Site URL</label>
+              </div>
+
+              <div class="mdl-textfield mdl-js-textfield mdl-textfield--floating-label fullwidth">
+                <input class="mdl-textfield__input" type="text" id="title" name="title" value="{{ Setting `title` }}">
+                <label class="mdl-textfield__label" for="title">Title</label>
+              </div>
+
+              <div class="mdl-textfield mdl-js-textfield mdl-textfield--floating-label fullwidth">
+                <input class="mdl-textfield__input" type="text" id="subtitle" name="subtitle" value="{{ Setting `subtitle` }}">
+                <label class="mdl-textfield__label" for="subtitle">Subtitle</label>
+              </div>
+
+              <div class="mdl-textfield mdl-js-textfield mdl-textfield--floating-label fullwidth">
+                <input class="mdl-textfield__input" type="text" id="meta_keywords" name="meta_keywords" value="{{ Setting `meta_keywords` }}">
+                <label class="mdl-textfield__label" for="meta_keywords">Meta Keywords</label>
+              </div>
+
+              <div class="mdl-textfield mdl-js-textfield mdl-textfield--floating-label fullwidth">
+                <input class="mdl-textfield__input" type="text" id="meta_description" name="meta_description" value="{{ Setting `meta_description` }}">
+                <label class="mdl-textfield__label" for="meta_description">Meta Description</label>
+              </div>
+
+              <div class="m-t-20">
+                <button type="submit" class="mdl-button mdl-js-button mdl-button--raised mdl-button--colored mdl-color--blue-500 mdl-js-ripple-effect">
+                  Save
+                  <span class="mdl-button__ripple-container"><span class="mdl-ripple is-animating"></span></span>
+                </button>
+
+              </div>
+
+            </form>
+
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <div class="mdl-grid mdl-grid--no-spacing">
+
+    <div class="mdl-cell mdl-cell--9-col mdl-cell--12-col-tablet mdl-cell--12-col-phone no-p-l">
+      <div class="p-20 ml-card-holder">
+        <div class="mdl-card mdl-shadow--1dp fullwidth">
+          <div class="mdl-card__title">
+            <h2 class="mdl-card__title-text">Content</h2>
+          </div>
+          <div class="p-15 p-20--small">
+
+            <form class="setting-form" action="/admin/setting/" method="POST">
+
+              <div class="mdl-textfield mdl-js-textfield mdl-textfield--floating-label fullwidth">
+                <input class="mdl-textfield__input" type="text" pattern="-?[0-9]*(\.[0-9]+)?" id="post_per_page" name="post_per_page" value="{{ Setting `post_per_page` }}">
+                <label class="mdl-textfield__label" for="post_per_page">Post per Page</label>
+                <span class="mdl-textfield__error">Please input a number</span>
+              </div>
+
+              <div class="mdl-textfield mdl-js-textfield mdl-textfield--floating-label fullwidth">
+                <input class="mdl-textfield__input" type="text" pattern="-?[0-9]*(\.[0-9]+)?" id="popular_posts_num" name="popular_posts_num" value="{{ Setting `popular_posts_num` }}">
+                <label class="mdl-textfield__label" for="popular_posts_num">Number of Popular Posts</label>
+                <span class="mdl-textfield__error">Please input a number</span>
+              </div>
+
+              <div class="mdl-textfield mdl-js-textfield mdl-textfield--floating-label fullwidth">
+                <input class="mdl-textfield__input" type="text" pattern="-?[0-9]*(\.[0-9]+)?" id="recent_comments_num" name="recent_comments_num" value="{{ Setting `popular_posts_num` }}">
+                <label class="mdl-textfield__label" for="recent_comments_num">Number of Recent Comments</label>
+                <span class="mdl-textfield__error">Please input a number</span>
+              </div>
+
+              <div class="m-t-20">
+                <button type="submit" class="mdl-button mdl-js-button mdl-button--raised mdl-button--colored mdl-color--blue-500 mdl-js-ripple-effect">
+                  Save
+                  <span class="mdl-button__ripple-container"><span class="mdl-ripple is-animating"></span></span>
+                </button>
+              </div>
+
+            </form>
+
+          </div>
         </div>
       </div>
     </div>
   </div>
-</div>
+
+
+  <div class="mdl-grid mdl-grid--no-spacing">
+
+    <div class="mdl-cell mdl-cell--9-col mdl-cell--12-col-tablet mdl-cell--12-col-phone no-p-l">
+      <div class="p-20 ml-card-holder">
+        <div class="mdl-card mdl-shadow--1dp fullwidth">
+          <div class="mdl-card__title">
+            <h2 class="mdl-card__title-text">Navigation</h2>
+          </div>
+          <div class="p-15 p-20--small">
+
+            <form id="setting-nav-form" class="setting-form form form-align setting-panel" action="/admin/setting/nav/" method="post">
+              <div id="navigators">
+              <div class="mdl-grid mdl-grid--no-spacing">
+                {{range .Navigators}}
+                <div class="mdl-grid mdl-grid--no-spacing fullwidth">
+                  <div class="mdl-cell mdl-cell--5-col mdl-cell--5-col-tablet mdl-cell--5-col-phone p-r-25">
+                    <div class="mdl-textfield mdl-js-textfield mdl-textfield--floating-label fullwidth">
+                      <input class="mdl-textfield__input" type="text" name="label" value="{{.Label}}">
+                      <label class="mdl-textfield__label" for="label">Label</label>
+                    </div>
+                  </div>
+
+                  <div class="mdl-cell mdl-cell--5-col mdl-cell--5-col-tablet mdl-cell--5-col-phone p-r-25">
+                    <div class="mdl-textfield mdl-js-textfield mdl-textfield--floating-label fullwidth">
+                      <input class="mdl-textfield__input" type="text" name="url" value="{{.Url}}">
+                      <label class="mdl-textfield__label" for="url">URL</label>
+                    </div>
+                  </div>
+
+                  <div class="mdl-cell mdl-cell--2-col mdl-cell--2-col-tablet mdl-cell--2-col-phone">
+                    <a class="mdl-button mdl-js-button mdl-button--raised mdl-button--colored mdl-color--red-400 mdl-js-ripple-effect del-nav" href="#">Delete</a>
+                  </div>
+                </div>
+                {{end}}
+              </div>
+              </div>
+
+              <div class="m-t-20">
+                <button type="submit" class="mdl-button mdl-js-button mdl-button--raised mdl-button--colored mdl-color--blue-500 mdl-js-ripple-effect">
+                  Save
+                  <span class="mdl-button__ripple-container"><span class="mdl-ripple is-animating"></span></span>
+                </button>
+                <a class="mdl-button mdl-js-button mdl-button--raised mdl-button--colored mdl-color--green-500 mdl-js-ripple-effect" id="add-nav" rel="#nav-item">
+                  Add
+                  <span class="mdl-button__ripple-container"><span class="mdl-ripple is-animating"></span></span>
+                </a>
+              </div>
+            </form>
+
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+
+  <div class="mdl-grid mdl-grid--no-spacing">
+
+    <div class="mdl-cell mdl-cell--9-col mdl-cell--12-col-tablet mdl-cell--12-col-phone no-p-l">
+      <div class="p-20 ml-card-holder">
+        <div class="mdl-card mdl-shadow--1dp fullwidth">
+          <div class="mdl-card__title">
+            <h2 class="mdl-card__title-text">Custom</h2>
+          </div>
+          <div class="p-15 p-20--small">
+
+            <form id="setting-custom-form" class="setting-form form form-align setting-panel" action="/admin/setting/custom/" method="post">
+              <div id="custom-settings" class="mdl-grid mdl-grid--no-spacing">
+                {{range .Custom}}
+                <div class="mdl-grid mdl-grid--no-spacing fullwidth">
+                  <div class="mdl-cell mdl-cell--5-col mdl-cell--5-col-tablet mdl-cell--5-col-phone p-r-25">
+                    <div class="mdl-textfield mdl-js-textfield mdl-textfield--floating-label fullwidth">
+                      <input class="mdl-textfield__input" type="text" name="key" value="{{ .Key }}">
+                      <label class="mdl-textfield__label" for="key">Key</label>
+                    </div>
+                  </div>
+
+                  <div class="mdl-cell mdl-cell--5-col mdl-cell--5-col-tablet mdl-cell--5-col-phone p-r-25">
+                    <div class="mdl-textfield mdl-js-textfield mdl-textfield--floating-label fullwidth">
+                      <input class="mdl-textfield__input" type="text" name="value" value="{{ .Value }}">
+                      <label class="mdl-textfield__label" for="value">Value</label>
+                    </div>
+                  </div>
+
+                  <div class="mdl-cell mdl-cell--2-col mdl-cell--2-col-tablet mdl-cell--2-col-phone">
+                    <a class="mdl-button mdl-js-button mdl-button--raised mdl-button--colored mdl-color--red-400 mdl-js-ripple-effect del-custom" href="#">Delete</a>
+                  </div>
+                </div>
+
+                {{end}}
+              </div>
+
+              <div class="m-t-20">
+                <button type="submit" class="mdl-button mdl-js-button mdl-button--raised mdl-button--colored mdl-color--blue-500 mdl-js-ripple-effect">
+                  Save
+                  <span class="mdl-button__ripple-container"><span class="mdl-ripple is-animating"></span></span>
+                </button>
+                <a class="mdl-button mdl-js-button mdl-button--raised mdl-button--colored mdl-color--green-500 mdl-js-ripple-effect" id="add-custom" rel="#custom-item">
+                  Add
+                  <span class="mdl-button__ripple-container"><span class="mdl-ripple is-animating"></span></span>
+                </a>
+              </div>
+            </form>
+
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+
+</section>
+
+<script type="text/template" id="nav-item">
+
+    <div class="mdl-grid mdl-grid--no-spacing fullwidth">
+    <div class="mdl-cell mdl-cell--5-col mdl-cell--5-col-tablet mdl-cell--5-col-phone p-r-25">
+      <div class="mdl-textfield mdl-js-textfield mdl-textfield--floating-label fullwidth">
+        <input class="mdl-textfield__input" type="text" id="label" name="label" value="">
+        <label class="mdl-textfield__label" for="label">Label</label>
+      </div>
+    </div>
+
+    <div class="mdl-cell mdl-cell--5-col mdl-cell--5-col-tablet mdl-cell--5-col-phone p-r-25">
+      <div class="mdl-textfield mdl-js-textfield mdl-textfield--floating-label fullwidth">
+        <input class="mdl-textfield__input" type="text" id="url" name="url" value="">
+        <label class="mdl-textfield__label" for="url">URL</label>
+      </div>
+    </div>
+
+    <div class="mdl-cell mdl-cell--2-col mdl-cell--2-col-tablet mdl-cell--2-col-phone">
+      <a class="mdl-button mdl-js-button mdl-button--raised mdl-button--colored mdl-color--red-400 mdl-js-ripple-effect del-nav" href="#">Delete</a>
+    </div>
+  </div>
+
+</script>
+
+<script type="text/template" id="custom-item">
+
+  <div class="mdl-grid mdl-grid--no-spacing fullwidth">
+    <div class="mdl-cell mdl-cell--5-col mdl-cell--5-col-tablet mdl-cell--5-col-phone p-r-25">
+      <div class="mdl-textfield mdl-js-textfield mdl-textfield--floating-label fullwidth">
+        <input class="mdl-textfield__input" type="text" id="key" name="key" value="">
+        <label class="mdl-textfield__label" for="key">Label</label>
+      </div>
+    </div>
+
+    <div class="mdl-cell mdl-cell--5-col mdl-cell--5-col-tablet mdl-cell--5-col-phone p-r-25">
+      <div class="mdl-textfield mdl-js-textfield mdl-textfield--floating-label fullwidth">
+        <input class="mdl-textfield__input" type="text" id="value" name="value" value="">
+        <label class="mdl-textfield__label" for="value">Value</label>
+      </div>
+    </div>
+
+    <div class="mdl-cell mdl-cell--2-col mdl-cell--2-col-tablet mdl-cell--2-col-phone">
+      <a class="mdl-button mdl-js-button mdl-button--raised mdl-button--colored mdl-color--red-400 mdl-js-ripple-effect del-custom" href="#">Delete</a>
+    </div>
+  </div>
+
+</script>
 
 {{end}}
+
 
 {{ define "after_footer" }}
 <script>
 
-  $(document).ready(function(){
-    $('ul.tabs').tabs();
-  });
-
-  $(function () {
-    $('.setting-form').ajaxForm(function (json) {
-      if (json.status === "success") {
-        Materialize.toast("Saved", 2500, "green");
-      } else {
-        Materialize.toast(json.msg, 2500, "green");
-      }
-    }).on("click","#add-custom",function(e) {
-      e.preventDefault();
-      $("#custom-settings").append($($(this).attr("rel")).html());
-    }).on("click", "#add-nav", function(e) {
-      e.preventDefault();
-      $("#navigators").append($($(this).attr("rel")).html());
-    }).on("click","#del-nav",function(e){
-      e.preventDefault();
-      if(confirm("Delete this item？")){
-        $(this).parent().parent().remove();
-      }
-    }).on("click","#del-custom",function(e){
-      e.preventDefault();
-      if(confirm("Delete this item？")){
-        $(this).parent().parent().remove();
-      }
-    })
-  })
 </script>
 {{ end }}

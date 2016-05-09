@@ -13,6 +13,7 @@ func FileViewHandler(ctx *golf.Context) {
 	user, _ := ctx.Session.Get("user")
 	uploadDir, _ := ctx.App.Config.GetString("upload_dir", "upload")
 	uploadDir = path.Clean(uploadDir)
+	ctx.Request.ParseForm()
 	dir, err := ctx.Query("dir")
 	dir = path.Clean(dir)
 	var (
