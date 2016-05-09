@@ -72,15 +72,9 @@ func PostSaveHandler(ctx *golf.Context) {
 	id := ctx.Param("id")
 	idInt, _ := strconv.Atoi(id)
 	p.Id = int64(idInt)
-	p.Title = ctx.Request.FormValue("title")
-	p.Slug = ctx.Request.FormValue("slug")
-	p.Markdown = ctx.Request.FormValue("content")
-	p.Html = utils.Markdown2Html(p.Markdown)
-	p.AllowComment = ctx.Request.FormValue("comment") == "on"
-	p.Category = ctx.Request.FormValue("category")
+	p.UpdateFromRequest(ctx.Request)
 	p.CreatedBy = u.Id
 	p.UpdatedBy = u.Id
-	p.IsPublished = ctx.Request.FormValue("status") == "on"
 	p.IsPage = false
 	p.Hits = 1
 	tags := model.GenerateTagsFromCommaString(ctx.Request.FormValue("tag"))
@@ -108,14 +102,9 @@ func ContentSaveHandler(ctx *golf.Context) {
 	idInt, _ := strconv.Atoi(id)
 	p.Id = int64(idInt)
 	p.GetPostById()
-	p.Title = ctx.Request.FormValue("title")
-	p.Slug = ctx.Request.FormValue("slug")
-	p.Markdown = ctx.Request.FormValue("content")
+	p.UpdateFromRequest(ctx.Request)
 	p.Html = utils.Markdown2Html(p.Markdown)
-	p.AllowComment = ctx.Request.FormValue("comment") == "on"
-	p.Category = ctx.Request.FormValue("category")
 	p.UpdatedBy = u.Id
-	p.IsPublished = ctx.Request.FormValue("status") == "on"
 	p.Hits = 1
 	tags := model.GenerateTagsFromCommaString(ctx.Request.FormValue("tag"))
 	var e error
@@ -223,15 +212,10 @@ func PageSaveHandler(ctx *golf.Context) {
 			"msg":    "The slug of this post has conflicts with another post."})
 		return
 	}
-	p.Title = ctx.Request.FormValue("title")
-	p.Slug = ctx.Request.FormValue("slug")
-	p.Markdown = ctx.Request.FormValue("content")
+	p.UpdateFromRequest(ctx.Request)
 	p.Html = utils.Markdown2Html(p.Markdown)
-	p.AllowComment = ctx.Request.FormValue("comment") == "on"
-	p.Category = ctx.Request.FormValue("category")
 	p.CreatedBy = u.Id
 	p.UpdatedBy = u.Id
-	p.IsPublished = ctx.Request.FormValue("status") == "on"
 	p.IsPage = true
 	p.Hits = 1
 	tags := model.GenerateTagsFromCommaString(ctx.Request.FormValue("tag"))
