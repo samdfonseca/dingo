@@ -40,12 +40,12 @@
               </div>
 
               <div class="mdl-textfield mdl-js-textfield mdl-textfield--floating-label fullwidth">
-                <input class="mdl-textfield__input" type="url" id="website" name="website" value="{{.User.Website}}">
+                <input class="mdl-textfield__input" type="url" id="website" name="url" value="{{.User.Website}}">
                 <label class="mdl-textfield__label" for="website">Personal Website</label>
               </div>
 
               <div class="mdl-textfield mdl-js-textfield mdl-textfield--floating-label fullwidth">
-                <textarea class="mdl-textfield__input" type="text" rows= "3" id="bio" name="bio" value="{{.User.Bio}}" ></textarea>
+                <textarea class="mdl-textfield__input" type="text" rows= "3" id="bio" name="bio">{{.User.Bio}}</textarea>
                 <label class="mdl-textfield__label" for="bio">Bio</label>
               </div>
 
@@ -69,31 +69,3 @@
 
 {{end}}
 
-{{ define "after_footer" }}
-<script src="/static/lib/validate.min.js"></script>
-<script>
-    $(function(){
-        new FormValidator("profile-form",[
-            {"name":"slug","rules":"alpha_numeric|min_length[1]|max_length[20]"},
-            {"name":"email","rules":"valid_email"},
-            {"name":"url","rules":"valid_url"}
-        ],function(errors,e) {
-            e.preventDefault();
-            $('.invalid').hide();
-            if(errors.length){
-                $("#"+errors[0].id+"-invalid").removeClass("hide").show();
-                return;
-            }
-            $('#profile').ajaxSubmit(function(json){
-                if(json.status === "error"){
-                    alert(json.msg);
-                }else{
-                    alertify.success("Profile saved")
-                }
-                return false;
-            });
-        })
-    });
-</script>
-
-{{ end }}
