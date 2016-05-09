@@ -5,58 +5,51 @@ import (
 	"time"
 
 	"github.com/dinever/dingo/app/utils"
+	"github.com/russross/meddler"
 )
 
 // Comment struct defines a comment item data.
 type Comment struct {
-	Id        int64
-	Author    string
-	Email     string
-	Website   string
-	Avatar    string
-	CreatedAt *time.Time
-	Content   string
-	Approved  bool
-	PostId    int64
-	Parent    int64
-	Type      string
-	Ip        string
-	UserAgent string
-	UserId    int64
+	Id        int64      `meddler:"id,pk"`
+	PostId    int64      `meddler:"post_id"`
+	Author    string     `meddler:"author"`
+	Email     string     `meddler:"author_email"`
+	Avatar    string     `meddler:"author_avatar"`
+	Website   string     `meddler:"author_url"`
+	Ip        string     `meddler:"author_ip"`
+	CreatedAt *time.Time `meddler:"created_at"`
+	Content   string     `meddler:"content"`
+	Approved  bool       `meddler:"approved"`
+	UserAgent string     `meddler:"agent"`
+	Type      string     `meddler:"type"`
+	Parent    int64      `meddler:"parent"`
+	UserId    int64      `meddler:"user_id"`
 }
 
-func NewComment() *Comment {
-	c := new(Comment)
-	c.CreatedAt = utils.Now()
+type Comments []*Comment
+
+func (c Comments) Len() int {
+	return len(c)
+}
+
+func (c Comments) Get(i int) *Comment {
+	return c[i]
+}
+
+func (c Comments) GetAll() []*Comment {
 	return c
 }
 
+func NewComment() *Comment {
+	return &Comment{
+		CreatedAt: utils.Now(),
+	}
+}
+
 func (c *Comment) Save() error {
-	writeDB, err := db.Begin()
-	if err != nil {
-		writeDB.Rollback()
-		return err
-	}
-	var result sql.Result
-	if c.Id > 0 {
-		result, err = writeDB.Exec(stmtInsertComment, c.Id, c.PostId, c.Author, c.Email, c.Website, c.Ip, c.CreatedAt, c.Content, c.Approved, c.UserAgent, c.Parent, c.UserId)
-	} else {
-		result, err = writeDB.Exec(stmtInsertComment, nil, c.PostId, c.Author, c.Email, c.Website, c.Ip, c.CreatedAt, c.Content, c.Approved, c.UserAgent, c.Parent, c.UserId)
-	}
-	if err != nil {
-		writeDB.Rollback()
-		return err
-	}
-	commentId, err := result.LastInsertId()
-	if err != nil {
-		writeDB.Rollback()
-		return err
-	}
-	if err := writeDB.Commit(); err != nil {
-		return err
-	}
-	c.Id = commentId
-	return nil
+	c.Avatar = utils.Gravatar(c.Email, "50")
+	err := meddler.Save(db, "comments", c)
+	return err
 }
 
 func (c *Comment) ToJson() map[string]interface{} {
@@ -80,7 +73,9 @@ func (c *Comment) ParentContent() string {
 	if c.Parent < 1 {
 		return ""
 	}
-	comment, err := GetCommentById(c.Parent)
+
+	comment := &Comment{Id: c.Parent}
+	err := comment.GetCommentById()
 	if err != nil {
 		return "> Comment not found."
 	}
@@ -100,66 +95,24 @@ func GetNumberOfComments() (int64, error) {
 	return count, nil
 }
 
-func GetCommentList(page, size int64) ([]*Comment, *utils.Pager, error) {
-	var (
-		pager *utils.Pager
-	)
+func (comments *Comments) GetCommentList(page, size int64) (*utils.Pager, error) {
+	var pager *utils.Pager
+
 	count, err := GetNumberOfComments()
 	pager = utils.NewPager(page, size, count)
-	rows, err := db.Query(stmtGetAllCommentList, size, pager.Begin-1)
-	defer rows.Close()
-	if err != nil {
-		return nil, nil, err
-	}
-	comments, err := extractComments(rows)
-	if err != nil {
-		return nil, nil, err
-	}
-	return comments, pager, nil
+
+	err = meddler.QueryAll(db, comments, "SELECT * FROM comments ORDER BY created_at DESC LIMIT ? OFFSET ?", size, pager.Begin-1)
+	return pager, err
 }
 
-func extractComments(rows *sql.Rows) ([]*Comment, error) {
-	comments := make([]*Comment, 0)
-	for rows.Next() {
-		comment := new(Comment)
-		err := scanComment(rows, comment)
-		if err != nil {
-			return nil, err
-		}
-		comments = append(comments, comment)
-	}
-	return comments, nil
-}
-
-func scanComment(rows Row, comment *Comment) error {
-	var (
-		nullParent sql.NullInt64
-		nullUserId sql.NullInt64
-	)
-	err := rows.Scan(&comment.Id, &comment.PostId, &comment.Author, &comment.Email, &comment.Website, &comment.CreatedAt, &comment.Content, &comment.Approved, &comment.UserAgent, &nullParent, &nullUserId)
-	comment.Avatar = utils.Gravatar(comment.Email, "50")
-	comment.Parent = nullParent.Int64
-	comment.UserId = nullUserId.Int64
+func (comment *Comment) GetCommentById() error {
+	err := meddler.QueryRow(db, comment, "SELECT * FROM comments WHERE id = ?", comment.Id)
 	return err
 }
 
-func GetCommentById(id int64) (*Comment, error) {
-	comment := new(Comment)
-	row := db.QueryRow(stmtGetCommentById, id)
-	err := scanComment(row, comment)
-	if err != nil {
-		return nil, err
-	}
-	return comment, nil
-}
-
-func GetCommentByPostId(id int64) ([]*Comment, error) {
-	rows, err := db.Query(stmtGetApprovedCommentListByPostId, id)
-	defer rows.Close()
-	if err != nil {
-		return nil, err
-	}
-	return extractComments(rows)
+func (comments *Comments) GetCommentsByPostId(id int64) error {
+	err := meddler.QueryAll(db, comments, "SELECT * FROM comments WHERE post_id = ? AND approved = 1", id)
+	return err
 }
 
 func DeleteComment(id int64) error {

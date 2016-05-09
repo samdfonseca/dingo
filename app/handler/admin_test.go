@@ -423,7 +423,8 @@ func TestCommentHandler(t *testing.T) {
 				ctx := mockContext(form, "POST", "/comment/1/")
 				app.ServeHTTP(ctx.Response, ctx.Request)
 
-				c, err := model.GetCommentById(1)
+				c := &model.Comment{Id: 1}
+				err := c.GetCommentById()
 				So(err, ShouldBeNil)
 				So(c.Approved, ShouldBeFalse)
 
@@ -436,7 +437,8 @@ func TestCommentHandler(t *testing.T) {
 					So(ctx.Response.(*httptest.ResponseRecorder).Body.String(), ShouldContainSubstring, "success")
 
 					Convey("Get the approved comment", func() {
-						c, err := model.GetCommentById(1)
+						c := &model.Comment{Id: 1}
+						err = c.GetCommentById()
 
 						So(err, ShouldBeNil)
 						So(c.Approved, ShouldBeTrue)
@@ -453,14 +455,16 @@ func TestCommentHandler(t *testing.T) {
 					So(ctx.Response.(*httptest.ResponseRecorder).Body.String(), ShouldContainSubstring, "success")
 
 					Convey("Get the parent comment", func() {
-						c, err := model.GetCommentById(1)
+						c := &model.Comment{Id: 1}
+						err = c.GetCommentById()
 
 						So(err, ShouldBeNil)
 						So(c.Approved, ShouldBeTrue)
 					})
 
 					Convey("Get the reply comment", func() {
-						c, err := model.GetCommentById(2)
+						c := &model.Comment{Id: 2}
+						err = c.GetCommentById()
 
 						So(err, ShouldBeNil)
 						So(c.Parent, ShouldEqual, 1)
@@ -477,10 +481,11 @@ func TestCommentHandler(t *testing.T) {
 					So(ctx.Response.(*httptest.ResponseRecorder).Body.String(), ShouldContainSubstring, "success")
 
 					Convey("Get the parent comment", func() {
-						c, err := model.GetCommentById(1)
+						c := &model.Comment{Id: 1}
+						err = c.GetCommentById()
 
 						So(err, ShouldNotBeNil)
-						So(c, ShouldBeNil)
+						So(c.CreatedAt, ShouldBeNil)
 					})
 				})
 

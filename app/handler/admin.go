@@ -219,7 +219,8 @@ func PageSaveHandler(ctx *golf.Context) {
 func CommentViewHandler(ctx *golf.Context) {
 	i, _ := strconv.Atoi(ctx.Request.FormValue("page"))
 	user, _ := ctx.Session.Get("user")
-	comments, pager, err := model.GetCommentList(int64(i), 10)
+	comments := new(model.Comments)
+	pager, err := comments.GetCommentList(int64(i), 10)
 	if err != nil {
 		panic(err)
 	}
@@ -235,7 +236,8 @@ func CommentAddHandler(ctx *golf.Context) {
 	userObj, _ := ctx.Session.Get("user")
 	u := userObj.(*model.User)
 	pid, _ := strconv.Atoi(ctx.Request.FormValue("pid"))
-	parent, err := model.GetCommentById(int64(pid))
+	parent := &model.Comment{Id: int64(pid)}
+	err := parent.GetCommentById()
 	if err != nil {
 		panic(err)
 	}
@@ -269,7 +271,8 @@ func CommentAddHandler(ctx *golf.Context) {
 
 func CommentUpdateHandler(ctx *golf.Context) {
 	id, _ := strconv.Atoi(ctx.Request.FormValue("id"))
-	c, err := model.GetCommentById(int64(id))
+	c := &model.Comment{Id: int64(id)}
+	err := c.GetCommentById()
 	if err != nil {
 		ctx.JSON(map[string]interface{}{
 			"status": "error",

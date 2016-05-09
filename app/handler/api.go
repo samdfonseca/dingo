@@ -45,7 +45,8 @@ func APICommentHandler(ctx *golf.Context) {
 		handleErr(ctx, 500, err)
 		return
 	}
-	comment, err := model.GetCommentById(int64(id))
+	comment := &model.Comment{Id: int64(id)}
+	err = comment.GetCommentById()
 	if err != nil {
 		handleErr(ctx, 404, err)
 		return
@@ -60,12 +61,13 @@ func APICommentPostHandler(ctx *golf.Context) {
 		handleErr(ctx, 500, err)
 		return
 	}
-	comment, err := model.GetCommentByPostId(int64(id))
+	comments := new(model.Comments)
+	err = comments.GetCommentsByPostId(int64(id))
 	if err != nil {
 		handleErr(ctx, 404, err)
 		return
 	}
-	ctx.JSONIndent(comment, "", "  ")
+	ctx.JSONIndent(comments, "", "  ")
 }
 
 // APIPostsHandler gets every page, ordered by publication date.

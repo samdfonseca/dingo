@@ -58,9 +58,10 @@ func TestComment(t *testing.T) {
 			So(err, ShouldBeNil)
 
 			Convey("Get Comment List", func() {
-				result, _, err := GetCommentList(1, 2)
+				comments := new(Comments)
+				_, err := comments.GetCommentList(1, 2)
 				So(err, ShouldBeNil)
-				So(result, ShouldHaveLength, 2)
+				So(comments, ShouldHaveLength, 2)
 			})
 			Convey("To Json", func() {
 				result := cc.ToJson()
@@ -79,16 +80,19 @@ func TestComment(t *testing.T) {
 			})
 
 			Convey("Get Comment By ID", func() {
-				result, err := GetCommentById(cc.Id)
+				result := &Comment{Id: cc.Id}
+				err := result.GetCommentById()
 				So(err, ShouldBeNil)
 				commentEqualCheck(result, cc)
 			})
 
-			Convey("Get Comment By Post ID", func() {
-				result, err := GetCommentByPostId(cc.Id)
+			Convey("Get Comments By Post ID", func() {
+				comments := new(Comments)
+				err := comments.GetCommentsByPostId(cc.Id)
 				So(err, ShouldBeNil)
-				commentEqualCheck(result[0], cc)
-				commentEqualCheck(result[1], pc)
+				commentEqualCheck(comments.Get(1), cc)
+				commentEqualCheck(comments.Get(0), pc)
+
 			})
 
 			Convey("Validate Comment", func() {
@@ -99,9 +103,10 @@ func TestComment(t *testing.T) {
 			Convey("Delete Comment", func() {
 				err := DeleteComment(cc.Id)
 				So(err, ShouldBeNil)
-				result, err := GetCommentById(cc.Id)
+				result := &Comment{Id: cc.Id}
+				err = result.GetCommentById()
 				So(err, ShouldNotBeNil)
-				So(result, ShouldBeNil)
+				So(result.CreatedAt, ShouldBeNil)
 			})
 		})
 		Reset(func() {

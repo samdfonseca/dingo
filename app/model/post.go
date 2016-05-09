@@ -88,11 +88,12 @@ func (p *Post) Author() *User {
 }
 
 func (p *Post) Comments() []*Comment {
-	comments, err := GetCommentByPostId(p.Id)
+	comments := new(Comments)
+	err := comments.GetCommentsByPostId(p.Id)
 	if err != nil {
 		return nil
 	}
-	return comments
+	return comments.GetAll()
 }
 
 func (p *Post) Summary() string {

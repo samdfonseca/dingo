@@ -98,11 +98,12 @@ comments (
   post_id       varchar(150) NOT NULL,
   author        varchar(150) NOT NULL,
   author_email  varchar(150) NOT NULL,
+  author_avatar varchar(50)  NOT NULL,
   author_url    varchar(200) NOT NULL,
   author_ip     varchar(100) NOT NULL,
-  created_at    datetime NOT NULL,
-  content       text NOT NULL,
-  approved      tinyint NOT NULL DEFAULT '0',
+  created_at    datetime     NOT NULL,
+  content       text         NOT NULL,
+  approved      tinyint      NOT NULL DEFAULT '0',
   agent         varchar(255) NOT NULL,
   type          varchar(20),
   parent        integer,
@@ -168,15 +169,8 @@ const stmtDeletePostTagsByPostId = `DELETE FROM posts_tags WHERE post_id = ?`
 const stmtInsertPostTag = `INSERT INTO posts_tags (id, post_id, tag_id) VALUES (?, ?, ?)`
 
 // Comments
-var commentCountSelector = SQL.Select(`count(*)`).From(`comments`)
-var stmtGetAllCommentCount = commentCountSelector.SQL()
-var commentSelector = SQL.Select(`id, post_id, author, author_email, author_url, created_at, content, approved, agent, parent, user_id`).From(`comments`)
-var stmtGetAllCommentList = commentSelector.Copy().OrderBy(`created_at DESC`).Limit(`?`).Offset(`?`).SQL()
-var stmtGetApprovedCommentList = commentSelector.Copy().Where(`approved = 1`).OrderBy(`created_at DESC`).Limit(`?`).Offset(`?`).SQL()
-var stmtGetCommentById = commentSelector.Copy().Where(`id = ?`).SQL()
-var stmtGetApprovedCommentListByPostId = commentSelector.Copy().Where(`post_id = ?`, `approved = 1`).OrderBy(`created_at DESC`).SQL()
+const stmtGetAllCommentCount = `SELECT count(*) FROM comments`
 
-const stmtInsertComment = `INSERT OR REPLACE INTO comments (id, post_id, author, author_email, author_url, author_ip, created_at, content, approved, agent, parent, user_id) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
 const stmtDeleteCommentById = `DELETE FROM comments WHERE id = ?`
 
 // Users

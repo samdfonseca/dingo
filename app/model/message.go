@@ -79,11 +79,12 @@ func generateCommentMessage(co interface{}) string {
 		s = "<p>" + c.Author + " commented on post <i>" + string(post.Title) + "</i>: </p><p>"
 		s += utils.Html2Str(c.Content) + "</p>"
 	} else {
-		p, err := GetCommentById(c.Parent)
+		pc := &Comment{Id: c.Parent}
+		err = pc.GetCommentById()
 		if err != nil {
 			s = "<p>" + c.Author + " commented on post <i>" + string(post.Title) + "</i>: </p><p>"
 		} else {
-			s = "<p>" + c.Author + " replied " + p.Author + "'s comment on <i>" + string(post.Title) + "</i>: </p><p>"
+			s = "<p>" + c.Author + " replied " + pc.Author + "'s comment on <i>" + string(post.Title) + "</i>: </p><p>"
 			s += utils.Html2Str(c.Content) + "</p>"
 		}
 	}
