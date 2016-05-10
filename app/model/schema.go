@@ -1,9 +1,5 @@
 package model
 
-import (
-	"github.com/dinever/dingo/app/model/sql_builder"
-)
-
 const schema = `
 CREATE TABLE IF NOT EXISTS
 posts (
@@ -151,38 +147,3 @@ messages (
   created_at   datetime NOT NULL
 );
 `
-
-// Posts
-var postCountSelector = SQL.Select(`count(*)`).From(`posts`)
-
-var stmtGetPostsCountByTag = postCountSelector.Copy().From(`posts, posts_tags`).Where(`posts_tags.post_id = posts.id`, `posts_tags.tag_id = ?`, `posts.published`).SQL()
-
-const stmtDeletePostById = `DELETE FROM posts WHERE id = ?`
-
-//PostTags
-const stmtDeletePostTagsByPostId = `DELETE FROM posts_tags WHERE post_id = ?`
-const stmtInsertPostTag = `INSERT INTO posts_tags (id, post_id, tag_id) VALUES (?, ?, ?)`
-
-// Comments
-const stmtGetAllCommentCount = `SELECT count(*) FROM comments`
-
-const stmtDeleteCommentById = `DELETE FROM comments WHERE id = ?`
-
-// Users
-const stmtGetUsersCountByEmail = `SELECT count(*) FROM users where email = ?`
-
-// RoleUser
-const stmtInsertRoleUser = `INSERT INTO roles_users (id, role_id, user_id) VALUES (?, ?, ?)`
-
-// Tokens
-
-// Tags
-const stmtDeleteOldTags = `DELETE FROM tags WHERE id IN (SELECT id FROM tags EXCEPT SELECT tag_id FROM posts_tags)`
-
-// Settings
-
-// Messages
-var messageSelector = SQL.Select(`id, type, data, is_read, created_at`).From(`messages`)
-
-//var stmtGetUnreadMessages = messageSelector.Copy().Where(`is_read = 0`).OrderBy(`created_at DESC`).Limit(`?`).Offset(`?`).SQL()
-var stmtGetUnreadMessages = messageSelector.Copy().Where(`is_read = 0`).OrderBy(`created_at DESC`).Limit(`10`).Offset(`0`).SQL()

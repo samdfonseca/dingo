@@ -100,22 +100,22 @@ func (u *User) CheckPassword(password string) bool {
 }
 
 func (user *User) GetUserById() error {
-	err := meddler.QueryRow(db, user, "SELECT * FROM users WHERE id = ?", user.Id)
+	err := meddler.QueryRow(db, user, stmtGetUserById, user.Id)
 	return err
 }
 
 func (user *User) GetUserBySlug() error {
-	err := meddler.QueryRow(db, user, "SELECT * FROM users WHERE slug = ?", user.Slug)
+	err := meddler.QueryRow(db, user, stmtGetUserBySlug, user.Slug)
 	return err
 }
 
 func (user *User) GetUserByName() error {
-	err := meddler.QueryRow(db, user, "SELECT * FROM users WHERE name = ?", user.Name)
+	err := meddler.QueryRow(db, user, stmtGetUserByName, user.Name)
 	return err
 }
 
 func (user *User) GetUserByEmail() error {
-	err := meddler.QueryRow(db, user, "SELECT * FROM users WHERE email = ?", user.Email)
+	err := meddler.QueryRow(db, user, stmtGetUserByEmail, user.Email)
 	return err
 }
 
@@ -150,7 +150,15 @@ func (u User) UserEmailExist() bool {
 
 func GetNumberOfUsers() (int64, error) {
 	var count int64
-	row := db.QueryRow("SELECT COUNT(*) FROM users")
+	row := db.QueryRow(stmtGetNumberOfUsers)
 	err := row.Scan(&count)
 	return count, err
 }
+
+const stmtGetUserById = `SELECT * FROM users WHERE id = ?`
+const stmtGetUserBySlug = `SELECT * FROM users WHERE slug = ?`
+const stmtGetUserByName = `SELECT * FROM users WHERE name = ?`
+const stmtGetUserByEmail = `SELECT * FROM users WHERE email = ?`
+const stmtInsertRoleUser = `INSERT INTO roles_users (id, role_id, user_id) VALUES (?, ?, ?)`
+const stmtGetUsersCountByEmail = `SELECT count(*) FROM users where email = ?`
+const stmtGetNumberOfUsers = `SELECT COUNT(*) FROM users`

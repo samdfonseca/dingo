@@ -107,22 +107,22 @@ func (t *Tag) Update() error {
 }
 
 func (tags *Tags) GetTagsByPostId(postId int64) error {
-	err := meddler.QueryAll(db, tags, "SELECT * FROM tags WHERE id IN (SELECT tag_id FROM posts_tags  WHERE post_id = ?)", postId)
+	err := meddler.QueryAll(db, tags, stmtGetTagsByPostId, postId)
 	return err
 }
 
 func (tag *Tag) GetTag() error {
-	err := meddler.QueryRow(db, tag, "SELECT * FROM tags WHERE id = ?", tag.Id)
+	err := meddler.QueryRow(db, tag, stmtGetTag, tag.Id)
 	return err
 }
 
 func (tag *Tag) GetTagBySlug() error {
-	err := meddler.QueryRow(db, tag, "SELECT * FROM tags WHERE slug = ?", tag.Slug)
+	err := meddler.QueryRow(db, tag, stmtGetTagBySlug, tag.Slug)
 	return err
 }
 
 func (tags *Tags) GetAllTags() error {
-	err := meddler.QueryAll(db, tags, "SELECT * FROM tags")
+	err := meddler.QueryAll(db, tags, stmtGetAllTags)
 	return err
 }
 
@@ -139,3 +139,9 @@ func DeleteOldTags() error {
 	}
 	return WriteDB.Commit()
 }
+
+const stmtGetTagsByPostId = `SELECT * FROM tags WHERE id IN (SELECT tag_id FROM posts_tags  WHERE post_id = ?)`
+const stmtGetTag = `SELECT * FROM tags WHERE id = ?`
+const stmtGetTagBySlug = `SELECT * FROM tags WHERE slug = ?`
+const stmtGetAllTags = `SELECT * FROM tags`
+const stmtDeleteOldTags = `DELETE FROM tags WHERE id IN (SELECT id FROM tags EXCEPT SELECT tag_id FROM posts_tags)`

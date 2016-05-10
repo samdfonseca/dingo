@@ -228,12 +228,12 @@ func DeletePostById(id int64) error {
 }
 
 func (post *Post) GetPostById() error {
-	err := meddler.QueryRow(db, post, "SELECT * FROM posts WHERE id = ?", post.Id)
+	err := meddler.QueryRow(db, post, stmtGetPostById, post.Id)
 	return err
 }
 
 func (post *Post) GetPostBySlug(slug string) error {
-	err := meddler.QueryRow(db, post, "SELECT * FROM posts WHERE slug = ?", slug)
+	err := meddler.QueryRow(db, post, stmtGetPostBySlug, slug)
 	return err
 }
 
@@ -253,29 +253,30 @@ func (posts *Posts) GetPostsByTag(tagId, page, size int64, onlyPublished bool) (
 	if onlyPublished {
 		where = "published AND"
 	}
-	err = meddler.QueryAll(db, posts, fmt.Sprintf("SELECT * FROM posts WHERE %s id IN ( SELECT post_id FROM posts_tags WHERE tag_id = ? ) ORDER BY published_at DESC LIMIT ? OFFSET ?", where), tagId, size, pager.Begin-1)
+	err = meddler.QueryAll(db, posts, fmt.Sprintf(stmtGetPostsByTag, where), tagId, size, pager.Begin-1)
 	return pager, err
 }
 
 func (posts *Posts) GetAllPostsByTag(tagId int64) error {
-	err := meddler.QueryAll(db, posts, "SELECT * FROM posts WHERE id IN ( SELECT post_id FROM posts_tags WHERE tag_id = ?) ORDER BY published_at DESC ", tagId)
+	err := meddler.QueryAll(db, posts, stmtGetAllPostsByTag, tagId)
 	return err
 }
 
 func GetNumberOfPosts(isPage bool, published bool) (int64, error) {
 	var count int64
-	selector := postCountSelector.Copy()
-	if published {
-		selector.Where(`published`)
-	}
+	var where string
 	if isPage {
-		selector.Where(`page = 1`)
+		where = `page = 1`
 	} else {
-		selector.Where(`page = 0`)
+		where = `page = 0`
+	}
+	if published {
+		where = where + ` AND published`
 	}
 	var row *sql.Row
 
-	row = db.QueryRow(selector.SQL())
+	fmt.Printf("\n %v \n", fmt.Sprintf(stmtNumberOfPosts, where))
+	row = db.QueryRow(fmt.Sprintf(stmtNumberOfPosts, where))
 	err := row.Scan(&count)
 	if err != nil {
 		return 0, err
@@ -298,7 +299,7 @@ func (posts *Posts) GetPostList(page, size int64, isPage bool, onlyPublished boo
 		where = where + ` AND published`
 	}
 
-	err = meddler.QueryAll(db, posts, fmt.Sprintf("SELECT * FROM posts WHERE %s ORDER BY ? LIMIT ? OFFSET ?", where), orderBy, size, pager.Begin-1)
+	err = meddler.QueryAll(db, posts, fmt.Sprintf(stmtGetPostList, where), orderBy, size, pager.Begin-1)
 	return pager, err
 }
 
@@ -312,7 +313,7 @@ func (posts *Posts) GetAllPostList(isPage bool, onlyPublished bool, orderBy stri
 	if onlyPublished {
 		where = where + `AND published`
 	}
-	err := meddler.QueryAll(db, posts, fmt.Sprintf("SELECT * FROM posts WHERE %s ORDER BY ?", where), orderBy)
+	err := meddler.QueryAll(db, posts, fmt.Sprintf(stmtGetAllPostList, where), orderBy)
 	return err
 }
 
@@ -332,3 +333,15 @@ func generateNewSlug(slug string, suffix int) string {
 	}
 	return newSlug
 }
+
+const stmtGetPostById = `SELECT * FROM posts WHERE id = ?`
+const stmtGetPostBySlug = `SELECT * FROM posts WHERE slug = ?`
+const stmtGetPostsByTag = `SELECT * FROM posts WHERE %s id IN ( SELECT post_id FROM posts_tags WHERE tag_id = ? ) ORDER BY published_at DESC LIMIT ? OFFSET ?`
+const stmtGetAllPostsByTag = `SELECT * FROM posts WHERE id IN ( SELECT post_id FROM posts_tags WHERE tag_id = ?) ORDER BY published_at DESC `
+const stmtGetPostsCountByTag = "SELECT count(*) FROM posts, posts_tags WHERE posts_tags.post_id = posts.id AND posts.published AND posts_tags.tag_id = ?"
+const stmtInsertPostTag = `INSERT INTO posts_tags (id, post_id, tag_id) VALUES (?, ?, ?)`
+const stmtDeletePostTagsByPostId = `DELETE FROM posts_tags WHERE post_id = ?`
+const stmtNumberOfPosts = "SELECT count(*) FROM posts WHERE id IN ( SELECT post_id FROM posts_tags ) AND %s"
+const stmtGetAllPostList = `SELECT * FROM posts WHERE %s ORDER BY ?`
+const stmtGetPostList = `SELECT * FROM posts WHERE %s ORDER BY ? LIMIT ? OFFSET ?`
+const stmtDeletePostById = `DELETE FROM posts WHERE id = ?`

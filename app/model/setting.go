@@ -49,7 +49,7 @@ func SetNavigators(labels, urls []string) error {
 }
 
 func (setting *Setting) GetSetting() error {
-	err := meddler.QueryRow(db, setting, "SELECT * FROM settings WHERE key = ?", setting.Key)
+	err := meddler.QueryRow(db, setting, stmtGetSetting, setting.Key)
 	return err
 }
 
@@ -68,7 +68,7 @@ type Settings []*Setting
 
 func GetSettingsByType(t string) *Settings {
 	settings := new(Settings)
-	err := meddler.QueryAll(db, settings, "SELECT * FROM settings WHERE type = ?", t)
+	err := meddler.QueryAll(db, settings, stmtGetSettingsByType, t)
 	if err != nil {
 		return nil
 	}
@@ -77,7 +77,7 @@ func GetSettingsByType(t string) *Settings {
 
 func (s *Setting) Save() error {
 	var id int
-	row := db.QueryRow("SELECT id FROM settings WHERE KEY = ?", s.Key)
+	row := db.QueryRow(stmtSaveSelect, s.Key)
 	if err := row.Scan(&id); err != nil {
 		s.Id = 0
 	} else {
@@ -104,3 +104,7 @@ func SetSettingIfNotExists(k, v, t string) error {
 	}
 	return err
 }
+
+const stmtGetSetting = `SELECT * FROM settings WHERE key = ?`
+const stmtSaveSelect = `SELECT id FROM settings WHERE KEY = ?`
+const stmtGetSettingsByType = `SELECT * FROM settings WHERE type = ?`

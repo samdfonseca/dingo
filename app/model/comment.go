@@ -101,17 +101,17 @@ func (comments *Comments) GetCommentList(page, size int64) (*utils.Pager, error)
 	count, err := GetNumberOfComments()
 	pager = utils.NewPager(page, size, count)
 
-	err = meddler.QueryAll(db, comments, "SELECT * FROM comments ORDER BY created_at DESC LIMIT ? OFFSET ?", size, pager.Begin-1)
+	err = meddler.QueryAll(db, comments, stmtGetCommentList, size, pager.Begin-1)
 	return pager, err
 }
 
 func (comment *Comment) GetCommentById() error {
-	err := meddler.QueryRow(db, comment, "SELECT * FROM comments WHERE id = ?", comment.Id)
+	err := meddler.QueryRow(db, comment, stmtGetCommentById, comment.Id)
 	return err
 }
 
 func (comments *Comments) GetCommentsByPostId(id int64) error {
-	err := meddler.QueryAll(db, comments, "SELECT * FROM comments WHERE post_id = ? AND approved = 1", id)
+	err := meddler.QueryAll(db, comments, stmtGetCommentsByPostId, id)
 	return err
 }
 
@@ -141,3 +141,9 @@ func (c *Comment) ValidateComment() string {
 	}
 	return ""
 }
+
+const stmtGetAllCommentCount = `SELECT count(*) FROM comments`
+const stmtDeleteCommentById = `DELETE FROM comments WHERE id = ?`
+const stmtGetCommentList = `SELECT * FROM comments ORDER BY created_at DESC LIMIT ? OFFSET ?`
+const stmtGetCommentById = `SELECT * FROM comments WHERE id = ?`
+const stmtGetCommentsByPostId = `SELECT * FROM comments WHERE post_id = ? AND approved = 1`

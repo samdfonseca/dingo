@@ -35,7 +35,7 @@ func (t *Token) Save() error {
 		writeDB.Rollback()
 		return err
 	}
-	_, err = writeDB.Exec("INSERT OR REPLACE INTO tokens (id,value, user_id, created_at, expired_at) VALUES (?,?, ?, ?, ?)", t.Id, t.Value, t.UserId, t.CreatedAt, t.ExpiredAt)
+	_, err = writeDB.Exec(stmtSave, t.Id, t.Value, t.UserId, t.CreatedAt, t.ExpiredAt)
 	if err != nil {
 		writeDB.Rollback()
 		return err
@@ -44,7 +44,7 @@ func (t *Token) Save() error {
 }
 
 func (t *Token) GetTokenByValue() error {
-	err := meddler.QueryRow(db, t, "SELECT * FROM tokens WHERE value = ?", t.Value)
+	err := meddler.QueryRow(db, t, stmtGetTokenByValue, t.Value)
 	return err
 }
 
@@ -56,3 +56,6 @@ func (t *Token) IsValid() bool {
 	}
 	return t.ExpiredAt.After(*utils.Now())
 }
+
+const stmtSave = `INSERT OR REPLACE INTO tokens (id,value, user_id, created_at, expired_at) VALUES (?,?, ?, ?, ?)`
+const stmtGetTokenByValue = `SELECT * FROM tokens WHERE value = ?`
