@@ -45,7 +45,8 @@ func APICommentHandler(ctx *golf.Context) {
 		handleErr(ctx, 500, err)
 		return
 	}
-	comment, err := model.GetCommentById(int64(id))
+	comment := &model.Comment{Id: int64(id)}
+	err = comment.GetCommentById()
 	if err != nil {
 		handleErr(ctx, 404, err)
 		return
@@ -60,12 +61,13 @@ func APICommentPostHandler(ctx *golf.Context) {
 		handleErr(ctx, 500, err)
 		return
 	}
-	comment, err := model.GetCommentByPostId(int64(id))
+	comments := new(model.Comments)
+	err = comments.GetCommentsByPostId(int64(id))
 	if err != nil {
 		handleErr(ctx, 404, err)
 		return
 	}
-	ctx.JSONIndent(comment, "", "  ")
+	ctx.JSONIndent(comments, "", "  ")
 }
 
 // APIPostsHandler gets every page, ordered by publication date.
@@ -109,7 +111,8 @@ func APIPostSlugHandler(ctx *golf.Context) {
 
 // APITagsHandler retrieves all the tags.
 func APITagsHandler(ctx *golf.Context) {
-	tags, err := model.GetAllTags()
+	tags := new(model.Tags)
+	err := tags.GetAllTags()
 	if err != nil {
 		handleErr(ctx, 404, err)
 		return
@@ -124,7 +127,8 @@ func APITagHandler(ctx *golf.Context) {
 		handleErr(ctx, 500, err)
 		return
 	}
-	tag, err := model.GetTag(int64(id))
+	tag := &model.Tag{Id: int64(id)}
+	err = tag.GetTag()
 	if err != nil {
 		handleErr(ctx, 404, err)
 		return
@@ -135,7 +139,8 @@ func APITagHandler(ctx *golf.Context) {
 // APITagSlugHandler retrieves the tag(s) with the given slug.
 func APITagSlugHandler(ctx *golf.Context) {
 	slug := ctx.Param("slug")
-	tags, err := model.GetTagBySlug(slug)
+	tags := &model.Tag{Slug: slug}
+	err := tags.GetTagBySlug()
 	if err != nil {
 		handleErr(ctx, 500, err)
 		return
@@ -157,7 +162,8 @@ func APIUserHandler(ctx *golf.Context) {
 		handleErr(ctx, 500, err)
 		return
 	}
-	user, err := model.GetUserById(int64(id))
+	user := &model.User{Id: int64(id)}
+	err = user.GetUserById()
 	if err != nil {
 		handleErr(ctx, 404, err)
 		return
@@ -168,7 +174,8 @@ func APIUserHandler(ctx *golf.Context) {
 // APIUserSlugHandler retrives the user with the given slug.
 func APIUserSlugHandler(ctx *golf.Context) {
 	slug := ctx.Param("slug")
-	user, err := model.GetUserBySlug(slug)
+	user := &model.User{Slug: slug}
+	err := user.GetUserBySlug()
 	if err != nil {
 		handleErr(ctx, 404, err)
 		return
@@ -179,7 +186,8 @@ func APIUserSlugHandler(ctx *golf.Context) {
 // APIUserEmailHandler retrieves the user with the given email.
 func APIUserEmailHandler(ctx *golf.Context) {
 	email := ctx.Param("email")
-	user, err := model.GetUserByEmail(email)
+	user := &model.User{Email: email}
+	err := user.GetUserByEmail()
 	if err != nil {
 		handleErr(ctx, 404, err)
 		return

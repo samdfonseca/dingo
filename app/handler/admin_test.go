@@ -283,7 +283,8 @@ func TestPostHandler(t *testing.T) {
 				})
 
 				Convey("Should have correct tag length", func() {
-					tags, _ := model.GetTagsByPostId(post.Id)
+					tags := new(model.Tags)
+					_ = tags.GetTagsByPostId(post.Id)
 					So(tags, ShouldHaveLength, 2)
 				})
 
@@ -310,13 +311,15 @@ func TestPostHandler(t *testing.T) {
 				})
 
 				Convey("Should create relevant tags", func() {
-					t, err := model.GetTagBySlug("dingo")
+					tag := &model.Tag{Slug: "dingo"}
+					err := tag.GetTagBySlug()
 					So(err, ShouldBeNil)
-					So(t.Name, ShouldEqual, "Dingo")
+					So(tag.Name, ShouldEqual, "Dingo")
 
-					t, err = model.GetTagBySlug("welcome")
+					tag = &model.Tag{Slug: "welcome"}
+					err = tag.GetTagBySlug()
 					So(err, ShouldBeNil)
-					So(t.Name, ShouldEqual, "Welcome")
+					So(tag.Name, ShouldEqual, "Welcome")
 				})
 
 			})
@@ -343,7 +346,8 @@ func TestPostHandler(t *testing.T) {
 					})
 
 					Convey("Should have correct tag length", func() {
-						tags, _ := model.GetTagsByPostId(post.Id)
+						tags := new(model.Tags)
+						_ = tags.GetTagsByPostId(post.Id)
 						So(tags, ShouldHaveLength, 1)
 					})
 
@@ -370,7 +374,9 @@ func TestPostHandler(t *testing.T) {
 					})
 
 					Convey("Unused tags should be removed", func() {
-						_, err := model.GetTagBySlug("dingo")
+						tag := &model.Tag{Slug: "dingo"}
+						err := tag.GetTagBySlug()
+						So(tag.CreatedAt, ShouldBeNil)
 						So(err, ShouldNotBeNil)
 					})
 
@@ -423,7 +429,8 @@ func TestCommentHandler(t *testing.T) {
 				ctx := mockContext(form, "POST", "/comment/1/")
 				app.ServeHTTP(ctx.Response, ctx.Request)
 
-				c, err := model.GetCommentById(1)
+				c := &model.Comment{Id: 1}
+				err := c.GetCommentById()
 				So(err, ShouldBeNil)
 				So(c.Approved, ShouldBeFalse)
 
@@ -436,7 +443,8 @@ func TestCommentHandler(t *testing.T) {
 					So(ctx.Response.(*httptest.ResponseRecorder).Body.String(), ShouldContainSubstring, "success")
 
 					Convey("Get the approved comment", func() {
-						c, err := model.GetCommentById(1)
+						c := &model.Comment{Id: 1}
+						err = c.GetCommentById()
 
 						So(err, ShouldBeNil)
 						So(c.Approved, ShouldBeTrue)
@@ -453,14 +461,16 @@ func TestCommentHandler(t *testing.T) {
 					So(ctx.Response.(*httptest.ResponseRecorder).Body.String(), ShouldContainSubstring, "success")
 
 					Convey("Get the parent comment", func() {
-						c, err := model.GetCommentById(1)
+						c := &model.Comment{Id: 1}
+						err = c.GetCommentById()
 
 						So(err, ShouldBeNil)
 						So(c.Approved, ShouldBeTrue)
 					})
 
 					Convey("Get the reply comment", func() {
-						c, err := model.GetCommentById(2)
+						c := &model.Comment{Id: 2}
+						err = c.GetCommentById()
 
 						So(err, ShouldBeNil)
 						So(c.Parent, ShouldEqual, 1)
@@ -477,10 +487,11 @@ func TestCommentHandler(t *testing.T) {
 					So(ctx.Response.(*httptest.ResponseRecorder).Body.String(), ShouldContainSubstring, "success")
 
 					Convey("Get the parent comment", func() {
-						c, err := model.GetCommentById(1)
+						c := &model.Comment{Id: 1}
+						err = c.GetCommentById()
 
 						So(err, ShouldNotBeNil)
-						So(c, ShouldBeNil)
+						So(c.CreatedAt, ShouldBeNil)
 					})
 				})
 

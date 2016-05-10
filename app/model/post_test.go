@@ -55,7 +55,8 @@ func TestPost(t *testing.T) {
 				So(err, ShouldBeNil)
 
 				Convey("Unused tag should be removed", func() {
-					_, err := GetTagBySlug("dingo")
+					tag := &Tag{Slug: "dingo"}
+					err = tag.GetTagBySlug()
 					So(err, ShouldNotBeNil)
 				})
 
@@ -65,9 +66,10 @@ func TestPost(t *testing.T) {
 					err := newPost.GetPostById()
 
 					So(err, ShouldBeNil)
-					tags, _ := GetTagsByPostId(newPost.Id)
+					tags := new(Tags)
+					err = tags.GetTagsByPostId(p.Id)
 					So(tags, ShouldHaveLength, 1)
-					So(tags[0].Slug, ShouldEqual, "welcome")
+					So(tags.Get(0).Slug, ShouldEqual, "welcome")
 					//					So((*newPost.UpdatedAt).After(*p.UpdatedAt), ShouldBeTrue)
 				})
 			})
@@ -113,7 +115,8 @@ func TestPost(t *testing.T) {
 				So(err, ShouldNotBeNil)
 
 				Convey("Tags should be deleted", func() {
-					tags, _ := GetAllTags()
+					tags := new(Tags)
+					_ = tags.GetAllTags()
 
 					So(tags, ShouldHaveLength, 0)
 				})

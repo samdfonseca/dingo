@@ -30,7 +30,8 @@ func TestUserSignUpWithCorrectInformation(t *testing.T) {
 				})
 
 				Convey("Get the previously signed user", func() {
-					user, err := model.GetUserById(1)
+					user := &model.User{Id: 1}
+					err := user.GetUserById()
 
 					Convey("The user can be get without error", func() {
 						So(err, ShouldBeNil)

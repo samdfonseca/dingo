@@ -47,12 +47,14 @@ func generateUniqueSlug(slug string, table string, suffix int) string {
 	}
 	var err error
 	if table == "tags" { // Not needed at the moment. Tags with the same name should have the same slug.
-		_, err = GetTagBySlug(slugToCheck)
+		tag := &Tag{Slug: slugToCheck}
+		err = tag.GetTagBySlug()
 	} else if table == "posts" {
 		post := new(Post)
 		err = post.GetPostBySlug(slugToCheck)
 	} else if table == "users" {
-		_, err = GetUserBySlug(slugToCheck)
+		u := new(User)
+		err = u.GetUserBySlug()
 	}
 	if err == nil {
 		return generateUniqueSlug(slug, table, suffix+1)

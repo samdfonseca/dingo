@@ -1,20 +1,22 @@
 package model
 
 import (
-	"database/sql"
 	"encoding/json"
 	"time"
 
 	"github.com/dinever/dingo/app/utils"
+	"github.com/russross/meddler"
 )
 
 type Setting struct {
-	Id        int
-	Key       string
-	Value     string
-	Type      string // general, content, navigation, custom
-	CreatedAt *time.Time
-	CreatedBy int64
+	Id        int        `meddler:"id,pk"`
+	Key       string     `meddler:"key"`
+	Value     string     `meddler:"value"`
+	Type      string     `meddler:"type"` // general, content, navigation, custom
+	CreatedAt *time.Time `meddler:"created_at"`
+	CreatedBy int64      `meddler:"created_by"`
+	UpdatedAt *time.Time `meddler:"updated_at"`
+	UpdatedBy int64      `meddler:"updated_by"`
 }
 
 type Navigator struct {
@@ -46,66 +48,43 @@ func SetNavigators(labels, urls []string) error {
 	return s.Save()
 }
 
-func GetSetting(k string) (*Setting, error) {
-	row := db.QueryRow(stmtGetSettingByKey, k)
-	s := new(Setting)
-	err := scanSetting(row, s)
-	return s, err
+func (setting *Setting) GetSetting() error {
+	err := meddler.QueryRow(db, setting, stmtGetSetting, setting.Key)
+	return err
 }
 
 func GetSettingValue(k string) string {
 	// TODO: error handling
-	s, _ := GetSetting(k)
-	return s.Value
+	setting := &Setting{Key: k}
+	_ = setting.GetSetting()
+	return setting.Value
 }
 
-func scanSetting(row Row, setting *Setting) error {
-	var nullValue sql.NullString
-	err := row.Scan(&setting.Id, &setting.Key, &nullValue, &setting.Type, &setting.CreatedAt, &setting.CreatedBy)
-	if err != nil {
-		return err
-	}
-	setting.Value = nullValue.String
-	return nil
+func GetCustomSettings() *Settings {
+	return GetSettingsByType("custom")
 }
 
-func GetCustomSettings() []*Setting {
-	return GetSettings("custom")
-}
+type Settings []*Setting
 
-func GetSettings(t string) []*Setting {
-	settings := make([]*Setting, 0)
-	rows, err := db.Query(stmtGetSettingsByType, t)
+func GetSettingsByType(t string) *Settings {
+	settings := new(Settings)
+	err := meddler.QueryAll(db, settings, stmtGetSettingsByType, t)
 	if err != nil {
-		return settings
-	}
-	defer rows.Close()
-	if err != nil {
-		return settings
-	}
-	for rows.Next() {
-		setting := new(Setting)
-		err := scanSetting(rows, setting)
-		if err != nil {
-			return settings
-		}
-		settings = append(settings, setting)
+		return nil
 	}
 	return settings
 }
 
 func (s *Setting) Save() error {
-	writeDB, err := db.Begin()
-	if err != nil {
-		writeDB.Rollback()
-		return err
+	var id int
+	row := db.QueryRow(stmtSaveSelect, s.Key)
+	if err := row.Scan(&id); err != nil {
+		s.Id = 0
+	} else {
+		s.Id = id
 	}
-	_, err = db.Exec(stmtUpdateSetting, s.Key, s.Key, s.Value, s.Type, s.CreatedAt, s.CreatedBy)
-	if err != nil {
-		writeDB.Rollback()
-		return err
-	}
-	return writeDB.Commit()
+	err := meddler.Save(db, "settings", s)
+	return err
 }
 
 func NewSetting(k, v, t string) *Setting {
@@ -118,10 +97,14 @@ func NewSetting(k, v, t string) *Setting {
 }
 
 func SetSettingIfNotExists(k, v, t string) error {
-	_, err := GetSetting(k)
+	s := NewSetting(k, v, t)
+	err := s.GetSetting()
 	if err != nil {
-		s := NewSetting(k, v, t)
 		return s.Save()
 	}
 	return err
 }
+
+const stmtGetSetting = `SELECT * FROM settings WHERE key = ?`
+const stmtSaveSelect = `SELECT id FROM settings WHERE KEY = ?`
+const stmtGetSettingsByType = `SELECT * FROM settings WHERE type = ?`

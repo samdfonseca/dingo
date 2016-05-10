@@ -42,28 +42,32 @@ func TestTag(t *testing.T) {
 			})
 
 			Convey("Get tags by post ID", func() {
-				tags, err := GetTagsByPostId(p.Id)
+				tags := new(Tags)
+				err = tags.GetTagsByPostId(p.Id)
 
 				So(tags, ShouldHaveLength, 2)
 				So(err, ShouldBeNil)
 			})
 
 			Convey("Get tag", func() {
-				t, err := GetTag(tag.Id)
+				t := &Tag{Id: tag.Id}
+				err := t.GetTag()
 
 				tagEqualCheck(t, tag)
 				So(err, ShouldBeNil)
 			})
 
 			Convey("Get tag by slug", func() {
-				t, err := GetTagBySlug(tag.Slug)
+				ttag := &Tag{Slug: tag.Slug}
+				err = ttag.GetTagBySlug()
 
-				tagEqualCheck(t, tag)
+				tagEqualCheck(ttag, tag)
 				So(err, ShouldBeNil)
 			})
 
 			Convey("Get all tags", func() {
-				ts, err := GetAllTags()
+				ts := new(Tags)
+				err := ts.GetAllTags()
 
 				So(ts, ShouldHaveLength, 3)
 				So(err, ShouldBeNil)
@@ -71,8 +75,10 @@ func TestTag(t *testing.T) {
 
 			Convey("Delete old tags", func() {
 				err := DeleteOldTags()
+				So(err, ShouldBeNil)
 
-				ts, err := GetAllTags()
+				ts := new(Tags)
+				err = ts.GetAllTags()
 				So(err, ShouldBeNil)
 				// delete test-tag created by mockTag(),
 				// but two tags created by mockPost remain.

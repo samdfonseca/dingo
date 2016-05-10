@@ -39,25 +39,29 @@ func TestUser(t *testing.T) {
 			So(err, ShouldBeNil)
 
 			Convey("Get User By Id", func() {
-				u, err := GetUserById(user.Id)
+				u := &User{Id: user.Id}
+				err := u.GetUserById()
 				So(err, ShouldBeNil)
 				userEqualCheck(u, user)
 			})
 
 			Convey("Get User By Slug", func() {
-				u, err := GetUserBySlug(user.Slug)
+				u := &User{Slug: user.Slug}
+				err := u.GetUserBySlug()
 				So(err, ShouldBeNil)
 				userEqualCheck(u, user)
 			})
 
 			Convey("Get User By Name", func() {
-				u, err := GetUserByName(user.Name)
+				u := &User{Name: user.Name}
+				err := u.GetUserByName()
 				So(err, ShouldBeNil)
 				userEqualCheck(u, user)
 			})
 
 			Convey("Get User By Email", func() {
-				u, err := GetUserByEmail(user.Email)
+				u := &User{Email: user.Email}
+				err := u.GetUserByEmail()
 				So(err, ShouldBeNil)
 				userEqualCheck(u, user)
 			})
@@ -75,7 +79,7 @@ func TestUser(t *testing.T) {
 			})
 
 			Convey("Email Exist", func() {
-				result := UserEmailExist(user.Email)
+				result := user.UserEmailExist()
 				So(err, ShouldBeNil)
 				So(result, ShouldEqual, true)
 			})
@@ -91,7 +95,8 @@ func TestUser(t *testing.T) {
 				user.Email = "nakayamakenjiro@gmail.com"
 				err := user.Update()
 				So(err, ShouldBeNil)
-				u, err := GetUserById(user.Id)
+				u := &User{Id: user.Id}
+				err = u.GetUserById()
 				userEqualCheck(u, user)
 			})
 

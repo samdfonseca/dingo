@@ -113,7 +113,8 @@ func TagHandler(ctx *golf.Context) {
 	page, _ := strconv.Atoi(p)
 	t := ctx.Param("tag")
 	tagSlug, _ := url.QueryUnescape(t)
-	tag, err := model.GetTagBySlug(tagSlug)
+	tag := &model.Tag{Slug: tagSlug}
+	err := tag.GetTagBySlug()
 	if err != nil {
 		NotFoundHandler(ctx)
 		return

@@ -36,7 +36,8 @@ func TestSetting(t *testing.T) {
 			So(err, ShouldBeNil)
 
 			Convey("Get Setting", func() {
-				s, err := GetSetting("github")
+				s := &Setting{Key: "github"}
+				err = s.GetSetting()
 
 				So(err, ShouldBeNil)
 				So(s.Key, ShouldEqual, "github")
@@ -47,7 +48,8 @@ func TestSetting(t *testing.T) {
 
 			Convey("Set Setting if not exists", func() {
 				SetSettingIfNotExists("github", "github", "custom")
-				s, err := GetSetting("github")
+				s := &Setting{Key: "github"}
+				err = s.GetSetting()
 
 				So(err, ShouldBeNil)
 				So(s.Key, ShouldEqual, "github")
@@ -62,18 +64,16 @@ func TestSetting(t *testing.T) {
 			})
 
 			Convey("Get all settings", func() {
-				cs := GetSettings("custom")
+				cs := GetSettingsByType("custom")
 
 				So(cs, ShouldHaveLength, 2)
 			})
 
 			Convey("Get setting value", func() {
 				v := GetSettingValue("github")
-
 				So(v, ShouldEqual, "dinever")
 
 				v = GetSettingValue("gplus")
-
 				So(v, ShouldEqual, "")
 			})
 		})

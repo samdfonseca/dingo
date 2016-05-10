@@ -1,10 +1,11 @@
 package handler
 
 import (
-	"github.com/dinever/dingo/app/model"
-	"github.com/dinever/golf"
 	"net/http"
 	"strconv"
+
+	"github.com/dinever/dingo/app/model"
+	"github.com/dinever/golf"
 )
 
 func AuthMiddleware(next golf.HandlerFunc) golf.HandlerFunc {
@@ -19,7 +20,9 @@ func AuthMiddleware(next golf.HandlerFunc) golf.HandlerFunc {
 			ctx.Redirect("/login/")
 			return
 		}
-		token, err := model.GetTokenByValue(tokenStr.Value)
+		//token, err := model.GetTokenByValue(tokenStr.Value)
+		token := &model.Token{Value: tokenStr.Value}
+		err = token.GetTokenByValue()
 		if err != nil || !token.IsValid() {
 			ctx.Redirect("/login/")
 			return
@@ -30,7 +33,8 @@ func AuthMiddleware(next golf.HandlerFunc) golf.HandlerFunc {
 			return
 		}
 		uid, _ := strconv.Atoi(tokenUser.Value)
-		user, err := model.GetUserById(int64(uid))
+		user := &model.User{Id: int64(uid)}
+		err = user.GetUserById()
 		if err != nil {
 			panic(err)
 		}
