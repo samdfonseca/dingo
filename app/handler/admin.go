@@ -41,7 +41,6 @@ func ProfileChangeHandler(ctx *golf.Context) {
 	u.Name = ctx.Request.FormValue("name")
 	u.Slug = ctx.Request.FormValue("slug")
 	u.Email = ctx.Request.FormValue("email")
-	u.Avatar = utils.Gravatar(ctx.Request.FormValue("email"), "180")
 	u.Website = ctx.Request.FormValue("url")
 	u.Bio = ctx.Request.FormValue("bio")
 	err := u.Update()

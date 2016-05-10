@@ -90,6 +90,13 @@ func TestUser(t *testing.T) {
 				So(result, ShouldEqual, 1)
 			})
 
+			Convey("Get Avatar", func() {
+				u := &User{Id: user.Id}
+				err := u.GetUserById()
+				So(err, ShouldBeNil)
+				So(u.Avatar(), ShouldEqual, "http://1.gravatar.com/avatar/3583d6fbf01855a8d637059044752eb8?s=150")
+			})
+
 			Convey("Update User", func() {
 				user.Name = "Kenjiro Nakayama"
 				user.Email = "nakayamakenjiro@gmail.com"

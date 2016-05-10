@@ -27,7 +27,6 @@ type User struct {
 	CreatedBy      int        `meddler:"created_by"`
 	UpdatedAt      *time.Time `meddler:"updated_at"`
 	UpdatedBy      int        `meddler:"updated_by"`
-	Avatar         string     `meddler:"-"`
 	Role           int        `meddler:"-"` //1 = Administrator, 2 = Editor, 3 = Author, 4 = Owner
 }
 
@@ -97,6 +96,10 @@ func (u *User) CheckPassword(password string) bool {
 		return false
 	}
 	return true
+}
+
+func (u *User) Avatar() string {
+	return utils.Gravatar(u.Email, "150")
 }
 
 func (user *User) GetUserById() error {
