@@ -275,7 +275,6 @@ func GetNumberOfPosts(isPage bool, published bool) (int64, error) {
 	}
 	var row *sql.Row
 
-	fmt.Printf("\n %v \n", fmt.Sprintf(stmtNumberOfPosts, where))
 	row = db.QueryRow(fmt.Sprintf(stmtNumberOfPosts, where))
 	err := row.Scan(&count)
 	if err != nil {
