@@ -12,6 +12,18 @@ import (
 	"github.com/russross/meddler"
 )
 
+const stmtGetPostById = `SELECT * FROM posts WHERE id = ?`
+const stmtGetPostBySlug = `SELECT * FROM posts WHERE slug = ?`
+const stmtGetPostsByTag = `SELECT * FROM posts WHERE %s id IN ( SELECT post_id FROM posts_tags WHERE tag_id = ? ) ORDER BY published_at DESC LIMIT ? OFFSET ?`
+const stmtGetAllPostsByTag = `SELECT * FROM posts WHERE id IN ( SELECT post_id FROM posts_tags WHERE tag_id = ?) ORDER BY published_at DESC `
+const stmtGetPostsCountByTag = "SELECT count(*) FROM posts, posts_tags WHERE posts_tags.post_id = posts.id AND posts.published AND posts_tags.tag_id = ?"
+const stmtInsertPostTag = `INSERT INTO posts_tags (id, post_id, tag_id) VALUES (?, ?, ?)`
+const stmtDeletePostTagsByPostId = `DELETE FROM posts_tags WHERE post_id = ?`
+const stmtNumberOfPosts = "SELECT count(*) FROM posts WHERE id IN ( SELECT post_id FROM posts_tags ) AND %s"
+const stmtGetAllPostList = `SELECT * FROM posts WHERE %s ORDER BY %s`
+const stmtGetPostList = `SELECT * FROM posts WHERE %s ORDER BY %s LIMIT ? OFFSET ?`
+const stmtDeletePostById = `DELETE FROM posts WHERE id = ?`
+
 type Post struct {
 	Id              int64      `meddler:"id,pk"`
 	Title           string     `meddler:"title"`
@@ -298,7 +310,7 @@ func (posts *Posts) GetPostList(page, size int64, isPage bool, onlyPublished boo
 		where = where + ` AND published`
 	}
 
-	err = meddler.QueryAll(db, posts, fmt.Sprintf(stmtGetPostList, where), orderBy, size, pager.Begin-1)
+	err = meddler.QueryAll(db, posts, fmt.Sprintf(stmtGetPostList, where, orderBy), size, pager.Begin-1)
 	return pager, err
 }
 
@@ -312,7 +324,7 @@ func (posts *Posts) GetAllPostList(isPage bool, onlyPublished bool, orderBy stri
 	if onlyPublished {
 		where = where + `AND published`
 	}
-	err := meddler.QueryAll(db, posts, fmt.Sprintf(stmtGetAllPostList, where), orderBy)
+	err := meddler.QueryAll(db, posts, fmt.Sprintf(stmtGetAllPostList, where, orderBy))
 	return err
 }
 
@@ -332,15 +344,3 @@ func generateNewSlug(slug string, suffix int) string {
 	}
 	return newSlug
 }
-
-const stmtGetPostById = `SELECT * FROM posts WHERE id = ?`
-const stmtGetPostBySlug = `SELECT * FROM posts WHERE slug = ?`
-const stmtGetPostsByTag = `SELECT * FROM posts WHERE %s id IN ( SELECT post_id FROM posts_tags WHERE tag_id = ? ) ORDER BY published_at DESC LIMIT ? OFFSET ?`
-const stmtGetAllPostsByTag = `SELECT * FROM posts WHERE id IN ( SELECT post_id FROM posts_tags WHERE tag_id = ?) ORDER BY published_at DESC `
-const stmtGetPostsCountByTag = "SELECT count(*) FROM posts, posts_tags WHERE posts_tags.post_id = posts.id AND posts.published AND posts_tags.tag_id = ?"
-const stmtInsertPostTag = `INSERT INTO posts_tags (id, post_id, tag_id) VALUES (?, ?, ?)`
-const stmtDeletePostTagsByPostId = `DELETE FROM posts_tags WHERE post_id = ?`
-const stmtNumberOfPosts = "SELECT count(*) FROM posts WHERE id IN ( SELECT post_id FROM posts_tags ) AND %s"
-const stmtGetAllPostList = `SELECT * FROM posts WHERE %s ORDER BY ?`
-const stmtGetPostList = `SELECT * FROM posts WHERE %s ORDER BY ? LIMIT ? OFFSET ?`
-const stmtDeletePostById = `DELETE FROM posts WHERE id = ?`
