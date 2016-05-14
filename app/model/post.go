@@ -10,6 +10,7 @@ import (
 
 	"github.com/dinever/dingo/app/utils"
 	"github.com/russross/meddler"
+	"net/http"
 )
 
 type Post struct {
@@ -189,6 +190,16 @@ func (p *Post) Update() error {
 	}
 	err = meddler.Update(db, "posts", p)
 	return err
+}
+
+func (p *Post) UpdateFromRequest(r *http.Request) {
+	p.Title = r.FormValue("title")
+	p.Slug = r.FormValue("slug")
+	p.Markdown = r.FormValue("content")
+	p.Html = utils.Markdown2Html(p.Markdown)
+	p.AllowComment = r.FormValue("comment") == "on"
+	p.Category = r.FormValue("category")
+	p.IsPublished = r.FormValue("status") == "on"
 }
 
 func DeletePostTagsByPostId(post_id int64) error {
