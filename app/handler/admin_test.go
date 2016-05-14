@@ -251,6 +251,27 @@ func TestPostHandler(t *testing.T) {
 			Convey("Should return status success", func() {
 				So(ctx.Response.(*httptest.ResponseRecorder).Body.String(), ShouldContainSubstring, "success")
 			})
+
+			Convey("Save the page again", func() {
+				form := url.Values{}
+				form.Add("title", "Hello World")
+				form.Add("slug", "hello-world")
+				form.Add("content", "Sample content")
+				form.Add("tag", "Welcome, Dingo")
+				form.Add("comment", "on")
+				form.Add("category", "Dingo")
+				form.Add("status", "on")
+				ctx := authenticatedContext(form, "POST", "/admin/editor/1/")
+				app := ctx.App
+				app.ServeHTTP(ctx.Response, ctx.Request)
+
+				post := &model.Post{Id: 1}
+				_ = post.GetPostById()
+
+				Convey("Should still be a page", func() {
+					So(post.IsPage, ShouldEqual, true)
+				})
+			})
 		})
 
 		Convey("Create a post with correct format", func() {

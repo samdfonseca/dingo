@@ -71,16 +71,39 @@ func PostSaveHandler(ctx *golf.Context) {
 	id := ctx.Param("id")
 	idInt, _ := strconv.Atoi(id)
 	p.Id = int64(idInt)
-	p.Title = ctx.Request.FormValue("title")
-	p.Slug = ctx.Request.FormValue("slug")
-	p.Markdown = ctx.Request.FormValue("content")
-	p.Html = utils.Markdown2Html(p.Markdown)
-	p.AllowComment = ctx.Request.FormValue("comment") == "on"
-	p.Category = ctx.Request.FormValue("category")
+	p.UpdateFromRequest(ctx.Request)
 	p.CreatedBy = u.Id
 	p.UpdatedBy = u.Id
-	p.IsPublished = ctx.Request.FormValue("status") == "on"
 	p.IsPage = false
+	p.Hits = 1
+	tags := model.GenerateTagsFromCommaString(ctx.Request.FormValue("tag"))
+	var e error
+	e = p.Save(tags...)
+	if e != nil {
+		ctx.SendStatus(400)
+		ctx.JSON(map[string]interface{}{
+			"status": "error",
+			"msg":    e.Error(),
+		})
+		return
+	}
+	ctx.JSON(map[string]interface{}{
+		"status":  "success",
+		"content": p,
+	})
+}
+
+func ContentSaveHandler(ctx *golf.Context) {
+	userObj, _ := ctx.Session.Get("user")
+	u := userObj.(*model.User)
+	id := ctx.Param("id")
+	p := new(model.Post)
+	idInt, _ := strconv.Atoi(id)
+	p.Id = int64(idInt)
+	p.GetPostById()
+	p.UpdateFromRequest(ctx.Request)
+	p.Html = utils.Markdown2Html(p.Markdown)
+	p.UpdatedBy = u.Id
 	p.Hits = 1
 	tags := model.GenerateTagsFromCommaString(ctx.Request.FormValue("tag"))
 	var e error
@@ -116,7 +139,7 @@ func AdminPostHandler(ctx *golf.Context) {
 	})
 }
 
-func PostEditHandler(ctx *golf.Context) {
+func ContentEditHandler(ctx *golf.Context) {
 	userObj, _ := ctx.Session.Get("user")
 	u := userObj.(*model.User)
 	id := ctx.Param("id")
@@ -134,7 +157,7 @@ func PostEditHandler(ctx *golf.Context) {
 	})
 }
 
-func PostRemoveHandler(ctx *golf.Context) {
+func ContentRemoveHandler(ctx *golf.Context) {
 	id := ctx.Param("id")
 	postId, _ := strconv.Atoi(id)
 	err := model.DeletePostById(int64(postId))
@@ -188,15 +211,10 @@ func PageSaveHandler(ctx *golf.Context) {
 			"msg":    "The slug of this post has conflicts with another post."})
 		return
 	}
-	p.Title = ctx.Request.FormValue("title")
-	p.Slug = ctx.Request.FormValue("slug")
-	p.Markdown = ctx.Request.FormValue("content")
+	p.UpdateFromRequest(ctx.Request)
 	p.Html = utils.Markdown2Html(p.Markdown)
-	p.AllowComment = ctx.Request.FormValue("comment") == "on"
-	p.Category = ctx.Request.FormValue("category")
 	p.CreatedBy = u.Id
 	p.UpdatedBy = u.Id
-	p.IsPublished = ctx.Request.FormValue("status") == "on"
 	p.IsPage = true
 	p.Hits = 1
 	tags := model.GenerateTagsFromCommaString(ctx.Request.FormValue("tag"))

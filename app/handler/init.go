@@ -83,11 +83,11 @@ func registerAdminURLHandlers() {
 	app.Post("/admin/editor/page/", authChain.Final(PageSaveHandler))
 
 	app.Get("/admin/posts/", authChain.Final(AdminPostHandler))
-	app.Get("/admin/editor/:id/", authChain.Final(PostEditHandler))
-	app.Post("/admin/editor/:id/", authChain.Final(PostSaveHandler))
-	app.Delete("/admin/editor/:id/", authChain.Final(PostRemoveHandler))
-
 	app.Get("/admin/pages/", authChain.Final(AdminPageHandler))
+
+	app.Get("/admin/editor/:id/", authChain.Final(ContentEditHandler))
+	app.Post("/admin/editor/:id/", authChain.Final(ContentSaveHandler))
+	app.Delete("/admin/editor/:id/", authChain.Final(ContentRemoveHandler))
 
 	app.Get("/admin/comments/", authChain.Final(CommentViewHandler))
 	app.Post("/admin/comments/", authChain.Final(CommentAddHandler))
