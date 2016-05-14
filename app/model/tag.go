@@ -140,7 +140,7 @@ func DeleteOldTags() error {
 	return WriteDB.Commit()
 }
 
-const stmtGetTagsByPostId = `SELECT * FROM tags WHERE id IN (SELECT tag_id FROM posts_tags  WHERE post_id = ?)`
+const stmtGetTagsByPostId = `SELECT * FROM tags WHERE id IN (SELECT tag_id FROM posts_tags WHERE post_id = ?)`
 const stmtGetTag = `SELECT * FROM tags WHERE id = ?`
 const stmtGetTagBySlug = `SELECT * FROM tags WHERE slug = ?`
 const stmtGetAllTags = `SELECT * FROM tags`

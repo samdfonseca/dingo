@@ -9,6 +9,9 @@ import (
 	"github.com/russross/meddler"
 )
 
+const stmtSave = `INSERT OR REPLACE INTO tokens (id,value, user_id, created_at, expired_at) VALUES (?,?, ?, ?, ?)`
+const stmtGetTokenByValue = `SELECT * FROM tokens WHERE value = ?`
+
 type Token struct {
 	Id        int64      `meddler:"id,pk"`
 	Value     string     `meddler:"value"`
@@ -56,6 +59,3 @@ func (t *Token) IsValid() bool {
 	}
 	return t.ExpiredAt.After(*utils.Now())
 }
-
-const stmtSave = `INSERT OR REPLACE INTO tokens (id,value, user_id, created_at, expired_at) VALUES (?,?, ?, ?, ?)`
-const stmtGetTokenByValue = `SELECT * FROM tokens WHERE value = ?`

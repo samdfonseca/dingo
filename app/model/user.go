@@ -8,6 +8,14 @@ import (
 	"golang.org/x/crypto/bcrypt"
 )
 
+const stmtGetUserById = `SELECT * FROM users WHERE id = ?`
+const stmtGetUserBySlug = `SELECT * FROM users WHERE slug = ?`
+const stmtGetUserByName = `SELECT * FROM users WHERE name = ?`
+const stmtGetUserByEmail = `SELECT * FROM users WHERE email = ?`
+const stmtInsertRoleUser = `INSERT INTO roles_users (id, role_id, user_id) VALUES (?, ?, ?)`
+const stmtGetUsersCountByEmail = `SELECT count(*) FROM users where email = ?`
+const stmtGetNumberOfUsers = `SELECT COUNT(*) FROM users`
+
 type User struct {
 	Id             int64      `meddler:"id,pk"`
 	Name           string     `meddler:"name"`
@@ -154,11 +162,3 @@ func GetNumberOfUsers() (int64, error) {
 	err := row.Scan(&count)
 	return count, err
 }
-
-const stmtGetUserById = `SELECT * FROM users WHERE id = ?`
-const stmtGetUserBySlug = `SELECT * FROM users WHERE slug = ?`
-const stmtGetUserByName = `SELECT * FROM users WHERE name = ?`
-const stmtGetUserByEmail = `SELECT * FROM users WHERE email = ?`
-const stmtInsertRoleUser = `INSERT INTO roles_users (id, role_id, user_id) VALUES (?, ?, ?)`
-const stmtGetUsersCountByEmail = `SELECT count(*) FROM users where email = ?`
-const stmtGetNumberOfUsers = `SELECT COUNT(*) FROM users`

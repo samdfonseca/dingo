@@ -9,6 +9,8 @@ import (
 	"github.com/russross/meddler"
 )
 
+const stmtGetUnreadMessages = `SELECT * FROM messages WHERE is_read = 0 ORDER BY created_at DESC LIMIT 10 OFFSET 0`
+
 var (
 	messageGenerator map[string]func(v interface{}) string
 )
@@ -98,5 +100,3 @@ func generateBackupMessage(co interface{}) string {
 	}
 	return "The site is successfully backed up at: " + strings.TrimPrefix(str, "[1]")
 }
-
-const stmtGetUnreadMessages = `SELECT * FROM messages WHERE is_read = 0 ORDER BY created_at DESC LIMIT 10 OFFSET 0`
