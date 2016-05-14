@@ -8,6 +8,10 @@ import (
 	"github.com/russross/meddler"
 )
 
+const stmtGetSetting = `SELECT * FROM settings WHERE key = ?`
+const stmtSaveSelect = `SELECT id FROM settings WHERE KEY = ?`
+const stmtGetSettingsByType = `SELECT * FROM settings WHERE type = ?`
+
 type Setting struct {
 	Id        int        `meddler:"id,pk"`
 	Key       string     `meddler:"key"`
@@ -104,7 +108,3 @@ func SetSettingIfNotExists(k, v, t string) error {
 	}
 	return err
 }
-
-const stmtGetSetting = `SELECT * FROM settings WHERE key = ?`
-const stmtSaveSelect = `SELECT id FROM settings WHERE KEY = ?`
-const stmtGetSettingsByType = `SELECT * FROM settings WHERE type = ?`
