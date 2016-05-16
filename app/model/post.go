@@ -25,6 +25,15 @@ const stmtGetAllPostList = `SELECT * FROM posts WHERE %s ORDER BY %s`
 const stmtGetPostList = `SELECT * FROM posts WHERE %s ORDER BY %s LIMIT ? OFFSET ?`
 const stmtDeletePostById = `DELETE FROM posts WHERE id = ?`
 
+var safeOrderByStmt = map[string]string{
+	"created_at":        "created_at",
+	"created_at DESC":   "created_at DESC",
+	"updated_at":        "updated_at",
+	"updated_at DESC":   "updated_at DESC",
+	"published_at":      "published_at",
+	"published_at DESC": "published_at DESC",
+}
+
 type Post struct {
 	Id              int64      `meddler:"id,pk"`
 	Title           string     `meddler:"title"`
@@ -320,8 +329,9 @@ func (posts *Posts) GetPostList(page, size int64, isPage bool, onlyPublished boo
 	if onlyPublished {
 		where = where + ` AND published`
 	}
+	safeOrderBy := getSafeOrderByStmt(orderBy)
 
-	err = meddler.QueryAll(db, posts, fmt.Sprintf(stmtGetPostList, where, orderBy), size, pager.Begin-1)
+	err = meddler.QueryAll(db, posts, fmt.Sprintf(stmtGetPostList, where, safeOrderBy), size, pager.Begin-1)
 	return pager, err
 }
 
@@ -335,7 +345,8 @@ func (posts *Posts) GetAllPostList(isPage bool, onlyPublished bool, orderBy stri
 	if onlyPublished {
 		where = where + `AND published`
 	}
-	err := meddler.QueryAll(db, posts, fmt.Sprintf(stmtGetAllPostList, where, orderBy))
+	safeOrderBy := getSafeOrderByStmt(orderBy)
+	err := meddler.QueryAll(db, posts, fmt.Sprintf(stmtGetAllPostList, where, safeOrderBy))
 	return err
 }
 
@@ -354,4 +365,20 @@ func generateNewSlug(slug string, suffix int) string {
 		return generateNewSlug(slug, suffix+1)
 	}
 	return newSlug
+}
+
+// getSafeOrderByStmt returns a safe `ORDER BY` statement to be when used when
+// building SQL queries, in order to prevent SQL injection.
+//
+// Since we can't use the placeholder `?` to specify the `ORDER BY` values in
+// queries, we need to build them using `fmt.Sprintf`. Typically, doing so
+// would open you up to SQL injection attacks, since any string can be passed
+// into `fmt.Sprintf`, including strings that are valid SQL queries! By using
+// this function to check a map of safe values, we guarantee that no unsafe
+// values are ever passed to our query building function.
+func getSafeOrderByStmt(orderBy string) string {
+	if stmt, ok := safeOrderByStmt[orderBy]; ok {
+		return stmt
+	}
+	return "published_at DESC"
 }
