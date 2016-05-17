@@ -1,6 +1,6 @@
 **This project is under heavy development and is not ready for use. However, we'd love to have your contribution.**
 
-<img width=250px src="https://cloud.githubusercontent.com/assets/1311594/14765969/bc14bafc-09c7-11e6-92f8-d69774cca249.png"></img>
+<img width=500px src="https://cloud.githubusercontent.com/assets/1311594/15341604/a5523cba-1c5d-11e6-91e5-ae21a5024da6.png"></img>
 
 Dingo is a full-featured blog engine written in Go.
 
