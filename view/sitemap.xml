@@ -11,7 +11,7 @@
         <lastmod>{{.Created}}</lastmod>
         <changefreq>weekly</changefreq>
         <priority>0.6</priority>
-    </url>{{end}}{{range .Articles}}
+    </url>{{end}}{{range .Posts}}
     <url>
         <loc>{{.Link}}</loc>
         <lastmod>{{.Created}}</lastmod>

@@ -6,7 +6,7 @@
 	.widget-title {
 		padding-bottom: 10px;
 		margin-bottom: 0;
-		border-bottom: 2px solid $color_nepal_approx;
+		border-bottom: 2px solid $primary_color;
 	}
 	.widget-list {
 		margin: 0;
@@ -14,7 +14,7 @@
 		list-style-type: none;
 		li {
 			padding: 10px 0;
-			border-bottom: 1px solid $color_alto_approx;
+			border-bottom: 1px solid $primary_color;
 			&:last-child {
 				border-bottom: 0;
 			}
@@ -28,22 +28,18 @@
 		.tweet {
 			margin-bottom: 10px !important;
 			a {
-				color: $blue_lighten_1;
 				&:hover {
-					color: $color_buttered_rum_approx;
 				}
 			}
 		}
 		.timePosted {
 			margin-bottom: 0;
 			font-size: .875rem;
-			color: $color_suva_gray_approx;
 			a {
-				color: $color_suva_gray_approx;
 			}
 		}
 		.twitter-info {
-			border-top: 1px solid $color_alto_approx;
+			border-top: 1px solid $primary_color;
 			padding: 15px 0;
 		}
 	}
@@ -222,7 +218,7 @@
 		//Instead of the line below you could use @include word-break($value)
 		word-break: break-word;
 		&:hover {
-			color: $color_mine_shaft_approx;
+			color: $font_color;
 		}
 	}
 	&#widget-social .button {

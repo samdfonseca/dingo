@@ -4,7 +4,7 @@
         <title>{{.Title}}</title>
         <link>{{.Link}}</link>
         <description>{{.Desc}}</description>
-        <pubDate>{{.Created}}</pubDate>{{range .Articles}}
+        <pubDate>{{.Created}}</pubDate>{{range .Posts}}
         <item>
             <title>{{.Title}}</title>
             <link>{{.Link}}</link>

@@ -4,7 +4,7 @@ import "github.com/dinever/golf"
 
 type Statis struct {
 	Comments int64
-	Articles int64
+	Posts int64
 	Pages    int64
 	Files    int
 	Version  int
@@ -17,7 +17,7 @@ func NewStatis(app *golf.Application) *Statis {
 	pageNum, _ := GetNumberOfPosts(true, false)
 	commentNum, _ := GetNumberOfComments()
 
-	s.Articles = postNum
+	s.Posts = postNum
 	s.Pages = pageNum
 	s.Sessions = app.SessionManager.Count()
 	s.Comments = commentNum

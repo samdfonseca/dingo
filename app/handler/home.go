@@ -14,7 +14,7 @@ import (
 
 func RegisterFunctions(app *golf.Application) {
 	app.View.FuncMap["Tags"] = getAllTags
-	app.View.FuncMap["RecentArticles"] = getRecentPosts
+	app.View.FuncMap["RecentPosts"] = getRecentPosts
 }
 
 func HomeHandler(ctx *golf.Context) {
@@ -28,7 +28,7 @@ func HomeHandler(ctx *golf.Context) {
 	// theme := model.GetSetting("site_theme")
 	data := map[string]interface{}{
 		"Title":    "Home",
-		"Articles": posts,
+		"Posts": posts,
 		"Pager":    pager,
 	}
 	//	updateSidebarData(data)
@@ -46,7 +46,7 @@ func ContentHandler(ctx *golf.Context) {
 	post.Hits++
 	data := map[string]interface{}{
 		"Title":    post.Title,
-		"Article":  post,
+		"Post":  post,
 		"Content":  post,
 		"Comments": post.Comments,
 	}
@@ -122,7 +122,7 @@ func TagHandler(ctx *golf.Context) {
 	posts := new(model.Posts)
 	pager, err := posts.GetPostsByTag(tag.Id, int64(page), 5, true)
 	data := map[string]interface{}{
-		"Articles": posts,
+		"Posts": posts,
 		"Pager":    pager,
 		"Tag":      tag,
 		"Title":    tag.Name,
@@ -165,7 +165,7 @@ func SiteMapHandler(ctx *golf.Context) {
 		"Title":      model.GetSettingValue("site_title"),
 		"Link":       baseUrl,
 		"Created":    now,
-		"Articles":   articleMap,
+		"Posts":   articleMap,
 		"Navigators": navMap,
 	})
 }
@@ -191,6 +191,6 @@ func RssHandler(ctx *golf.Context) {
 		"Link":     baseUrl,
 		"Desc":     model.GetSettingValue("site_description"),
 		"Created":  utils.Now().Format(time.RFC822),
-		"Articles": articleMap,
+		"Posts": articleMap,
 	})
 }

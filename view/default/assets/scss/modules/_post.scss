@@ -24,7 +24,7 @@
 	padding-bottom: 10px;
 	margin-top: 0;
 	margin-bottom: 2rem;
-	border-bottom: 2px solid $color_nepal_approx;
+	border-bottom: 2px solid $black;
 }
 
 p {
@@ -50,7 +50,7 @@ blockquote {
 	font-style: italic;
 	border: 0;
 	letter-spacing: 0;
-	color: $color_tundora_approx;
+	color: $font-color;
 }
 
 blockquote::before {
@@ -119,7 +119,7 @@ blockquote::after {
 		}
 		.post-meta {
 			font-size: .875rem;
-			color: $color_suva_gray_approx;
+			color: $font-color;
 			margin-bottom: 10px;
 			a {
 				color: $black;
@@ -138,12 +138,12 @@ blockquote::after {
 			a {
 				display: inline-block;
 				height: 24px;
+				color: $white;
 				padding: 0 10px;
 				font-size: .8125rem;
 				line-height: 24px;
-				color: $color_storm_dust_approx;
 				text-decoration: none;
-				background-color: $color_alto_approx;
+				background-color: $primary_color;
 				//Instead of the line below you could use @include border-radius($radius, $vertical-radius)
 				border-radius: 12px;
 				//Instead of the line below you could use @include background-clip($clip)
@@ -158,7 +158,6 @@ blockquote::after {
 	.author-info {
 		margin-bottom: 40px;
 		padding-bottom: 40px;
-		border-bottom: 2px solid $color_nepal_approx;
 		.author-image {
 			max-width: 100px;
 			height: auto;
@@ -175,7 +174,6 @@ blockquote::after {
 		}
 	}
 	.tag-info {
-		border-bottom: 2px solid $color_nepal_approx;
 		.tag-name {
 			margin-top: 0;
 		}
@@ -187,6 +185,5 @@ blockquote::after {
 		clear: left;
 		height: 2px;
 		margin: 0 15px 45px;
-		background: $color_nepal_approx;
 	}
 }

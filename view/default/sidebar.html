@@ -3,7 +3,7 @@
   <div class="widget widget-bordered" id="widget-latest">
     <h4 class="widget-title">Latest post</h4>
     <ul class="widget-list">
-      {{ range RecentArticles }}
+      {{ range RecentPosts }}
       <li><a title="{{ .Title }}" href="{{ .Url }}/">{{ .Title }}</a></li>
       {{ end }}
       </ul>

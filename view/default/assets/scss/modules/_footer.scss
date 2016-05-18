@@ -1,12 +1,12 @@
 #footer {
-	background-color: $color_woodsmoke_approx;
+	background-color: $black;
 }
 
 #footer > .container {
-	background-color: $color_woodsmoke_approx;
+	background-color: $black;
 	.footer-wrapper {
 		padding: 30px 15px;
-		color: $color_dove_gray_approx;
+		color: $white;
 		.nav {
 			margin: 0;
 			padding: 0;
@@ -31,13 +31,12 @@
 			width: 100%;
 			margin-top: 10px;
 			padding-top: 15px;
-			border-top: 1px solid $color_shark_approx;
 		}
 	}
 	> .back-top {
 		margin: 0 -15px;
 		text-align: center;
-		border-top: 1px solid $color_wild_sand_approx;
+		border-top: 1px solid $white;
 		background-color: $white;
 		a {
 			font-size: 14px;
