@@ -152,5 +152,8 @@ func createWelcomeData() error {
 	c.UserAgent = "Mozilla"
 	c.UserId = 0
 	c.Approved = true
-	return c.Save()
+	c.Save()
+
+	SetNavigators([]string{"Home"}, []string{"/"})
+	return nil
 }
