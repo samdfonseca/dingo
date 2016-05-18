@@ -4,8 +4,8 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/dinever/dingo/app/handler"
-	"github.com/dinever/dingo/app/model"
+	"github.com/dingoblog/dingo/app/handler"
+	"github.com/dingoblog/dingo/app/model"
 )
 
 func fileExists(filename string) bool {

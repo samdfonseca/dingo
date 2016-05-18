@@ -7,7 +7,7 @@ import (
 	"net/http"
 	"strings"
 
-	"github.com/dinever/dingo/app/model"
+	"github.com/dingoblog/dingo/app/model"
 	"github.com/dinever/golf"
 )
 

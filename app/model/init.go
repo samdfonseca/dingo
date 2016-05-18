@@ -3,7 +3,7 @@ package model
 import (
 	"database/sql"
 
-	"github.com/dinever/dingo/app/utils"
+	"github.com/dingoblog/dingo/app/utils"
 	_ "github.com/mattn/go-sqlite3"
 )
 
@@ -143,7 +143,7 @@ func createWelcomeData() error {
 	c := NewComment()
 	c.Author = "Shawn Ding"
 	c.Email = "dingpeixuan911@gmail.com"
-	c.Website = "http://github.com/dinever/dingo"
+	c.Website = "http://github.com/dingoblog/dingo"
 	c.Content = "Welcome to Dingo! This is your first comment."
 	c.Avatar = utils.Gravatar(c.Email, "50")
 	c.PostId = p.Id

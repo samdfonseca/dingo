@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/dinever/dingo/app/utils"
+	"github.com/dingoblog/dingo/app/utils"
 	"github.com/dinever/golf"
 	"github.com/russross/meddler"
 )

@@ -15,21 +15,21 @@ Dingo is a full-featured blog engine written in Go.
 ## Installation
 
 ```
-$ go get github.com/dinever/dingo
+$ go get github.com/dingoblog/dingo
 ```
 
 ## Run the Server
 
 ```
-$ cd $GOPATH/src/github.com/dinever/dingo
+$ cd $GOPATH/src/github.com/dingoblog/dingo
 $ go run main.go --port 8000
 ```
 
 ## Contributing
 
-To contribute, please take a look at our [roadmap](https://github.com/dinever/dingo/issues/7) to find the issue that you would like to work on.
+To contribute, please take a look at our [roadmap](https://github.com/dingoblog/dingo/issues/7) to find the issue that you would like to work on.
 
-To read the source code, please start from the [URL endpoints](https://github.com/dinever/dingo/blob/master/app/app.go#L71)
+To read the source code, please start from the [URL endpoints](https://github.com/dingoblog/dingo/blob/master/app/app.go#L71)
 
 ## Admin Panel
 
