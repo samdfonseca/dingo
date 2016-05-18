@@ -9,7 +9,6 @@
 		padding: 0;
 		line-height: 36px;
 		color: $white;
-		background-color: $color_storm_dust_approx;
 		text-align: center;
 		//Instead of the line below you could use @include border-radius($radius, $vertical-radius)
 		border-radius: 50%;
@@ -24,7 +23,6 @@
 		}
 	}
 	&.button-twitter {
-		background-color: $blue;
 		color: $white;
 		text-decoration: none;
 		&:hover {
@@ -34,7 +32,6 @@
 		}
 	}
 	&.button-facebook {
-		background-color: $color_azure_approx;
 		color: $white;
 		text-decoration: none;
 		&:hover {
@@ -44,67 +41,54 @@
 		}
 	}
 	&.button-google-plus {
-		background-color: $color_valencia_approx;
 		color: $white;
 		text-decoration: none;
 		&:hover {
-			background-color: $black;
 			color: $white;
 			text-decoration: none;
 		}
 	}
 	&.button-linkedin {
-		background-color: $color_deep_cerulean_approx;
 		color: $white;
 		text-decoration: none;
 		&:hover {
-			background-color: $black;
 			color: $white;
 			text-decoration: none;
 		}
 	}
 	&.button-pinterest {
-		background-color: $color_monza_approx;
 		color: $white;
 		text-decoration: none;
 		&:hover {
-			background-color: $black;
 			color: $white;
 			text-decoration: none;
 		}
 	}
 	&.button-youtube {
-		background-color: $color_thunderbird_approx;
 		color: $white;
 		text-decoration: none;
 		&:hover {
-			background-color: $black;
 			color: $white;
 			text-decoration: none;
 		}
 	}
 	&.button-vimeo {
-		background-color: $color_scooter_approx;
 		color: $white;
 		text-decoration: none;
 		&:hover {
-			background-color: $black;
 			color: $white;
 			text-decoration: none;
 		}
 	}
 	&.button-vine {
-		background-color: $color_persian_green_approx;
 		color: $white;
 		text-decoration: none;
 		&:hover {
-			background-color: $black;
 			color: $white;
 			text-decoration: none;
 		}
 	}
 	&.button-flickr {
-		background-color: $color_science_blue_approx;
 		color: $white;
 		text-decoration: none;
 		&:hover {
@@ -114,7 +98,6 @@
 		}
 	}
 	&.button-instagram {
-		background-color: $color_astral_approx;
 		color: $white;
 		text-decoration: none;
 		&:hover {
@@ -124,7 +107,6 @@
 		}
 	}
 	&.button-tumblr {
-		background-color: $color_pickled_bluewood_approx;
 		color: $white;
 		text-decoration: none;
 		&:hover {
@@ -134,7 +116,6 @@
 		}
 	}
 	&.button-dribbble {
-		background-color: $color_french_rose_approx;
 		color: $white;
 		text-decoration: none;
 		&:hover {
@@ -144,7 +125,6 @@
 		}
 	}
 	&.button-yahoo {
-		background-color: $color_purple_approx;
 		color: $white;
 		text-decoration: none;
 		&:hover {
@@ -154,7 +134,6 @@
 		}
 	}
 	&.button-github {
-		background-color: $color_steel_blue_approx;
 		color: $white;
 		text-decoration: none;
 		&:hover {
@@ -164,7 +143,6 @@
 		}
 	}
 	&.button-rss {
-		background-color: $color_orange_approx;
 		color: $white;
 		text-decoration: none;
 		&:hover {
