@@ -7,7 +7,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/dinever/dingo/app/utils"
+	"github.com/dingoblog/dingo/app/utils"
 	. "github.com/smartystreets/goconvey/convey"
 )
 

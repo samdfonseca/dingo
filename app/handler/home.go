@@ -1,8 +1,8 @@
 package handler
 
 import (
-	"github.com/dinever/dingo/app/model"
-	"github.com/dinever/dingo/app/utils"
+	"github.com/dingoblog/dingo/app/model"
+	"github.com/dingoblog/dingo/app/utils"
 	"github.com/dinever/golf"
 	"html/template"
 	"log"

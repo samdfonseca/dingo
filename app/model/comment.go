@@ -4,7 +4,7 @@ import (
 	"database/sql"
 	"time"
 
-	"github.com/dinever/dingo/app/utils"
+	"github.com/dingoblog/dingo/app/utils"
 	"github.com/russross/meddler"
 )
 
