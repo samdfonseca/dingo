@@ -18,7 +18,7 @@ func mockComment() *Comment {
 	c.Website = "http://example.com"
 	c.Content = "comment test"
 	c.Avatar = utils.Gravatar(c.Email, "50")
-	c.Parent = 1
+	c.Parent = 0
 	c.PostId = 2
 	//	c.Ip = "127.0.0.1"
 	c.UserAgent = "Mozilla"
@@ -90,8 +90,8 @@ func TestComment(t *testing.T) {
 				comments := new(Comments)
 				err := comments.GetCommentsByPostId(cc.Id)
 				So(err, ShouldBeNil)
-				commentEqualCheck(comments.Get(1), cc)
 				commentEqualCheck(comments.Get(0), pc)
+				commentEqualCheck(comments.Get(0).Children.Get(0), cc)
 
 			})
 

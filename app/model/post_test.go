@@ -175,7 +175,6 @@ func TestPost(t *testing.T) {
 					err := newPost.Save()
 
 					So(err, ShouldBeNil)
-					println(newPost.Slug)
 					So(newPost.Slug, ShouldEqual, "welcome-to-dingo-2")
 				})
 			})
