@@ -59,7 +59,7 @@ func TestComment(t *testing.T) {
 
 			Convey("Get Comment List", func() {
 				comments := new(Comments)
-				_, err := comments.GetCommentList(1, 2)
+				_, err := comments.GetCommentList(1, 2, false)
 				So(err, ShouldBeNil)
 				So(comments, ShouldHaveLength, 2)
 			})

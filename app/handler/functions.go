@@ -18,6 +18,6 @@ func getRecentPosts() []*model.Post {
 
 func getRecentComments() []*model.Comment {
 	comments := new(model.Comments)
-	comments.GetCommentList(0, 5, true)
+	comments.GetCommentList(1, 5, true)
 	return *comments
 }
