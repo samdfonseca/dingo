@@ -8,6 +8,8 @@ import (
 	"github.com/russross/meddler"
 )
 
+type Comments []*Comment
+
 // Comment struct defines a comment item data.
 type Comment struct {
 	Id        int64      `meddler:"id,pk"`
@@ -24,9 +26,8 @@ type Comment struct {
 	Type      string     `meddler:"type"`
 	Parent    int64      `meddler:"parent"`
 	UserId    int64      `meddler:"user_id"`
+	Children *Comments   `meddler:"-"`
 }
-
-type Comments []*Comment
 
 func (c Comments) Len() int {
 	return len(c)
@@ -110,9 +111,41 @@ func (comment *Comment) GetCommentById() error {
 	return err
 }
 
+func (comment *Comment) getChildComments() (*Comments, error) {
+	comments := new(Comments)
+	err := meddler.QueryAll(db, comments, stmtGetCommentsByParentId, comment.Id)
+	return comments, err
+}
+
+func (comment *Comment) ParentComment() (*Comment, error) {
+	parent := NewComment()
+	parent.Id = comment.Parent
+	return parent, parent.GetCommentById()
+}
+
 func (comments *Comments) GetCommentsByPostId(id int64) error {
-	err := meddler.QueryAll(db, comments, stmtGetCommentsByPostId, id)
+	err := meddler.QueryAll(db, comments, stmtGetParentCommentsByPostId, id)
+	for _, c := range *comments {
+		buildCommentTree(c, c, 1)
+	}
 	return err
+}
+
+func buildCommentTree(p *Comment, c *Comment, level int) {
+	childComments, _ := c.getChildComments()
+	if p.Children == nil {
+		p.Children = childComments
+	} else {
+		newChildComments := append(*p.Children, *childComments...)
+		p.Children = &newChildComments
+	}
+	for _, c := range *childComments {
+		if level >= 2 {
+			buildCommentTree(p, c, level + 1)
+		} else {
+			buildCommentTree(c, c, level + 1)
+		}
+	}
 }
 
 func DeleteComment(id int64) error {
@@ -146,4 +179,6 @@ const stmtGetAllCommentCount = `SELECT count(*) FROM comments`
 const stmtDeleteCommentById = `DELETE FROM comments WHERE id = ?`
 const stmtGetCommentList = `SELECT * FROM comments ORDER BY created_at DESC LIMIT ? OFFSET ?`
 const stmtGetCommentById = `SELECT * FROM comments WHERE id = ?`
-const stmtGetCommentsByPostId = `SELECT * FROM comments WHERE post_id = ? AND approved = 1`
+const stmtGetCommentsByPostId = `SELECT * FROM comments WHERE post_id = ? AND approved = 1 AND parent = 0`
+const stmtGetParentCommentsByPostId = `SELECT * FROM comments WHERE post_id = ? AND approved = 1 AND parent = 0`
+const stmtGetCommentsByParentId = `SELECT * FROM comments WHERE parent = ? AND approved = 1`
