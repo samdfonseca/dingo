@@ -142,5 +142,15 @@ func TestPager(t *testing.T) {
 		So(pager.IsNext, ShouldBeFalse)
 		So(pager.IsPrev, ShouldBeFalse)
 	})
+
+	Convey("Test pager with 0 entries", t, func() {
+		pager := NewPager(1, 5, 0)
+
+		So(pager.Pages, ShouldEqual, 1)
+		So(pager.Current, ShouldEqual, 1)
+
+		So(pager.IsNext, ShouldBeFalse)
+		So(pager.IsPrev, ShouldBeFalse)
+	})
 }
 

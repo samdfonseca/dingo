@@ -24,6 +24,8 @@ func NewPager(page, size, total int64) *Pager {
 	pager.IsValid = true
 	if total % size > 0 {
 		pager.Pages += 1
+	} else if total == 0 {
+		pager.Pages = 1
 	}
 	pager.PageSlice = make([]int64, pager.Pages)
 	var i int64
