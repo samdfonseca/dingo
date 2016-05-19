@@ -27,8 +27,8 @@ func Initialize() *golf.Application {
 	app.View.SetTemplateLoader("theme", filepath.Join("view", theme))
 	//      static_dir, _ := app.Config.GetString("app/static_dir", "static")
 	app.Static("/upload/", upload_dir)
-	app.Static("/", filepath.Join("view", "admin", "assets", "dist"))
-	app.Static("/", filepath.Join("view", theme, "assets"))
+	app.Static("/admin/", filepath.Join("view", "admin", "assets", "dist"))
+	app.Static("/", filepath.Join("view", theme, "assets", "dist"))
 
 	app.SessionManager = golf.NewMemorySessionManager()
 	app.Error(404, NotFoundHandler)

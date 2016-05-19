@@ -4,6 +4,10 @@
   margin: 40px 0 0;
   float: left;
   width: 100%;
+  .comment-children {
+    list-style: none;
+    margin-left: 43px;
+  }
   .comment-avatar {
     float: left;
     margin: 0 23px 0 0;
@@ -39,7 +43,7 @@
       }
     }
   }
-  .comment-reply-link {
+  .comment-reply {
     margin: 0 0 0 83px;
     -webkit-transition: all .1s ease-in-out;
     transition: all .1s ease-in-out
@@ -48,6 +52,7 @@
 
 #comment-form {
   width: 100%;
+  margin: 0 0 20px 0;
   float: left;
   .comment-form-author, .comment-form-email, .comment-form-website {
     width: 33.3%;
