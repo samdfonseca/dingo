@@ -237,7 +237,7 @@ func CommentViewHandler(ctx *golf.Context) {
 	i, _ := strconv.Atoi(ctx.Request.FormValue("page"))
 	user, _ := ctx.Session.Get("user")
 	comments := new(model.Comments)
-	pager, err := comments.GetCommentList(int64(i), 10)
+	pager, err := comments.GetCommentList(int64(i), 10, false)
 	if err != nil {
 		panic(err)
 	}

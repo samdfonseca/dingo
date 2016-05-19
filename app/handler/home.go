@@ -15,6 +15,7 @@ import (
 func RegisterFunctions(app *golf.Application) {
 	app.View.FuncMap["Tags"] = getAllTags
 	app.View.FuncMap["RecentPosts"] = getRecentPosts
+	app.View.FuncMap["RecentComments"] = getRecentComments
 }
 
 func HomeHandler(ctx *golf.Context) {

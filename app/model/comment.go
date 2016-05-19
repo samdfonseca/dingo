@@ -6,6 +6,7 @@ import (
 
 	"github.com/dingoblog/dingo/app/utils"
 	"github.com/russross/meddler"
+	"fmt"
 )
 
 type Comments []*Comment
@@ -96,13 +97,18 @@ func GetNumberOfComments() (int64, error) {
 	return count, nil
 }
 
-func (comments *Comments) GetCommentList(page, size int64) (*utils.Pager, error) {
+func (comments *Comments) GetCommentList(page, size int64, onlyApproved bool) (*utils.Pager, error) {
 	var pager *utils.Pager
 
 	count, err := GetNumberOfComments()
 	pager = utils.NewPager(page, size, count)
 
-	err = meddler.QueryAll(db, comments, stmtGetCommentList, size, pager.Begin-1)
+	var where string
+	if onlyApproved {
+		where = `WHERE approved = 1`
+	}
+
+	err = meddler.QueryAll(db, comments, fmt.Sprintf(stmtGetCommentList, where), size, pager.Begin-1)
 	return pager, err
 }
 
@@ -121,6 +127,13 @@ func (comment *Comment) ParentComment() (*Comment, error) {
 	parent := NewComment()
 	parent.Id = comment.Parent
 	return parent, parent.GetCommentById()
+}
+
+func (comment *Comment) Post() (*Post) {
+	post := NewPost()
+	post.Id = comment.PostId
+	post.GetPostById()
+	return post
 }
 
 func (comments *Comments) GetCommentsByPostId(id int64) error {
@@ -177,7 +190,7 @@ func (c *Comment) ValidateComment() string {
 
 const stmtGetAllCommentCount = `SELECT count(*) FROM comments`
 const stmtDeleteCommentById = `DELETE FROM comments WHERE id = ?`
-const stmtGetCommentList = `SELECT * FROM comments ORDER BY created_at DESC LIMIT ? OFFSET ?`
+const stmtGetCommentList = `SELECT * FROM comments %s ORDER BY created_at DESC LIMIT ? OFFSET ?`
 const stmtGetCommentById = `SELECT * FROM comments WHERE id = ?`
 const stmtGetCommentsByPostId = `SELECT * FROM comments WHERE post_id = ? AND approved = 1 AND parent = 0`
 const stmtGetParentCommentsByPostId = `SELECT * FROM comments WHERE post_id = ? AND approved = 1 AND parent = 0`
