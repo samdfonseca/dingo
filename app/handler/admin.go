@@ -125,9 +125,15 @@ func ContentSaveHandler(ctx *golf.Context) {
 func AdminPostHandler(ctx *golf.Context) {
 	userObj, _ := ctx.Session.Get("user")
 	u := userObj.(*model.User)
-	i, _ := strconv.Atoi(ctx.Request.FormValue("page"))
+	p := ctx.Request.FormValue("page")
+	var page int
+	if p == "" {
+		page = 1
+	} else {
+		page, _ = strconv.Atoi(p)
+	}
 	posts := new(model.Posts)
-	pager, err := posts.GetPostList(int64(i), 10, false, false, "created_at DESC")
+	pager, err := posts.GetPostList(int64(page), 10, false, false, "created_at DESC")
 	if err != nil {
 		panic(err)
 	}
@@ -186,9 +192,15 @@ func PageCreateHandler(ctx *golf.Context) {
 func AdminPageHandler(ctx *golf.Context) {
 	userObj, _ := ctx.Session.Get("user")
 	u := userObj.(*model.User)
-	i, _ := strconv.Atoi(ctx.Request.FormValue("page"))
+	p := ctx.Request.FormValue("page")
+	var page int
+	if p == "" {
+		page = 1
+	} else {
+		page, _ = strconv.Atoi(p)
+	}
 	posts := new(model.Posts)
-	pager, err := posts.GetPostList(int64(i), 10, true, false, `created_at`)
+	pager, err := posts.GetPostList(int64(page), 10, true, false, `created_at`)
 	if err != nil {
 		panic(err)
 	}
@@ -234,10 +246,16 @@ func PageSaveHandler(ctx *golf.Context) {
 }
 
 func CommentViewHandler(ctx *golf.Context) {
-	i, _ := strconv.Atoi(ctx.Request.FormValue("page"))
 	user, _ := ctx.Session.Get("user")
+	p := ctx.Request.FormValue("page")
+	var page int
+	if p == "" {
+		page = 1
+	} else {
+		page, _ = strconv.Atoi(p)
+	}
 	comments := new(model.Comments)
-	pager, err := comments.GetCommentList(int64(i), 10, false)
+	pager, err := comments.GetCommentList(int64(page), 10, false)
 	if err != nil {
 		panic(err)
 	}

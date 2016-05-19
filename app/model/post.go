@@ -20,7 +20,7 @@ const stmtGetAllPostsByTag = `SELECT * FROM posts WHERE id IN ( SELECT post_id F
 const stmtGetPostsCountByTag = "SELECT count(*) FROM posts, posts_tags WHERE posts_tags.post_id = posts.id AND posts.published AND posts_tags.tag_id = ?"
 const stmtInsertPostTag = `INSERT INTO posts_tags (id, post_id, tag_id) VALUES (?, ?, ?)`
 const stmtDeletePostTagsByPostId = `DELETE FROM posts_tags WHERE post_id = ?`
-const stmtNumberOfPosts = "SELECT count(*) FROM posts WHERE id IN ( SELECT post_id FROM posts_tags ) AND %s"
+const stmtNumberOfPosts = "SELECT count(*) FROM posts WHERE %s"
 const stmtGetAllPostList = `SELECT * FROM posts WHERE %s ORDER BY %s`
 const stmtGetPostList = `SELECT * FROM posts WHERE %s ORDER BY %s LIMIT ? OFFSET ?`
 const stmtDeletePostById = `DELETE FROM posts WHERE id = ?`
@@ -281,11 +281,15 @@ func (posts *Posts) GetPostsByTag(tagId, page, size int64, onlyPublished bool) (
 		return nil, err
 	}
 	pager = utils.NewPager(page, size, count)
+
+	if !pager.IsValid {
+		return pager, fmt.Errorf("Page not found")
+	}
 	var where string
 	if onlyPublished {
 		where = "published AND"
 	}
-	err = meddler.QueryAll(db, posts, fmt.Sprintf(stmtGetPostsByTag, where), tagId, size, pager.Begin-1)
+	err = meddler.QueryAll(db, posts, fmt.Sprintf(stmtGetPostsByTag, where), tagId, size, pager.Begin)
 	return pager, err
 }
 
@@ -320,6 +324,10 @@ func (posts *Posts) GetPostList(page, size int64, isPage bool, onlyPublished boo
 	count, err := GetNumberOfPosts(isPage, onlyPublished)
 	pager = utils.NewPager(page, size, count)
 
+	if !pager.IsValid {
+		return pager, fmt.Errorf("Page not found")
+	}
+
 	var where string
 	if isPage {
 		where = `page = 1`
@@ -330,8 +338,7 @@ func (posts *Posts) GetPostList(page, size int64, isPage bool, onlyPublished boo
 		where = where + ` AND published`
 	}
 	safeOrderBy := getSafeOrderByStmt(orderBy)
-
-	err = meddler.QueryAll(db, posts, fmt.Sprintf(stmtGetPostList, where, safeOrderBy), size, pager.Begin-1)
+	err = meddler.QueryAll(db, posts, fmt.Sprintf(stmtGetPostList, where, safeOrderBy), size, pager.Begin)
 	return pager, err
 }
 
