@@ -9,8 +9,8 @@ import (
 	"testing"
 	"time"
 
-	"github.com/dingoblog/dingo/app/model"
 	"github.com/dinever/golf"
+	"github.com/dingoblog/dingo/app/model"
 	. "github.com/smartystreets/goconvey/convey"
 )
 
@@ -155,7 +155,8 @@ func TestUserLogInWithCorrectInformation(t *testing.T) {
 				Convey("Visit admin dashboard", func() {
 
 					w := httptest.NewRecorder()
-					app := Initialize()
+					app := golf.New()
+					app = Initialize(app)
 
 					req := makeTestHTTPRequest(nil, "GET", "/admin/")
 					req.Header = http.Header{"Cookie": rec.HeaderMap["Set-Cookie"]}
