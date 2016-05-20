@@ -103,12 +103,16 @@ func (comments *Comments) GetCommentList(page, size int64, onlyApproved bool) (*
 	count, err := GetNumberOfComments()
 	pager = utils.NewPager(page, size, count)
 
+	if !pager.IsValid {
+		return pager, fmt.Errorf("Page not found")
+	}
+
 	var where string
 	if onlyApproved {
 		where = `WHERE approved = 1`
 	}
 
-	err = meddler.QueryAll(db, comments, fmt.Sprintf(stmtGetCommentList, where), size, pager.Begin-1)
+	err = meddler.QueryAll(db, comments, fmt.Sprintf(stmtGetCommentList, where), size, pager.Begin)
 	return pager, err
 }
 
