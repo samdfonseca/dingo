@@ -155,7 +155,7 @@ func TestUserLogInWithCorrectInformation(t *testing.T) {
 				Convey("Visit admin dashboard", func() {
 
 					w := httptest.NewRecorder()
-					app := Initialize()
+					app := InitTestApp()
 
 					req := makeTestHTTPRequest(nil, "GET", "/admin/")
 					req.Header = http.Header{"Cookie": rec.HeaderMap["Set-Cookie"]}
@@ -164,7 +164,7 @@ func TestUserLogInWithCorrectInformation(t *testing.T) {
 					ctx.App.ServeHTTP(ctx.Response, ctx.Request)
 
 					Convey("Should not redirect to login page ", func() {
-						So(ctx.StatusCode(), ShouldEqual, 200)
+						So(ctx.Response.(*httptest.ResponseRecorder).Code, ShouldEqual, 200)
 					})
 				})
 			})
