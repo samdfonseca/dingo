@@ -49,7 +49,7 @@ func mockSignUpPostRequest(email, name, password, rePassword string) *golf.Conte
 
 func mockContext(form url.Values, method, path string) *golf.Context {
 	w := httptest.NewRecorder()
-	Initialize()
+	app := InitTestApp()
 
 	r := makeTestHTTPRequest(strings.NewReader(form.Encode()), method, path)
 	r.PostForm = form
@@ -58,7 +58,7 @@ func mockContext(form url.Values, method, path string) *golf.Context {
 
 func mockLogInPostContext() *golf.Context {
 	w := httptest.NewRecorder()
-	Initialize()
+	app := InitTestApp()
 
 	form := url.Values{}
 	form.Add("email", email)
