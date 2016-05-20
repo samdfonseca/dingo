@@ -4,9 +4,9 @@ import (
 	"os"
 	"path/filepath"
 
+	"github.com/dinever/golf"
 	"github.com/dingoblog/dingo/app/model"
 	"github.com/dingoblog/dingo/app/utils"
-	"github.com/dinever/golf"
 )
 
 var app *golf.Application
@@ -42,9 +42,6 @@ func Initialize() *golf.Application {
 
 func registerFuncMap() {
 	app.View.FuncMap["DateFormat"] = utils.DateFormat
-	app.View.FuncMap["DateInt64"] = utils.DateInt64
-	app.View.FuncMap["DateString"] = utils.DateString
-	app.View.FuncMap["DateTime"] = utils.DateTime
 	app.View.FuncMap["Now"] = utils.Now
 	app.View.FuncMap["Html2Str"] = utils.Html2Str
 	app.View.FuncMap["FileSize"] = utils.FileSize

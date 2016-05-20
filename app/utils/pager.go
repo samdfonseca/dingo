@@ -14,7 +14,7 @@ type Pager struct {
 	Next      int64
 	IsPrev    bool
 	IsNext    bool
-	IsValid bool
+	IsValid   bool
 }
 
 func NewPager(page, size, total int64) *Pager {
@@ -27,7 +27,7 @@ func NewPager(page, size, total int64) *Pager {
 	pager.Total = total
 	pager.Pages = total / size
 	pager.IsValid = true
-	if total % size > 0 {
+	if total%size > 0 {
 		pager.Pages += 1
 	} else if total == 0 {
 		pager.Pages = 1
@@ -36,7 +36,7 @@ func NewPager(page, size, total int64) *Pager {
 	pager.PageSlice = make([]int64, pager.Pages)
 	var i int64
 	for i = 1; i <= pager.Pages; i++ {
-		pager.PageSlice[i - 1] = i
+		pager.PageSlice[i-1] = i
 	}
 
 	pager.Begin = (page - 1) * size
