@@ -4,9 +4,9 @@ import (
 	"os"
 	"path/filepath"
 
+	"github.com/dinever/golf"
 	"github.com/dingoblog/dingo/app/model"
 	"github.com/dingoblog/dingo/app/utils"
-	"github.com/dinever/golf"
 )
 
 var app *golf.Application
