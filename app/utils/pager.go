@@ -1,5 +1,7 @@
 package utils
 
+import "fmt"
+
 type Pager struct {
 	Current   int64
 	Size      int64
@@ -16,6 +18,9 @@ type Pager struct {
 }
 
 func NewPager(page, size, total int64) *Pager {
+	if size <= 0 {
+		panic(fmt.Errorf("Pager size can not be less than 0"))
+	}
 	pager := new(Pager)
 	pager.Current = page
 	pager.Size = size
@@ -27,25 +32,30 @@ func NewPager(page, size, total int64) *Pager {
 	} else if total == 0 {
 		pager.Pages = 1
 	}
+
 	pager.PageSlice = make([]int64, pager.Pages)
 	var i int64
 	for i = 1; i <= pager.Pages; i++ {
 		pager.PageSlice[i - 1] = i
 	}
+
 	pager.Begin = (page - 1) * size
 	if page < 1 || pager.Begin > pager.Total {
 		pager.IsValid = false
 	}
+
 	pager.End = page * size
 	if pager.End > pager.Total {
 		pager.End = pager.Total
 	}
+
 	pager.Prev = pager.Current - 1
 	pager.IsPrev = true
 	if pager.Prev < 1 {
 		pager.Prev = 1
 		pager.IsPrev = false
 	}
+
 	pager.Next = pager.Current + 1
 	pager.IsNext = true
 	if pager.Next > pager.Pages {
