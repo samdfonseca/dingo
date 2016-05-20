@@ -4,8 +4,8 @@ import (
 	"net/http"
 	"strconv"
 
-	"github.com/dingoblog/dingo/app/model"
 	"github.com/dinever/golf"
+	"github.com/dingoblog/dingo/app/model"
 )
 
 func AuthMiddleware(next golf.HandlerFunc) golf.HandlerFunc {

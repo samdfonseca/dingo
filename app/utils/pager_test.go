@@ -1,8 +1,8 @@
 package utils
 
 import (
-	"testing"
 	. "github.com/smartystreets/goconvey/convey"
+	"testing"
 )
 
 func TestPager(t *testing.T) {
@@ -153,4 +153,3 @@ func TestPager(t *testing.T) {
 		So(pager.IsPrev, ShouldBeFalse)
 	})
 }
-

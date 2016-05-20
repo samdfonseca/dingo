@@ -7,8 +7,8 @@ import (
 	"net/http"
 	"strings"
 
-	"github.com/dingoblog/dingo/app/model"
 	"github.com/dinever/golf"
+	"github.com/dingoblog/dingo/app/model"
 )
 
 type JWTPostBody struct {
