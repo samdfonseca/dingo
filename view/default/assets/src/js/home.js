@@ -41,14 +41,17 @@ function initComment() {
             tpl.find(".comment-name").attr("href", json.comment.website).text(json.comment.author);
             tpl.find(".comment-reply").attr("rel", json.comment.id);
             tpl.find(".comment-content").html("<p>" + json.comment.content + "</p>");
-            var date = new Date(json.comment.create_time);
             tpl.find(".comment-message").html("Your comment is awaiting moderation.");
             tpl.attr("id", "comment-" + json.comment.id);
             if (json.comment.status == "approved") {
                 tpl.find(".comment-check").remove();
             }
             var parentId = $('#comment-parent').val();
-            tpl.insertAfter($('#comment-' + parentId));
+            if (parentId === '0') {
+                $('#comment-list').append(tpl);
+            } else {
+                tpl.insertAfter($('#comment-' + parentId));
+            }
             $('#comment-cancel').trigger("click");
             $('#comment-content').val("");
         } else {
@@ -62,7 +65,6 @@ function initComment() {
         form.removeClass("hide").insertAfter($(this));
         $('#comment-show').hide();
         $('#comment-parent').val(id);
-        $('#comment-form').removeClass("hide");
         $('.cancel-reply').show();
         var top = parentComment.offset().top;
         $('body,html').animate({scrollTop: top}, 500);
