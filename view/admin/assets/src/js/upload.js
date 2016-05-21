@@ -45,10 +45,10 @@ function initUpload(p) {
                     alertify.success("File has been uploaded.")
                     bar.html("/" + json.file.url + "&nbsp;&nbsp;&nbsp;(@" + json.file.name + ")");
                     
-                    if ($('#attach-show').length == 0) {
-                        editorAction(json);
-                    } else {
+                    if ($('.CodeMirror').length == 0) {
                         filesAction(json);
+                    } else {
+                        editorAction(json);
                     }
                 }
             });
