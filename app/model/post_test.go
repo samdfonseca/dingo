@@ -127,7 +127,7 @@ func TestPost(t *testing.T) {
 				pager, err := posts.GetPostsByTag(1, 1, 1, false)
 
 				So(posts, ShouldHaveLength, 1)
-				So(pager.Begin, ShouldEqual, 1)
+				So(pager.Begin, ShouldEqual, 0)
 				So(err, ShouldBeNil)
 			})
 
@@ -151,7 +151,7 @@ func TestPost(t *testing.T) {
 				pager, err := posts.GetPostList(1, 1, false, false, "created_at")
 
 				So(posts, ShouldHaveLength, 1)
-				So(pager.Begin, ShouldEqual, 1)
+				So(pager.Begin, ShouldEqual, 0)
 				So(err, ShouldBeNil)
 			})
 

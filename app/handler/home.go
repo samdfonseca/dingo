@@ -1,9 +1,9 @@
 package handler
 
 import (
+	"github.com/dinever/golf"
 	"github.com/dingoblog/dingo/app/model"
 	"github.com/dingoblog/dingo/app/utils"
-	"github.com/dinever/golf"
 	"html/template"
 	"log"
 	"net/url"
@@ -20,17 +20,24 @@ func RegisterFunctions(app *golf.Application) {
 
 func HomeHandler(ctx *golf.Context) {
 	p := ctx.Param("page")
-	page, _ := strconv.Atoi(p)
+
+	var page int
+	if p == "" {
+		page = 1
+	} else {
+		page, _ = strconv.Atoi(p)
+	}
 	posts := new(model.Posts)
 	pager, err := posts.GetPostList(int64(page), 5, false, true, "published_at DESC")
 	if err != nil {
-		panic(err)
+		ctx.Abort(404)
+		return
 	}
 	// theme := model.GetSetting("site_theme")
 	data := map[string]interface{}{
-		"Title":    "Home",
+		"Title": "Home",
 		"Posts": posts,
-		"Pager":    pager,
+		"Pager": pager,
 	}
 	//	updateSidebarData(data)
 	ctx.Loader("theme").Render("index.html", data)
@@ -47,7 +54,7 @@ func ContentHandler(ctx *golf.Context) {
 	post.Hits++
 	data := map[string]interface{}{
 		"Title":    post.Title,
-		"Post":  post,
+		"Post":     post,
 		"Content":  post,
 		"Comments": post.Comments,
 	}
@@ -111,7 +118,14 @@ func CommentHandler(ctx *golf.Context) {
 
 func TagHandler(ctx *golf.Context) {
 	p := ctx.Param("page")
-	page, _ := strconv.Atoi(p)
+
+	var page int
+	if p == "" {
+		page = 1
+	} else {
+		page, _ = strconv.Atoi(p)
+	}
+
 	t := ctx.Param("tag")
 	tagSlug, _ := url.QueryUnescape(t)
 	tag := &model.Tag{Slug: tagSlug}
@@ -124,9 +138,9 @@ func TagHandler(ctx *golf.Context) {
 	pager, err := posts.GetPostsByTag(tag.Id, int64(page), 5, true)
 	data := map[string]interface{}{
 		"Posts": posts,
-		"Pager":    pager,
-		"Tag":      tag,
-		"Title":    tag.Name,
+		"Pager": pager,
+		"Tag":   tag,
+		"Title": tag.Name,
 	}
 	ctx.Loader("theme").Render("tag.html", data)
 }
@@ -166,7 +180,7 @@ func SiteMapHandler(ctx *golf.Context) {
 		"Title":      model.GetSettingValue("site_title"),
 		"Link":       baseUrl,
 		"Created":    now,
-		"Posts":   articleMap,
+		"Posts":      articleMap,
 		"Navigators": navMap,
 	})
 }
@@ -188,10 +202,10 @@ func RssHandler(ctx *golf.Context) {
 	ctx.SetHeader("Content-Type", "text/xml; charset=utf-8")
 
 	ctx.Loader("base").Loader("base").Render("rss.xml", map[string]interface{}{
-		"Title":    model.GetSettingValue("site_title"),
-		"Link":     baseUrl,
-		"Desc":     model.GetSettingValue("site_description"),
-		"Created":  utils.Now().Format(time.RFC822),
-		"Posts": articleMap,
+		"Title":   model.GetSettingValue("site_title"),
+		"Link":    baseUrl,
+		"Desc":    model.GetSettingValue("site_description"),
+		"Created": utils.Now().Format(time.RFC822),
+		"Posts":   articleMap,
 	})
 }

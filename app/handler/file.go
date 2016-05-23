@@ -1,8 +1,9 @@
 package handler
 
 import (
-	"github.com/dingoblog/dingo/app/model"
 	"github.com/dinever/golf"
+	"github.com/dingoblog/dingo/app/model"
+	"github.com/dingoblog/dingo/app/utils"
 	"io/ioutil"
 	"os"
 	"path"
@@ -104,11 +105,26 @@ func FileUploadHandler(ctx *golf.Context) {
 		})
 		return
 	}
+	fi, err := os.Stat(Url)
+	if err != nil {
+		ctx.JSON(map[string]interface{}{
+			"status": "error",
+			"msg": e.Error(),
+		})
+		return
+	}
+	
+	fSize := utils.FileSize(fi.Size())
+	fileModTime := fi.ModTime()
+	fModTime := utils.DateFormat(&fileModTime, "%Y-%m-%d %H:%M")
 	ctx.JSON(map[string]interface{}{
 		"status": "success",
 		"file": map[string]interface{}{
 			"url":  Url,
 			"name": h.Filename,
+			"size": fSize,
+			"type": "File",
+			"time": fModTime,
 		},
 	})
 }

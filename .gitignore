@@ -29,3 +29,12 @@ Icon
 Network Trash Folder
 Temporary Items
 .apdisk
+
+# Database and key file
+dingo.db
+dingo.rsa
+dingo.rsa.pub
+
+# Ignore upload directory
+upload/*
+

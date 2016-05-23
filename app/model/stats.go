@@ -4,7 +4,7 @@ import "github.com/dinever/golf"
 
 type Statis struct {
 	Comments int64
-	Posts int64
+	Posts    int64
 	Pages    int64
 	Files    int
 	Version  int

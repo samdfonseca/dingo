@@ -1,5 +1,7 @@
 package utils
 
+import "fmt"
+
 type Pager struct {
 	Current   int64
 	Size      int64
@@ -12,47 +14,53 @@ type Pager struct {
 	Next      int64
 	IsPrev    bool
 	IsNext    bool
+	IsValid   bool
 }
 
 func NewPager(page, size, total int64) *Pager {
-	if page < 1 {
-		page = 1
+	if size <= 0 {
+		panic(fmt.Errorf("Pager size can not be less than 0"))
 	}
-	p := new(Pager)
-	p.Current = page
-	p.Size = size
-	p.Total = total
-	p.Pages = total / size
+	pager := new(Pager)
+	pager.Current = page
+	pager.Size = size
+	pager.Total = total
+	pager.Pages = total / size
+	pager.IsValid = true
 	if total%size > 0 {
-		p.Pages += 1
+		pager.Pages += 1
+	} else if total == 0 {
+		pager.Pages = 1
 	}
-	p.PageSlice = make([]int64, p.Pages)
+
+	pager.PageSlice = make([]int64, pager.Pages)
 	var i int64
-	for i = 1; i <= p.Pages; i++ {
-		p.PageSlice[i-1] = i
+	for i = 1; i <= pager.Pages; i++ {
+		pager.PageSlice[i-1] = i
 	}
-	p.Begin = (page-1)*size + 1
-	if p.Begin < 1 {
-		p.Begin = 1
+
+	pager.Begin = (page - 1) * size
+	if page < 1 || pager.Begin > pager.Total {
+		pager.IsValid = false
 	}
-	if p.Begin > p.Total {
-		p.Begin = p.Total
+
+	pager.End = page * size
+	if pager.End > pager.Total {
+		pager.End = pager.Total
 	}
-	p.End = page * size
-	if p.End > p.Total {
-		p.End = p.Total
+
+	pager.Prev = pager.Current - 1
+	pager.IsPrev = true
+	if pager.Prev < 1 {
+		pager.Prev = 1
+		pager.IsPrev = false
 	}
-	p.Prev = p.Current - 1
-	p.IsPrev = true
-	if p.Prev < 1 {
-		p.Prev = 1
-		p.IsPrev = false
+
+	pager.Next = pager.Current + 1
+	pager.IsNext = true
+	if pager.Next > pager.Pages {
+		pager.Next = pager.Pages
+		pager.IsNext = false
 	}
-	p.Next = p.Current + 1
-	p.IsNext = true
-	if p.Next > p.Pages {
-		p.Next = p.Pages
-		p.IsNext = false
-	}
-	return p
+	return pager
 }

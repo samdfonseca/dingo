@@ -4,9 +4,9 @@ import (
 	"database/sql"
 	"time"
 
+	"fmt"
 	"github.com/dingoblog/dingo/app/utils"
 	"github.com/russross/meddler"
-	"fmt"
 )
 
 type Comments []*Comment
@@ -27,7 +27,7 @@ type Comment struct {
 	Type      string     `meddler:"type"`
 	Parent    int64      `meddler:"parent"`
 	UserId    int64      `meddler:"user_id"`
-	Children *Comments   `meddler:"-"`
+	Children  *Comments  `meddler:"-"`
 }
 
 func (c Comments) Len() int {
@@ -103,12 +103,16 @@ func (comments *Comments) GetCommentList(page, size int64, onlyApproved bool) (*
 	count, err := GetNumberOfComments()
 	pager = utils.NewPager(page, size, count)
 
+	if !pager.IsValid {
+		return pager, fmt.Errorf("Page not found")
+	}
+
 	var where string
 	if onlyApproved {
 		where = `WHERE approved = 1`
 	}
 
-	err = meddler.QueryAll(db, comments, fmt.Sprintf(stmtGetCommentList, where), size, pager.Begin-1)
+	err = meddler.QueryAll(db, comments, fmt.Sprintf(stmtGetCommentList, where), size, pager.Begin)
 	return pager, err
 }
 
@@ -129,7 +133,7 @@ func (comment *Comment) ParentComment() (*Comment, error) {
 	return parent, parent.GetCommentById()
 }
 
-func (comment *Comment) Post() (*Post) {
+func (comment *Comment) Post() *Post {
 	post := NewPost()
 	post.Id = comment.PostId
 	post.GetPostById()
@@ -154,9 +158,9 @@ func buildCommentTree(p *Comment, c *Comment, level int) {
 	}
 	for _, c := range *childComments {
 		if level >= 2 {
-			buildCommentTree(p, c, level + 1)
+			buildCommentTree(p, c, level+1)
 		} else {
-			buildCommentTree(c, c, level + 1)
+			buildCommentTree(c, c, level+1)
 		}
 	}
 }
